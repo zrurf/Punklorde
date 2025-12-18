@@ -1,0 +1,72 @@
+name: punklorde
+description: "Life is just a game — This sentence is no mere jest for hackers from the cyberworld Punklorde."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  battery_plus: ^7.0.0
+  cbor: ^6.3.7
+  collection: ^1.19.1
+  connectivity_plus: ^7.0.0
+  coordtransform_dart: ^1.0.4
+  device_info_plus: ^12.2.0
+  dio: ^5.9.0
+  es_compression: ^2.0.15
+  fast_immutable_collections: ^11.1.0
+  flutter_animate: ^4.5.2
+  flutter_baidu_mapapi_base: 3.9.8
+  flutter_baidu_mapapi_map: 3.9.8
+  flutter_baidu_mapapi_utils: 3.9.8
+  flutter_bmflocation: 3.8.3
+  flutter_dotenv: ^6.0.0
+  flutter_foreground_task: ^9.1.0
+  flutter_i18n: ^0.37.0
+  flutter_lints: ^6.0.0
+  flutter_local_notifications: ^19.5.0
+  flutter_native_splash: ^2.4.7
+  forui: ^0.16.0
+  freeport: ^1.0.1
+  go_router: ^17.0.0
+  gscankit: ^1.0.3
+  home_widget: ^0.8.1
+  image_gallery_saver_plus: ^4.0.1
+  intl: ^0.20.2
+  latlong2: ^0.9.1
+  lucide_icons_flutter: ^3.1.6
+  json_serializable: ^6.11.3
+  mmkv: ^2.2.4
+  nanoid_plus: ^1.8.0
+  network_info_plus: ^7.0.0
+  permission_handler: ^12.0.1
+  screenshot_ntv: ^1.0.6
+  shelf: ^1.4.2
+  shelf_flutter_asset: ^0.1.0
+  signals: ^6.3.0
+  stylish_bottom_bar: ^1.1.1
+  toastification: ^3.0.3
+  url_launcher: ^6.3.2
+  wakelock_plus: ^1.3.3
+  web_socket_channel: ^3.0.3
+  webview_flutter: ^4.13.0
+  wolt_modal_sheet: ^0.11.0
+  workmanager: ^0.9.0+3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/webroot/
+    - assets/icon/
