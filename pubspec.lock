@@ -394,10 +394,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_i18n
-      sha256: "9c2e4cbfe35db52c0071371202804551932a331a7ea31338c65ec133ea9f56b8"
+      sha256: af7d625e4bfd04764d1554a6411d349dd62d4dc204105cc819a81a35a77bd9b6
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
-    version: "0.37.0"
+    version: "0.37.1"
   flutter_lints:
     dependency: "direct main"
     description:
@@ -481,18 +481,18 @@ packages:
     dependency: "direct main"
     description:
       name: forui
-      sha256: "6cc43d4a07fefc8a6ff875483546babf614ec68ab091016399ab5526ac8124b9"
+      sha256: "94c5dccb78f784ffbb6facf8032dd31e52ff66ac23c68e28cf67b272abb08464"
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
-    version: "0.16.0"
+    version: "0.17.0"
   forui_assets:
     dependency: transitive
     description:
       name: forui_assets
-      sha256: "0f74f49250bca9076b5ee9ffb9c7f0476c436f9a8299aa68aa7f1cb3f1b429f4"
+      sha256: "75f7e28448c4dc3e28371d3c8b226190454cc7054df08a3aabe3beae06464b31"
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
-    version: "0.16.0"
+    version: "0.17.0"
   freeport:
     dependency: "direct main"
     description:
@@ -593,10 +593,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: "51555e36056541237b15b57afc31a0f53d4f9aefd9bd00873a6dc0090e54e332"
+      sha256: "48c11d0943b93b6fb29103d956ff89aafeae48f6058a3939649be2093dcff0bf"
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
-    version: "4.6.0"
+    version: "4.7.1"
   image_gallery_saver_plus:
     dependency: "direct main"
     description:
@@ -693,14 +693,6 @@ packages:
       url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
     source: hosted
     version: "6.11.3"
-  latlong2:
-    dependency: "direct main"
-    description:
-      name: latlong2
-      sha256: "98227922caf49e6056f91b6c56945ea1c7b166f28ffcd5fb8e72fc0b453cc8fe"
-      url: "https://mirrors.tuna.tsinghua.edu.cn/dart-pub/"
-    source: hosted
-    version: "0.9.1"
   leak_tracker:
     dependency: transitive
     description:
@@ -1588,4 +1580,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.10.1 <4.0.0"
-  flutter: ">=3.35.0"
+  flutter: ">=3.38.0"

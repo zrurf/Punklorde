@@ -1,5 +1,13 @@
 import 'package:signals/signals.dart';
 
+late final String deviceOs;
+late final String deviceOSVersion;
+late final String deviceManufacturer;
+late final String deviceBrand;
+late final String deviceModel;
+late final String deviceName;
+late final String deviceProduct;
+
 final rawHeadingRunning = signal<bool>(false);
 final rawHeading = signal<double>(0); // 原始设备朝向
 

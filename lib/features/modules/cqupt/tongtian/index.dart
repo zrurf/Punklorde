@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_baidu_mapapi_base/flutter_baidu_mapapi_base.dart';
 import 'package:flutter_baidu_mapapi_map/flutter_baidu_mapapi_map.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:punklorde/common/models/auth.dart';
 import 'package:punklorde/common/utils/lbs/distance.dart';
 import 'package:punklorde/common/utils/permission/checker.dart';
-import 'package:punklorde/common/models/location.dart' as modLoc;
+import 'package:punklorde/common/models/location.dart';
 import 'package:punklorde/core/services/lbs/location.dart';
 import 'package:punklorde/core/services/motion_simulator/model.dart';
 import 'package:punklorde/core/services/motion_simulator/simulator.dart';
@@ -19,11 +18,10 @@ import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/core/status/location.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/api/api.dart';
+import 'package:punklorde/features/modules/cqupt/tongtian/const/const.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/data.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/model.dart'
     hide VirtualPath, MotionProfile;
-import 'package:punklorde/features/modules/cqupt/tongtian/model/auth.dart';
-import 'package:punklorde/features/modules/cqupt/tongtian/views/widgets/bar.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
@@ -60,9 +58,9 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
   final _runState = signal<RunState>(.idle);
   final _runSpeed = signal<double>(0);
   final _runDistance = signal<double>(0);
+  final _runRealDistance = signal<double>(0);
 
   late final FSelectController<MapItem> _selectCtrlMp;
-  final _textCtrlOpenid = TextEditingController(text: "");
   final _textCtrlSpeed = TextEditingController(text: "3.2");
   final _textCtrlInterval = TextEditingController(text: "1000");
   final _textCtrlDistance = TextEditingController(text: "2100");
@@ -80,7 +78,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
   String? placeCode;
   String? sportCode;
 
-  final _uploadBuf = signal<List<modLoc.TrajPoint>>([]);
+  final _uploadBuf = signal<List<TrajPoint>>([]);
 
   BMFMarker? _previewStartMarker;
   BMFMarker? _playMarker;
@@ -100,9 +98,14 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       curve: Curves.fastEaseInToSlowEaseOut,
     );
 
-    _selectCtrlMp = FSelectController(vsync: this);
+    _selectCtrlMp = FSelectController();
 
     super.initState();
+
+    initIndex().then((v) {
+      return _loadedIdx.value =
+          globalMpIndex.value.isNotEmpty && globalVpIndex.value.isNotEmpty;
+    });
   }
 
   @override
@@ -137,6 +140,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     );
     _mapController?.addPolyline(_previewLine!);
     _mapController?.addMarker(_previewStartMarker!);
+    _mapController?.setCenterCoordinate(path.first, true);
   }
 
   Future<bool> loadMotionData(String id) async {
@@ -180,7 +184,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     return true;
   }
 
-  Future<void> startAutoRunning() async {
+  Future<void> startAutoRunning(BuildContext context) async {
     if (_motionProfile.value == null) return;
     if (_virtualPaths.isEmpty) return;
 
@@ -189,23 +193,19 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
 
     WakelockPlus.enable();
 
-    ModTongtianAuth? auth;
-    if (authStatus.value.containsKey("MOD_TONGTIAN_AUTH")) {
-      auth = authStatus.value["MOD_TONGTIAN_AUTH"] as ModTongtianAuth;
-      if (auth.openid != _textCtrlOpenid.text) {
-        auth = null;
-      }
-    }
+    AuthCredential? auth = authManager.getAuth(providerId);
 
-    auth = await getTongtianAuth(_textCtrlOpenid.text);
     if (auth == null) {
-      print("_ERR: 无法获取登录信息");
+      toastification.show(
+        context: context,
+        title: const Text("操作失败"),
+        description: const Text("未登录，请先登录"),
+        autoCloseDuration: const Duration(seconds: 3),
+        primaryColor: Colors.red,
+        icon: Icon(LucideIcons.circleX),
+      );
       return;
     }
-
-    auth.openid = _textCtrlOpenid.text;
-
-    authStatus.value["MOD_TONGTIAN_AUTH"] = auth;
 
     _apiClient = ApiClient(auth);
 
@@ -262,8 +262,8 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
         } else {
           _playLine!.updateCoordinates(_playLine!.coordinates + [pos]);
           _playMarker!.updatePosition(pos);
-          /*
-          _runDistance.value =
+
+          _runRealDistance.value =
               _runDistance.value +
               haversineDistance(
                 position.latitude,
@@ -271,11 +271,10 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                 lastpoint!.latitude,
                 lastpoint!.longitude,
               );
-          */
         }
         _uploadBuf.add(
-          modLoc.TrajPoint(
-            coordinate: modLoc.Coordinate(
+          TrajPoint(
+            coordinate: Coordinate(
               lat: position.latitude,
               lng: position.longitude,
             ),
@@ -296,6 +295,16 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     _motionSimService!.isRunning.subscribe((v) {
       if (!v && _runState.value == .running) {
         _apiClient?.endMotion(sportCode!);
+
+        toastification.show(
+          context: context,
+          title: const Text("跑步完成"),
+          description: const Text("跑步已结束，请在企业微信查看结果"),
+          autoCloseDuration: const Duration(seconds: 5),
+          primaryColor: Colors.green,
+          icon: Icon(LucideIcons.circleCheck),
+        );
+
         _runState.value = .idle;
         WakelockPlus.disable();
       }
@@ -328,6 +337,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
 
   void stopAutoRunning() async {
     await _motionSimService?.stopSimulation();
+
     WakelockPlus.disable();
   }
 
@@ -376,11 +386,6 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     // 监听信号变化，更新ValueNotifier
     effect(() {
       _runConfigNotifier.value = _runConfig.value;
-    });
-
-    initIndex().then((v) {
-      return _loadedIdx.value =
-          globalMpIndex.value.isNotEmpty && globalVpIndex.value.isNotEmpty;
     });
 
     return SafeArea(
@@ -479,6 +484,19 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
             ),
           ),
           Positioned(
+            right: 12,
+            top: 12,
+            child: SizedBox(
+              width: 40,
+              height: 40,
+              child: FButton.icon(
+                style: FButtonStyle.secondary(),
+                onPress: () {},
+                child: Icon(LucideIcons.circleQuestionMark),
+              ),
+            ),
+          ),
+          Positioned(
             left: 12,
             right: 12,
             bottom: 12,
@@ -496,18 +514,20 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                         right: 100,
                         child: Padding(
                           padding: EdgeInsetsGeometry.fromLTRB(16, 16, 16, 16),
-                          child: FSelect<MapItem>.searchBuilder(
-                            controller: _selectCtrlMp,
+                          child: FSelect.searchBuilder(
                             label: const Text('运动预设'),
+                            control: FSelectControl<MapItem>.managed(
+                              controller: _selectCtrlMp,
+                              onChange: (value) {
+                                if (value != null) loadMotionData(value.id);
+                              },
+                            ),
                             hint: "选择运动预设",
-                            onChange: (value) {
-                              if (value != null) loadMotionData(value.id);
-                            },
-                            anchor: .bottomCenter,
-                            fieldAnchor: .topCenter,
                             format: (MapItem value) => value.name,
+                            contentAnchor: .bottomCenter,
+                            fieldAnchor: .topCenter,
                             filter: (query) {
-                              var lists = globalMpIndex.watch(context).values;
+                              var lists = globalMpIndex.value.values;
                               if (query.isEmpty) return lists;
                               return lists.where(
                                 (v) =>
@@ -550,7 +570,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                 ),
                               ),
                               Text(
-                                '运动里程：${_runDistance.watch(context).toStringAsFixed(2)} m',
+                                '运动里程：${_runRealDistance.watch(context).toStringAsFixed(2)} (${_runDistance.watch(context).toStringAsFixed(2)}) m',
                                 textAlign: .left,
                                 style: TextStyle(
                                   fontSize: 15,
@@ -641,7 +661,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                                   ),
                                                   FButton(
                                                     onPress: () {
-                                                      startAutoRunning();
+                                                      startAutoRunning(context);
                                                       Navigator.of(
                                                         context,
                                                       ).pop();
@@ -693,21 +713,6 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                   spacing: 8,
                                   children: [
                                     const Text(
-                                      "账号配置",
-                                      textAlign: .left,
-                                      style: TextStyle(
-                                        fontWeight: .bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    FTextField(
-                                      controller: _textCtrlOpenid,
-                                      label: const Text("Open ID"),
-                                      description: const Text(
-                                        "微信登录小程序时的Open ID",
-                                      ),
-                                    ),
-                                    const Text(
                                       "跑步配置",
                                       textAlign: .left,
                                       style: TextStyle(
@@ -716,34 +721,44 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                       ),
                                     ),
                                     FTextField(
-                                      controller: _textCtrlSpeed,
+                                      // controller: _textCtrlSpeed,
+                                      control: FTextFieldControl.managed(
+                                        controller: _textCtrlSpeed,
+
+                                        onChange: (v) {
+                                          _runConfig.value = value.copyWith(
+                                            speed:
+                                                double.tryParse(v.text) ?? 3.2,
+                                          );
+                                        },
+                                      ),
                                       label: const Text("配速"),
                                       description: const Text("模拟运动的配速（米/秒）"),
                                       hint: "默认: 3.2",
                                       keyboardType:
                                           TextInputType.numberWithOptions(),
-                                      onChange: (v) {
-                                        _runConfig.value = value.copyWith(
-                                          speed: double.tryParse(v) ?? 3.2,
-                                        );
-                                      },
                                       onEditingComplete: () {
                                         _textCtrlSpeed.text = value.speed
                                             .toString();
                                       },
                                     ),
                                     FTextField(
-                                      controller: _textCtrlDistance,
+                                      // controller: _textCtrlDistance,
+                                      control: FTextFieldControl.managed(
+                                        controller: _textCtrlDistance,
+                                        onChange: (v) {
+                                          _runConfig.value = value.copyWith(
+                                            distance:
+                                                double.tryParse(v.text) ?? 2100,
+                                          );
+                                        },
+                                      ),
                                       label: const Text("里程"),
                                       description: const Text("模拟运动里程（米）"),
                                       hint: "默认: 2100",
                                       keyboardType:
                                           TextInputType.numberWithOptions(),
-                                      onChange: (v) {
-                                        _runConfig.value = value.copyWith(
-                                          distance: double.tryParse(v) ?? 2100,
-                                        );
-                                      },
+
                                       onEditingComplete: () {
                                         _textCtrlDistance.text = value.distance
                                             .toString();
@@ -764,7 +779,22 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                               },
                                             ),
                                             FTextField(
-                                              controller: _textCtrlInterval,
+                                              // controller: _textCtrlInterval,
+                                              control:
+                                                  FTextFieldControl.managed(
+                                                    controller:
+                                                        _textCtrlInterval,
+                                                    onChange: (v) {
+                                                      _runConfig.value = value
+                                                          .copyWith(
+                                                            interval:
+                                                                int.tryParse(
+                                                                  v.text,
+                                                                ) ??
+                                                                1000,
+                                                          );
+                                                    },
+                                                  ),
                                               label: const Text("刷新间隔"),
                                               description: const Text(
                                                 "坐标点刷新的间隔时间（毫秒）",
@@ -772,14 +802,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                               hint: "默认: 1000",
                                               keyboardType:
                                                   TextInputType.numberWithOptions(),
-                                              onChange: (v) {
-                                                _runConfig.value = value
-                                                    .copyWith(
-                                                      interval:
-                                                          int.tryParse(v) ??
-                                                          1000,
-                                                    );
-                                              },
+
                                               onEditingComplete: () {
                                                 _textCtrlInterval.text = value
                                                     .interval

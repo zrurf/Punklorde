@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:punklorde/app/route/app_route.dart';
 import 'package:toastification/toastification.dart';
 

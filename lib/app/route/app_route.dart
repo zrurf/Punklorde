@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:punklorde/app/views/pages/account.dart';
 import 'package:punklorde/app/views/pages/index/home.dart';
 import 'package:punklorde/app/views/pages/index/notify.dart';
 import 'package:punklorde/app/views/pages/index/profile.dart';
@@ -126,6 +126,12 @@ final appRoute = GoRouter(
           path: '/p/scanner',
           pageBuilder: (context, state) {
             return NoTransitionPage(child: ScannerView());
+          },
+        ),
+        GoRoute(
+          path: '/p/account',
+          pageBuilder: (context, state) {
+            return NoTransitionPage(child: AccountView());
           },
         ),
       ],

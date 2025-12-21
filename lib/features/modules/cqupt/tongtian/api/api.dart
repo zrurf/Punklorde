@@ -1,37 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:punklorde/common/models/auth.dart';
+import 'package:punklorde/common/utils/etc/device.dart';
 import 'package:punklorde/common/models/location.dart';
-import 'package:punklorde/features/modules/cqupt/tongtian/const/const.dart';
+import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/const/url.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/model/api.dart';
-import 'package:punklorde/features/modules/cqupt/tongtian/model/auth.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/utils/date.dart';
-
-final _dio = Dio();
-
-Future<ModTongtianAuth?> getTongtianAuth(String openid) async {
-  try {
-    final response = await _dio.get(
-      '$loginUrl?sxCode=&openid=$openid&phoneType=Google_Android',
-      options: Options(
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "User-Agent": appletUserAgent,
-        },
-      ),
-    );
-    print("_INFO: ${response.data}");
-    return ModTongtianAuth.fromJson(response.data["data"]);
-  } catch (e) {
-    print("_ERROR: $e");
-    return null;
-  }
-}
 
 class ApiClient {
   final Dio _dio;
-  final String userAgent = appletUserAgent;
-  final ModTongtianAuth auth;
+  final String userAgent = getUA(.wxapplet);
+  AuthCredential auth;
 
   ApiClient(this.auth) : _dio = Dio();
 
@@ -50,6 +29,15 @@ class ApiClient {
         ),
       );
       print("_INFO: ${response.data}");
+
+      // 登录失效处理
+      if (response.data["code"] == "40401") {
+        if (await refreshToken()) {
+          return await startMotion(pName, pCode);
+        } else {
+          return null;
+        }
+      }
       return response.data["data"];
     } catch (e) {
       print("_ERROR: $e");
@@ -95,6 +83,14 @@ class ApiClient {
         ),
       );
       print("_INFO: ${response.data}");
+      // 登录失效处理
+      if (response.data["code"] == "40401") {
+        if (await refreshToken()) {
+          return await uploadPoint(points, pName, pCode, sCode);
+        } else {
+          return null;
+        }
+      }
       return UploadPointRedult.fromJson(response.data["data"]);
     } catch (e) {
       print("_ERROR: $e");
@@ -104,7 +100,7 @@ class ApiClient {
 
   Future<bool> endMotion(String sCode) async {
     try {
-      await _dio.post(
+      var response = await _dio.post(
         endMotionUrl + sCode,
         options: Options(
           headers: {
@@ -116,10 +112,28 @@ class ApiClient {
           receiveTimeout: Duration(seconds: 20),
         ),
       );
+      // 登录失效处理
+      if (response.data["code"] == "40401") {
+        if (await refreshToken()) {
+          return await endMotion(sCode);
+        } else {
+          return false;
+        }
+      }
     } catch (e) {
       print("_ERROR: $e");
       return false;
     }
     return true;
+  }
+
+  Future<bool> refreshToken() async {
+    await authManager.refreshAuth(auth.type);
+    var newAuth = authManager.getAuth(auth.type);
+    if (newAuth != null) {
+      auth = newAuth;
+      return true;
+    }
+    return false;
   }
 }
