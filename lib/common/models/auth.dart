@@ -33,6 +33,19 @@ class AuthCredential {
   );
 }
 
+// 访客身份验证凭证
+class GuestAuthCredential {
+  final String id;
+  final String name;
+  final AuthCredential auth;
+
+  const GuestAuthCredential({
+    required this.id,
+    required this.name,
+    required this.auth,
+  });
+}
+
 // 身份验证提供者
 abstract class AccountProvider {
   String get id;
@@ -41,6 +54,7 @@ abstract class AccountProvider {
   bool get supportRefresh; // 是否支持刷新（会在App启动时自动刷新）
   bool get reqireUi; // 是否需要UI
 
+  String? get uiRoute; // 如果需要UI登录方式，则需要提供UI路由
   List<AccountInputSchema>? get inputSchema; // 如果不支持UI登录方式，则需要提供输入参数
 
   Future<AuthCredential?> login(

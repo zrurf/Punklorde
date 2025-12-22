@@ -38,6 +38,9 @@ class TongtianAuthProvider extends AccountProvider {
   @override
   bool get supportRefresh => true;
 
+  @override
+  String? get uiRoute => null;
+
   final _dio = Dio();
 
   @override

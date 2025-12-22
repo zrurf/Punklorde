@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:forui/forui.dart';
@@ -8,6 +10,7 @@ import 'package:punklorde/core/status/auth.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:toastification/toastification.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import 'package:xxh3/xxh3.dart';
 
 class AuthManager {
   final Map<String, AccountProvider> _providers = {};
@@ -111,9 +114,9 @@ class AuthManager {
           ),
         ],
       );
-    }
+    } else {}
 
-    return true;
+    return false;
   }
 
   Future<bool> logout(AuthCredential auth) async {
@@ -123,6 +126,139 @@ class AuthManager {
     bool res = await _providers[auth.type]?.logout(auth) ?? true;
     authCredential.value.remove(auth.type);
     return res;
+  }
+
+  Future<bool> guestLogin(BuildContext context) async {
+    String shareCode = "";
+    String guestName = "";
+
+    WoltModalSheet.show(
+      context: context,
+      pageListBuilder: (ctx) => [
+        WoltModalSheetPage(
+          child: Padding(
+            padding: .fromLTRB(16, 2, 16, 8),
+            child: Column(
+              spacing: 8,
+              children: [
+                Text("访客登录", style: TextStyle(fontWeight: .bold, fontSize: 20)),
+                FTextField(
+                  label: const Text("访客名称"),
+                  hint: "请输入访客名称",
+                  control: FTextFieldControl.managed(
+                    onChange: (value) {
+                      guestName = value.text;
+                    },
+                  ),
+                ),
+                FTextField.multiline(
+                  label: const Text("分享码"),
+                  hint: "分享码应该以 eyJ 开头...",
+                  description: Text("请输入访客的分享码"),
+                  control: FTextFieldControl.managed(
+                    onChange: (value) {
+                      shareCode = value.text;
+                    },
+                  ),
+                ),
+                FButton(
+                  onPress: () {
+                    if (shareCode.isEmpty || guestName.isEmpty) {
+                      toastification.show(
+                        context: context,
+                        title: const Text("登录失败"),
+                        description: const Text("请填写完整的信息"),
+                        autoCloseDuration: const Duration(seconds: 3),
+                        primaryColor: Colors.red,
+                        icon: Icon(LucideIcons.circleX),
+                      );
+                      return;
+                    }
+                    AuthCredential credential;
+                    try {
+                      credential = AuthCredential.fromJson(
+                        jsonDecode(utf8.decode(base64.decode(shareCode))),
+                      );
+                    } catch (e) {
+                      toastification.show(
+                        context: context,
+                        title: const Text("登录失败"),
+                        description: const Text("无法解析分享码，分享码格式错误"),
+                        autoCloseDuration: const Duration(seconds: 3),
+                        primaryColor: Colors.red,
+                        icon: Icon(LucideIcons.circleX),
+                      );
+                      return;
+                    }
+
+                    if (!_providers.containsKey(credential.type)) {
+                      toastification.show(
+                        context: context,
+                        title: const Text("登录失败"),
+                        description: const Text("没有分享码匹配的平台"),
+                        autoCloseDuration: const Duration(seconds: 3),
+                        primaryColor: Colors.red,
+                        icon: Icon(LucideIcons.circleX),
+                      );
+                      return;
+                    }
+
+                    String aid = xxh3String(utf8.encode(guestName));
+
+                    if (guestAuthCredential.value[credential.type]?.containsKey(
+                          aid,
+                        ) ??
+                        false) {
+                      toastification.show(
+                        context: context,
+                        title: const Text("登录失败"),
+                        description: const Text("访客名称已存在"),
+                        autoCloseDuration: const Duration(seconds: 3),
+                        primaryColor: Colors.red,
+                        icon: Icon(LucideIcons.circleX),
+                      );
+                      return;
+                    }
+
+                    var prov = _providers[credential.type]!;
+
+                    if (guestAuthCredential.value[credential.type] == null) {
+                      guestAuthCredential.value[credential.type] = {};
+                    }
+
+                    guestAuthCredential.value[credential.type]![aid] =
+                        GuestAuthCredential(
+                          id: aid,
+                          name: guestName,
+                          auth: credential,
+                        );
+
+                    Navigator.of(ctx).pop();
+                    if (context.mounted) {
+                      toastification.show(
+                        context: context,
+                        title: const Text("访客登录成功"),
+                        description: Text("${prov.name} 访客登录成功"),
+                        autoCloseDuration: const Duration(seconds: 3),
+                        primaryColor: Colors.green,
+                        icon: Icon(LucideIcons.circleCheck),
+                      );
+                    }
+                  },
+                  child: Text("登录"),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    return true;
+  }
+
+  void guestLogout(GuestAuthCredential auth) {
+    guestAuthCredential.value[auth.auth.type]?.remove(auth.id);
   }
 
   Future<void> refreshAll() async {
@@ -162,6 +298,14 @@ class AuthManager {
 
   AuthCredential? getAuth(String id) {
     return authCredential.value[id];
+  }
+
+  List<GuestAuthCredential> getGuestAuths(String id) {
+    return (guestAuthCredential.value[id] ?? {}).values.toList();
+  }
+
+  GuestAuthCredential? getGuestAuth(String pid, String aid) {
+    return (guestAuthCredential.value[pid] ?? {})[aid];
   }
 
   AccountProvider? getProvider(String id) {

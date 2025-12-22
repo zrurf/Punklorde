@@ -38,54 +38,78 @@ class _AccountViewState extends State<AccountView> {
                 },
               ),
             ],
+            suffixes: [
+              FHeaderAction(
+                icon: Icon(LucideIcons.userRoundPlus),
+                onPress: () {
+                  authManager.guestLogin(context);
+                },
+              ),
+            ],
           ),
           Padding(
             padding: .fromLTRB(16, 2, 16, 8),
             child: Column(
               spacing: 8,
-              children:
-                  currentSchool.watch(context)?.accountProviders.map<Widget>((
-                    p,
-                  ) {
-                    return FTile(
-                      title: Text(p.name),
-                      prefix: (authCredential.watch(context).containsKey(p.id))
-                          ? Icon(LucideIcons.circleCheck, color: Colors.green)
-                          : Icon(LucideIcons.circleMinus, color: Colors.grey),
-                      suffix: Icon(LucideIcons.chevronRight),
-                      onPress: () {
-                        if (authCredential.watch(context).containsKey(p.id)) {
-                          var authCred = authCredential.watch(context)[p.id]!;
-                          WoltModalSheet.show(
-                            context: context,
-                            pageListBuilder: (ctx) => [
-                              WoltModalSheetPage(
-                                child: Padding(
-                                  padding: .fromLTRB(16, 2, 16, 8),
-                                  child: Column(
-                                    spacing: 8,
-                                    children: [
-                                      Text(
-                                        "已经登录到 ${authManager.getProvider(authCred.type)?.name}",
-                                        style: TextStyle(
-                                          fontWeight: .bold,
-                                          fontSize: 20,
-                                        ),
-                                      ),
+              children: [
+                const Text(
+                  "主账号",
+                  textAlign: .left,
+                  style: TextStyle(fontWeight: .bold, fontSize: 18),
+                ),
+                Column(
+                  spacing: 8,
+                  children:
+                      currentSchool.watch(context)?.accountProviders.map<
+                        Widget
+                      >((p) {
+                        return FTile(
+                          title: Text(p.name),
+                          prefix:
+                              (authCredential.watch(context).containsKey(p.id))
+                              ? Icon(
+                                  LucideIcons.circleCheck,
+                                  color: Colors.green,
+                                )
+                              : Icon(
+                                  LucideIcons.circleMinus,
+                                  color: Colors.grey,
+                                ),
+                          suffix: Icon(LucideIcons.chevronRight),
+                          onPress: () {
+                            if (authCredential
+                                .watch(context)
+                                .containsKey(p.id)) {
+                              var authCred = authCredential.watch(
+                                context,
+                              )[p.id]!;
+                              WoltModalSheet.show(
+                                context: context,
+                                pageListBuilder: (ctx) => [
+                                  WoltModalSheetPage(
+                                    child: Padding(
+                                      padding: .fromLTRB(16, 2, 16, 8),
+                                      child: Column(
+                                        spacing: 8,
+                                        children: [
+                                          Text(
+                                            "已经登录到 ${authManager.getProvider(authCred.type)?.name}",
+                                            style: TextStyle(
+                                              fontWeight: .bold,
+                                              fontSize: 20,
+                                            ),
+                                          ),
 
-                                      FItem(
-                                        title: Text("查看登录信息"),
-                                        prefix: Icon(LucideIcons.fileUser),
-                                        suffix: Icon(LucideIcons.chevronRight),
-                                        onPress: () {
-                                          showFDialog(
-                                            context: context,
-                                            builder:
-                                                (
-                                                  context,
-                                                  style,
-                                                  animation,
-                                                ) => FDialog(
+                                          FItem(
+                                            title: Text("查看登录信息"),
+                                            prefix: Icon(LucideIcons.fileUser),
+                                            suffix: Icon(
+                                              LucideIcons.chevronRight,
+                                            ),
+                                            onPress: () {
+                                              showFDialog(
+                                                context: context,
+                                                builder: (context, style, animation) => FDialog(
                                                   style: style,
                                                   animation: animation,
                                                   direction: Axis.horizontal,
@@ -151,41 +175,124 @@ class _AccountViewState extends State<AccountView> {
                                                     ),
                                                   ],
                                                 ),
-                                          );
-                                        },
+                                              );
+                                            },
+                                          ),
+                                          FItem(
+                                            title: Text(
+                                              "退出登录",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            prefix: Icon(LucideIcons.logOut),
+                                            onPress: () {
+                                              authManager.logout(authCred);
+                                              Navigator.of(ctx).pop();
+                                            },
+                                          ),
+                                        ],
                                       ),
-                                      FItem(
-                                        title: Text("登录访客账号"),
-                                        prefix: Icon(LucideIcons.keyRound),
-                                        onPress: () {
-                                          Navigator.of(ctx).pop();
-                                        },
-                                      ),
-                                      FItem(
-                                        title: Text(
-                                          "退出登录",
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                        prefix: Icon(LucideIcons.logOut),
-                                        onPress: () {
-                                          authManager.logout(authCred);
-                                          Navigator.of(ctx).pop();
-                                        },
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          authManager.login(context, p.id);
-                        }
-                      },
-                      onLongPress: () {},
-                    );
-                  }).toList() ??
-                  [],
+                                ],
+                              );
+                            } else {
+                              authManager.login(context, p.id);
+                            }
+                          },
+                          onLongPress: () {},
+                        );
+                      }).toList() ??
+                      [],
+                ),
+                FDivider(),
+                const Text(
+                  "访客账号",
+                  textAlign: .left,
+                  style: TextStyle(fontWeight: .bold, fontSize: 18),
+                ),
+                Column(
+                  spacing: 8,
+                  children: guestAuthCredential.watch(context).keys.map<Widget>(
+                    (pid) {
+                      return FTileGroup(
+                        label: Text(
+                          authManager.getProvider(pid)?.name ?? "未知平台",
+                        ),
+                        description: const Text("显示已登录的访客"),
+                        children:
+                            (guestAuthCredential
+                                        .watch(context)[pid]
+                                        ?.values
+                                        .map<FTile>(
+                                          (v) => FTile(
+                                            title: Text(v.name),
+                                            prefix: Icon(LucideIcons.user),
+                                            suffix: Icon(
+                                              LucideIcons.chevronRight,
+                                            ),
+                                            onPress: () {
+                                              WoltModalSheet.show(
+                                                context: context,
+                                                pageListBuilder: (ctx) => [
+                                                  WoltModalSheetPage(
+                                                    child: Padding(
+                                                      padding: .fromLTRB(
+                                                        16,
+                                                        2,
+                                                        16,
+                                                        8,
+                                                      ),
+                                                      child: Column(
+                                                        spacing: 8,
+                                                        children: [
+                                                          Text(
+                                                            "访客 ${v.name}",
+                                                            style: TextStyle(
+                                                              fontWeight: .bold,
+                                                              fontSize: 20,
+                                                            ),
+                                                          ),
+                                                          FItem(
+                                                            title: Text(
+                                                              "退出登录",
+                                                              style: TextStyle(
+                                                                color:
+                                                                    Colors.red,
+                                                              ),
+                                                            ),
+                                                            prefix: Icon(
+                                                              LucideIcons
+                                                                  .logOut,
+                                                            ),
+                                                            onPress: () {
+                                                              authManager
+                                                                  .guestLogout(
+                                                                    v,
+                                                                  );
+                                                              Navigator.of(
+                                                                ctx,
+                                                              ).pop();
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                            onLongPress: () {},
+                                          ),
+                                        ) ??
+                                    [])
+                                .toList(),
+                      );
+                    },
+                  ).toList(),
+                ),
+              ],
             ),
           ),
         ],

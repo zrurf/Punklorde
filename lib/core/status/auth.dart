@@ -5,5 +5,7 @@ import 'package:signals/signals.dart';
 final Signal<Map<String, dynamic>> authStatus = signal({});
 
 final Signal<Map<String, AuthCredential>> authCredential = signal({});
+final Signal<Map<String, Map<String, GuestAuthCredential>>>
+guestAuthCredential = signal({});
 
 final AuthManager authManager = AuthManager();

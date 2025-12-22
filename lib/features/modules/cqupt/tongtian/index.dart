@@ -42,44 +42,58 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     with TickerProviderStateMixin {
   final GlobalKey<_ModuleTontianViewState> widgetKey = GlobalKey();
 
+  // 地图参数
   final BMFMapOptions _mapOption = BMFMapOptions(
     center: BMFCoordinate(39.965, 116.404),
     zoomLevel: 18,
     buildingsEnabled: true,
   );
 
-  late final AnimationController _animeCtrl;
-  late final Animation<double> _animation;
-
+  // 地图控制器
   BMFMapController? _mapController;
 
-  MotionSimulationService? _motionSimService;
-
-  final _runState = signal<RunState>(.idle);
-  final _runSpeed = signal<double>(0);
-  final _runDistance = signal<double>(0);
-  final _runRealDistance = signal<double>(0);
-
+  // UI控制器
   late final FSelectController<MapItem> _selectCtrlMp;
   final _textCtrlSpeed = TextEditingController(text: "3.2");
   final _textCtrlInterval = TextEditingController(text: "1000");
   final _textCtrlDistance = TextEditingController(text: "2100");
 
+  // UI动画控制器
+  late final AnimationController _animeCtrl;
+  late final Animation<double> _animation;
+
+  // 运动模拟服务
+  MotionSimulationService? _motionSimService;
+
+  // 运动配置数据
   final _loaded = signal<bool>(false);
   final _loadedIdx = signal<bool>(false);
   final _motionProfile = signal<schema.MotionProfile?>(null);
   List<schema.VirtualPath> _virtualPaths = [];
 
+  // 加载锁
   final _loadMpLock = signal<bool>(false);
 
-  ApiClient? _apiClient;
+  // 运动状态
+  final _runState = signal<RunState>(.idle); // 运动状态
+  final _runSpeed = signal<double>(0); // 运动速度
+  final _runDistance = signal<double>(0); // 运动距离（服务器）
+  final _runRealDistance = signal<double>(0); // 实际运动距离
+  final _runDuration = signal<Duration>(Duration.zero); // 运动时长
 
+  // 运动计时器
+  Timer? _runTimer;
+
+  // API客户端
+  ApiClient? _apiClient;
+  // 当前运动数据
   String? placeName;
   String? placeCode;
   String? sportCode;
-
+  // 上传数据缓冲
   final _uploadBuf = signal<List<TrajPoint>>([]);
 
+  // 地图绘制数据
   BMFMarker? _previewStartMarker;
   BMFMarker? _playMarker;
   BMFPolyline? _previewLine;
@@ -102,6 +116,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
 
     super.initState();
 
+    // 加载运动索引数据
     initIndex().then((v) {
       return _loadedIdx.value =
           globalMpIndex.value.isNotEmpty && globalVpIndex.value.isNotEmpty;
@@ -118,6 +133,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     super.dispose();
   }
 
+  /// 预览运动路径
   void previewPath(schema.VirtualPath p) {
     clearPreview();
     final path = p.points.map((v) => BMFCoordinate(v.lat, v.lng)).toList();
@@ -143,6 +159,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     _mapController?.setCenterCoordinate(path.first, true);
   }
 
+  // 加载运动数据
   Future<bool> loadMotionData(String id) async {
     if (_loadMpLock.value) return false;
     _loadMpLock.value = true;
@@ -184,15 +201,22 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     return true;
   }
 
+  // 开始自动运动
   Future<void> startAutoRunning(BuildContext context) async {
     if (_motionProfile.value == null) return;
     if (_virtualPaths.isEmpty) return;
 
+    // 清理上次数据
     clearAutoRunning();
+    _uploadBuf.value.clear();
+    _runDuration.value = Duration.zero;
+
     _motionSimService = MotionSimulationService();
 
+    // 保持屏幕常亮
     WakelockPlus.enable();
 
+    // 获取登录凭证
     AuthCredential? auth = authManager.getAuth(providerId);
 
     if (auth == null) {
@@ -207,10 +231,10 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       return;
     }
 
+    // 创建API客户端
     _apiClient = ApiClient(auth);
 
-    _uploadBuf.value.clear();
-
+    // 创建虚拟路径
     final VirtualPath virtualPath = VirtualPath(
       id: _virtualPaths[0].id,
       name: _virtualPaths[0].name,
@@ -227,6 +251,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     );
     TrajectoryPoint? lastpoint;
 
+    // 监听位置更新
     _motionSimService!.currentPosition.subscribe((position) {
       if (position != null) {
         print('位置更新: ${position.latitude}, ${position.longitude}');
@@ -264,7 +289,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
           _playMarker!.updatePosition(pos);
 
           _runRealDistance.value =
-              _runDistance.value +
+              _runRealDistance.value +
               haversineDistance(
                 position.latitude,
                 position.longitude,
@@ -285,6 +310,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       }
     });
 
+    // 监听运动速度
     _motionSimService!.currentOutput.subscribe((output) {
       if (output != null) {
         print('速度: ${output.speed.toStringAsFixed(2)} m/s');
@@ -292,6 +318,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       }
     });
 
+    // 监听运动结束
     _motionSimService!.isRunning.subscribe((v) {
       if (!v && _runState.value == .running) {
         _apiClient?.endMotion(sportCode!);
@@ -310,13 +337,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       }
     });
 
-    _motionSimService!.startSimulation(
-      motionProfile: motionProfile,
-      pace: _runConfig.value.speed,
-      refreshRate: 1000 / _runConfig.value.interval,
-      targetDistance: _runConfig.value.distance,
-    );
-
+    // 监听上传缓冲区，并上传数据
     _uploadBuf.subscribe((v) async {
       if (v.length >= 8) {
         _apiClient?.uploadPoint(v, placeName!, placeCode!, sportCode!).then((
@@ -330,17 +351,31 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       }
     });
 
+    // 开始运动
+    _motionSimService!.startSimulation(
+      motionProfile: motionProfile,
+      pace: _runConfig.value.speed,
+      refreshRate: 1000 / _runConfig.value.interval,
+      targetDistance: _runConfig.value.distance,
+    );
+
+    _runTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _runDuration.value = Duration(seconds: _runDuration.value.inSeconds + 1);
+    });
+
     _runState.value = .running;
 
     sportCode = await _apiClient?.startMotion(placeName!, placeCode!);
   }
 
+  // 停止自动运动
   void stopAutoRunning() async {
     await _motionSimService?.stopSimulation();
 
     WakelockPlus.disable();
   }
 
+  // 清空自动运动数据
   void clearAutoRunning() {
     _motionSimService?.dispose();
     _motionSimService = null;
@@ -356,6 +391,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     _playMarker = null;
   }
 
+  // 清空预览数据
   void clearPreview() {
     if (_previewLine != null) {
       _mapController?.removeOverlay(_previewLine!.id);
@@ -367,6 +403,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     _previewStartMarker = null;
   }
 
+  // 暂停自动运动（未使用）
   void pauseAutoRunning() {
     if (_runState.value == .running) {
       _motionSimService?.pauseSimulation();
@@ -374,6 +411,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     }
   }
 
+  // 恢复自动运动（未使用）
   void resumeAutoRunning() {
     if (_runState.value == .paused) {
       _motionSimService?.resumeSimulation();
@@ -556,21 +594,29 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                         bottom: 0,
                         right: 100,
                         child: Padding(
-                          padding: EdgeInsetsGeometry.fromLTRB(32, 8, 8, 8),
+                          padding: EdgeInsetsGeometry.fromLTRB(16, 8, 8, 8),
                           child: Column(
                             mainAxisAlignment: .center,
                             crossAxisAlignment: .start,
                             children: [
                               Text(
-                                '${_runSpeed.watch(context).toStringAsFixed(2)} m/s',
+                                '${_runSpeed.watch(context).toStringAsFixed(2)}m/s',
                                 textAlign: .left,
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 22,
                                   fontWeight: .bold,
                                 ),
                               ),
                               Text(
-                                '运动里程：${_runRealDistance.watch(context).toStringAsFixed(2)} (${_runDistance.watch(context).toStringAsFixed(2)}) m',
+                                '耗时: ${_runDuration.watch(context).toString().split('.').first}',
+                                textAlign: .left,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                '里程: ${_runRealDistance.watch(context).toStringAsFixed(2)}(${_runDistance.watch(context).toStringAsFixed(2)})m',
                                 textAlign: .left,
                                 style: TextStyle(
                                   fontSize: 15,
