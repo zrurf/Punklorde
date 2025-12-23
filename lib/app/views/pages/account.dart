@@ -292,6 +292,11 @@ class _AccountViewState extends State<AccountView> {
                     },
                   ).toList(),
                 ),
+                Text(
+                  "没有更多了",
+                  textAlign: .center,
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
               ],
             ),
           ),

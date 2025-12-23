@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/common/models/auth.dart';
 import 'package:punklorde/common/utils/etc/device.dart';
 import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/features/modules/cqupt/tongtian/const/url.dart';
+import 'package:toastification/toastification.dart';
 
 class ModTongtianAuth {
   String? openid;
@@ -15,6 +17,13 @@ class ModTongtianAuth {
   factory ModTongtianAuth.fromJson(Map<String, dynamic> json) {
     return ModTongtianAuth(token: json['token'], publicKey: json['publicKey']);
   }
+}
+
+class TongtianAuthResult {
+  final String? message;
+  final ModTongtianAuth? auth;
+
+  const TongtianAuthResult({this.message, this.auth});
 }
 
 class TongtianAuthProvider extends AccountProvider {
@@ -46,12 +55,12 @@ class TongtianAuthProvider extends AccountProvider {
   @override
   Future<AuthCredential?> refresh(AuthCredential auth) async {
     var newAuth = await _getAuth(auth.id);
-    return (newAuth != null)
+    return (newAuth.auth != null)
         ? AuthCredential(
             type: id,
             id: auth.id,
-            token: newAuth.token,
-            ext: {"publicKey": newAuth.publicKey},
+            token: newAuth.auth!.token,
+            ext: {"publicKey": newAuth.auth!.publicKey},
           )
         : null;
   }
@@ -62,12 +71,24 @@ class TongtianAuthProvider extends AccountProvider {
     Map<String, dynamic> param,
   ) async {
     var auth = await _getAuth(param["openid"] as String);
-    return (auth != null)
+
+    if (auth.auth == null && context.mounted) {
+      toastification.show(
+        context: context,
+        title: Text("登录错误"),
+        description: Text(auth.message ?? "未知错误"),
+        icon: Icon(LucideIcons.circleX),
+        primaryColor: Colors.red,
+        autoCloseDuration: Duration(seconds: 3),
+      );
+    }
+
+    return (auth.auth != null)
         ? AuthCredential(
             type: id,
             id: param["openid"],
-            token: auth.token,
-            ext: {"publicKey": auth.publicKey},
+            token: auth.auth!.token,
+            ext: {"publicKey": auth.auth!.publicKey},
           )
         : null;
   }
@@ -77,21 +98,26 @@ class TongtianAuthProvider extends AccountProvider {
     return true;
   }
 
-  Future<ModTongtianAuth?> _getAuth(String openid) async {
+  Future<TongtianAuthResult> _getAuth(String openid) async {
     try {
       final response = await _dio.get(
-        '$loginUrl?sxCode=&openid=$openid&phoneType=${deviceModel}_$deviceOs',
+        '$loginUrl?wxCode=&openid=$openid&phoneType=${deviceModel}_$deviceOs',
         options: Options(
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": getUA(.wxapplet),
+            "token": "",
           },
         ),
       );
-      return ModTongtianAuth.fromJson(response.data["data"]);
+      return TongtianAuthResult(
+        auth: ModTongtianAuth.fromJson(response.data["data"]),
+      );
+    } on DioException catch (e) {
+      return TongtianAuthResult(message: e.message);
     } catch (e) {
-      return null;
+      return TongtianAuthResult(message: e.toString());
     }
   }
 }
