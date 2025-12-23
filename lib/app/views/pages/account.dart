@@ -214,83 +214,86 @@ class _AccountViewState extends State<AccountView> {
                 ),
                 Column(
                   spacing: 8,
-                  children: guestAuthCredential.watch(context).keys.map<Widget>(
-                    (pid) {
-                      return FTileGroup(
-                        label: Text(
-                          authManager.getProvider(pid)?.name ?? "未知平台",
-                        ),
-                        description: const Text("显示已登录的访客"),
-                        children:
-                            (guestAuthCredential
-                                        .watch(context)[pid]
-                                        ?.values
-                                        .map<FTile>(
-                                          (v) => FTile(
-                                            title: Text(v.name),
-                                            prefix: Icon(LucideIcons.user),
-                                            suffix: Icon(
-                                              LucideIcons.chevronRight,
-                                            ),
-                                            onPress: () {
-                                              WoltModalSheet.show(
-                                                context: context,
-                                                pageListBuilder: (ctx) => [
-                                                  WoltModalSheetPage(
-                                                    child: Padding(
-                                                      padding: .fromLTRB(
-                                                        16,
-                                                        2,
-                                                        16,
-                                                        8,
-                                                      ),
-                                                      child: Column(
-                                                        spacing: 8,
-                                                        children: [
-                                                          Text(
-                                                            "访客 ${v.name}",
-                                                            style: TextStyle(
-                                                              fontWeight: .bold,
-                                                              fontSize: 20,
-                                                            ),
+                  children: guestAuthCredential.watch(context).keys.map<Widget>((
+                    pid,
+                  ) {
+                    return (guestAuthCredential.watch(context)[pid]!.isNotEmpty)
+                        ? FTileGroup(
+                            label: Text(
+                              authManager.getProvider(pid)?.name ?? "未知平台",
+                            ),
+                            description: const Text("显示已登录的访客"),
+                            children:
+                                (guestAuthCredential
+                                            .watch(context)[pid]
+                                            ?.values
+                                            .map<FTile>(
+                                              (v) => FTile(
+                                                title: Text(v.name),
+                                                prefix: Icon(LucideIcons.user),
+                                                suffix: Icon(
+                                                  LucideIcons.chevronRight,
+                                                ),
+                                                onPress: () {
+                                                  WoltModalSheet.show(
+                                                    context: context,
+                                                    pageListBuilder: (ctx) => [
+                                                      WoltModalSheetPage(
+                                                        child: Padding(
+                                                          padding: .fromLTRB(
+                                                            16,
+                                                            2,
+                                                            16,
+                                                            8,
                                                           ),
-                                                          FItem(
-                                                            title: Text(
-                                                              "退出登录",
-                                                              style: TextStyle(
-                                                                color:
-                                                                    Colors.red,
+                                                          child: Column(
+                                                            spacing: 8,
+                                                            children: [
+                                                              Text(
+                                                                "访客 ${v.name}",
+                                                                style: TextStyle(
+                                                                  fontWeight:
+                                                                      .bold,
+                                                                  fontSize: 20,
+                                                                ),
                                                               ),
-                                                            ),
-                                                            prefix: Icon(
-                                                              LucideIcons
-                                                                  .logOut,
-                                                            ),
-                                                            onPress: () {
-                                                              authManager
-                                                                  .guestLogout(
-                                                                    v,
-                                                                  );
-                                                              Navigator.of(
-                                                                ctx,
-                                                              ).pop();
-                                                            },
+                                                              FItem(
+                                                                title: Text(
+                                                                  "退出登录",
+                                                                  style: TextStyle(
+                                                                    color: Colors
+                                                                        .red,
+                                                                  ),
+                                                                ),
+                                                                prefix: Icon(
+                                                                  LucideIcons
+                                                                      .logOut,
+                                                                ),
+                                                                onPress: () {
+                                                                  authManager
+                                                                      .guestLogout(
+                                                                        v,
+                                                                      );
+                                                                  Navigator.of(
+                                                                    ctx,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ],
+                                                        ),
                                                       ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                            onLongPress: () {},
-                                          ),
-                                        ) ??
-                                    [])
-                                .toList(),
-                      );
-                    },
-                  ).toList(),
+                                                    ],
+                                                  );
+                                                },
+                                                onLongPress: () {},
+                                              ),
+                                            ) ??
+                                        [])
+                                    .toList(),
+                          )
+                        : Container();
+                  }).toList(),
                 ),
                 Text(
                   "没有更多了",

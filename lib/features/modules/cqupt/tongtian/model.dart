@@ -4,26 +4,35 @@ class RunConfig {
   final double speed; // 速度
   final double distance; // 目标里程
   final int interval; // 毫秒每次
-  final bool useJitter; // 是否启用抖动
+  final double speedJitterStrength; // 速度抖动强度
+  final double positionJitterStrength; // 位置抖动强度
+  final int? jitterSeed; // 抖动种子
 
   const RunConfig({
     this.speed = 3.2,
     required this.distance,
     this.interval = 1000,
-    this.useJitter = true,
+    this.speedJitterStrength = 0.05,
+    this.positionJitterStrength = 0.5,
+    this.jitterSeed,
   });
 
   RunConfig copyWith({
     double? speed,
     double? distance,
     int? interval,
-    bool? useJitter,
+    double? speedJitterStrength,
+    double? positionJitterStrength,
+    int? jitterSeed,
   }) {
     return RunConfig(
       speed: speed ?? this.speed,
       distance: distance ?? this.distance,
       interval: interval ?? this.interval,
-      useJitter: useJitter ?? this.useJitter,
+      speedJitterStrength: speedJitterStrength ?? this.speedJitterStrength,
+      positionJitterStrength:
+          positionJitterStrength ?? this.positionJitterStrength,
+      jitterSeed: jitterSeed ?? this.jitterSeed,
     );
   }
 }

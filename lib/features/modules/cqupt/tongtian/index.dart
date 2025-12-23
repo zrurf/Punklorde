@@ -9,9 +9,11 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/common/models/auth.dart';
 import 'package:punklorde/common/utils/lbs/distance.dart';
+import 'package:punklorde/common/utils/notification.dart';
 import 'package:punklorde/common/utils/permission/checker.dart';
 import 'package:punklorde/common/models/location.dart';
 import 'package:punklorde/core/services/lbs/location.dart';
+import 'package:punklorde/core/services/motion_simulator/core/jitter/jitter.dart';
 import 'package:punklorde/core/services/motion_simulator/model.dart';
 import 'package:punklorde/core/services/motion_simulator/simulator.dart';
 import 'package:punklorde/core/status/auth.dart';
@@ -28,7 +30,7 @@ import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import './model.dart' as schema;
 
-final _runConfig = signal<RunConfig>(RunConfig(distance: 2100));
+final _runConfig = signal<RunConfig>(RunConfig(distance: 2300));
 final _runConfigNotifier = ValueNotifier<RunConfig>(_runConfig.value);
 
 final class ModuleTontianView extends StatefulWidget {
@@ -56,7 +58,10 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
   late final FSelectController<MapItem> _selectCtrlMp;
   final _textCtrlSpeed = TextEditingController(text: "3.2");
   final _textCtrlInterval = TextEditingController(text: "1000");
-  final _textCtrlDistance = TextEditingController(text: "2100");
+  final _textCtrlDistance = TextEditingController(text: "2300");
+  final _textCtrlSpeedJitterStrength = TextEditingController(text: "0.05");
+  final _textCtrlPositionJitterStrength = TextEditingController(text: "0.5");
+  final _textCtrlJitterSeed = TextEditingController(text: "");
 
   // UI动画控制器
   late final AnimationController _animeCtrl;
@@ -101,8 +106,11 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
 
   @override
   void initState() {
-    checkAndRequestPermissions(PermissionType.location);
+    // 申请权限
+    checkAndRequestPermissions(.location);
+    checkAndRequestPermissions(.notice);
 
+    // 初始化动画控制器
     _animeCtrl = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -332,6 +340,8 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
           icon: Icon(LucideIcons.circleCheck),
         );
 
+        showNotification("跑步结束", "跑步已结束，请在企业微信查看结果", id: noticeChannelId);
+
         _runState.value = .idle;
         WakelockPlus.disable();
       }
@@ -357,6 +367,12 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
       pace: _runConfig.value.speed,
       refreshRate: 1000 / _runConfig.value.interval,
       targetDistance: _runConfig.value.distance,
+      jitterConfig: JitterConfig(
+        positionJitterStrength: _runConfig.value.positionJitterStrength,
+        speedJitterStrength: _runConfig.value.speedJitterStrength,
+        jitterFrequency: 1.0,
+        seed: _runConfig.value.jitterSeed,
+      ),
     );
 
     _runTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -366,12 +382,25 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
     _runState.value = .running;
 
     sportCode = await _apiClient?.startMotion(placeName!, placeCode!);
+
+    if (context.mounted) {
+      toastification.show(
+        context: context,
+        title: const Text("自动跑步已开始"),
+        description: const Text("跑步已开始，达到预设里程后会自动结束"),
+        autoCloseDuration: const Duration(seconds: 5),
+        primaryColor: Colors.orange,
+        icon: Icon(LucideIcons.circlePlay),
+      );
+    }
+
+    showNotification("自动跑步已开始", "跑步已开始，达到预设里程后会自动结束", id: noticeChannelId);
   }
 
   // 停止自动运动
   void stopAutoRunning() async {
     await _motionSimService?.stopSimulation();
-
+    _runTimer?.cancel();
     WakelockPlus.disable();
   }
 
@@ -767,7 +796,6 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                       ),
                                     ),
                                     FTextField(
-                                      // controller: _textCtrlSpeed,
                                       control: FTextFieldControl.managed(
                                         controller: _textCtrlSpeed,
 
@@ -789,19 +817,20 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                       },
                                     ),
                                     FTextField(
-                                      // controller: _textCtrlDistance,
                                       control: FTextFieldControl.managed(
                                         controller: _textCtrlDistance,
                                         onChange: (v) {
                                           _runConfig.value = value.copyWith(
                                             distance:
-                                                double.tryParse(v.text) ?? 2100,
+                                                double.tryParse(v.text) ?? 2300,
                                           );
                                         },
                                       ),
                                       label: const Text("里程"),
-                                      description: const Text("模拟运动里程（米）"),
-                                      hint: "默认: 2100",
+                                      description: const Text(
+                                        "模拟运动里程（米）（由于服务器计算误差，建议高出目标值15%）",
+                                      ),
+                                      hint: "默认: 2300",
                                       keyboardType:
                                           TextInputType.numberWithOptions(),
 
@@ -815,6 +844,7 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                       builder: (context, child) => FCollapsible(
                                         value: _animation.value,
                                         child: Column(
+                                          spacing: 8,
                                           children: [
                                             FDivider(
                                               style: (sty) {
@@ -825,7 +855,6 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                               },
                                             ),
                                             FTextField(
-                                              // controller: _textCtrlInterval,
                                               control:
                                                   FTextFieldControl.managed(
                                                     controller:
@@ -852,6 +881,92 @@ class _ModuleTontianViewState extends State<ModuleTontianView>
                                               onEditingComplete: () {
                                                 _textCtrlInterval.text = value
                                                     .interval
+                                                    .toString();
+                                              },
+                                            ),
+                                            FTextField(
+                                              control:
+                                                  FTextFieldControl.managed(
+                                                    controller:
+                                                        _textCtrlJitterSeed,
+                                                    onChange: (v) {
+                                                      _runConfig.value = value
+                                                          .copyWith(
+                                                            jitterSeed:
+                                                                int.tryParse(
+                                                                  v.text,
+                                                                ),
+                                                          );
+                                                    },
+                                                  ),
+                                              label: const Text("抖动种子"),
+                                              description: const Text(
+                                                "抖动运算的随机种子，可为空",
+                                              ),
+                                              hint: "默认: Null",
+                                              keyboardType:
+                                                  TextInputType.numberWithOptions(),
+                                              onEditingComplete: () {
+                                                _textCtrlJitterSeed.text = value
+                                                    .jitterSeed
+                                                    .toString();
+                                              },
+                                            ),
+                                            FTextField(
+                                              control: FTextFieldControl.managed(
+                                                controller:
+                                                    _textCtrlSpeedJitterStrength,
+                                                onChange: (v) {
+                                                  _runConfig.value = value
+                                                      .copyWith(
+                                                        speedJitterStrength:
+                                                            double.tryParse(
+                                                              v.text,
+                                                            ) ??
+                                                            0.05,
+                                                      );
+                                                },
+                                              ),
+                                              label: const Text("速度抖动强度"),
+                                              description: const Text(
+                                                "速度抖动强度，越高意味着速度越随机，平均值偏离预设越严重。为0则不启用抖动。",
+                                              ),
+                                              hint: "默认: 0.05",
+                                              keyboardType:
+                                                  TextInputType.numberWithOptions(),
+                                              onEditingComplete: () {
+                                                _textCtrlSpeedJitterStrength
+                                                    .text = value
+                                                    .speedJitterStrength
+                                                    .toString();
+                                              },
+                                            ),
+                                            FTextField(
+                                              control: FTextFieldControl.managed(
+                                                controller:
+                                                    _textCtrlPositionJitterStrength,
+                                                onChange: (v) {
+                                                  _runConfig.value = value
+                                                      .copyWith(
+                                                        positionJitterStrength:
+                                                            double.tryParse(
+                                                              v.text,
+                                                            ) ??
+                                                            0.5,
+                                                      );
+                                                },
+                                              ),
+                                              label: const Text("坐标抖动强度"),
+                                              description: const Text(
+                                                "坐标抖动强度，越高意味着位置越随机，路线偏移预设越严重，较高的值可防止查水表，但可能会超出电子围栏。为0则不启用抖动。",
+                                              ),
+                                              hint: "默认: 0.5",
+                                              keyboardType:
+                                                  TextInputType.numberWithOptions(),
+                                              onEditingComplete: () {
+                                                _textCtrlPositionJitterStrength
+                                                    .text = value
+                                                    .positionJitterStrength
                                                     .toString();
                                               },
                                             ),

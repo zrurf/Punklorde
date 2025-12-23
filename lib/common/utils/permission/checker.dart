@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-enum PermissionType { storage, location, photo }
+enum PermissionType { storage, location, photo, notice }
 
 Future<bool> checkAndRequestPermissions(PermissionType type) async {
   var status = await (await _getPermission(type)).status;
@@ -22,6 +22,8 @@ Future<Permission> _getPermission(PermissionType type) async {
       return .photos;
     case .location:
       return .location;
+    case .notice:
+      return .notification;
   }
 }
 

@@ -44,6 +44,19 @@ class GuestAuthCredential {
     required this.name,
     required this.auth,
   });
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "auth": auth.toJson(),
+  };
+
+  factory GuestAuthCredential.fromJson(Map<String, dynamic> json) =>
+      GuestAuthCredential(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        auth: AuthCredential.fromJson(json['auth'] as Map<String, dynamic>),
+      );
 }
 
 // 身份验证提供者

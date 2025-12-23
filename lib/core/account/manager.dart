@@ -82,7 +82,13 @@ class AuthManager {
                     onPress: () async {
                       var auth = await prov.login(context, param);
                       if (auth != null) {
-                        authCredential.value[providerId] = auth;
+                        // 由于Signal无法响应Map变化，所以使用新Map强制响应
+                        // authCredential.value[providerId] = auth;
+                        var newMap = Map<String, AuthCredential>.from(
+                          authCredential.value,
+                        );
+                        newMap[providerId] = auth;
+                        authCredential.value = newMap;
                       }
                       if (auth != null && ctx.mounted) {
                         Navigator.of(ctx).pop();
@@ -124,7 +130,12 @@ class AuthManager {
       return false;
     }
     bool res = await _providers[auth.type]?.logout(auth) ?? true;
-    authCredential.value.remove(auth.type);
+    // 由于Signal无法响应Map变化，所以使用新Map强制响应
+    //authCredential.value.remove(auth.type);
+    var newMap = Map<String, AuthCredential>.from(authCredential.value);
+    newMap.remove(auth.type);
+    authCredential.value = newMap;
+
     return res;
   }
 
@@ -222,6 +233,8 @@ class AuthManager {
 
                     var prov = _providers[credential.type]!;
 
+                    // 使用新Map强制响应
+                    /*
                     if (guestAuthCredential.value[credential.type] == null) {
                       guestAuthCredential.value[credential.type] = {};
                     }
@@ -232,6 +245,20 @@ class AuthManager {
                           name: guestName,
                           auth: credential,
                         );
+                    */
+                    var newMap =
+                        Map<String, Map<String, GuestAuthCredential>>.from(
+                          guestAuthCredential.value,
+                        );
+                    if (newMap[credential.type] == null) {
+                      newMap[credential.type] = {};
+                    }
+                    newMap[credential.type]![aid] = GuestAuthCredential(
+                      id: aid,
+                      name: guestName,
+                      auth: credential,
+                    );
+                    guestAuthCredential.value = newMap;
 
                     Navigator.of(ctx).pop();
                     if (context.mounted) {
@@ -258,7 +285,13 @@ class AuthManager {
   }
 
   void guestLogout(GuestAuthCredential auth) {
-    guestAuthCredential.value[auth.auth.type]?.remove(auth.id);
+    // 使用新Map强制响应
+    // guestAuthCredential.value[auth.auth.type]?.remove(auth.id);
+    var newMap = Map<String, Map<String, GuestAuthCredential>>.from(
+      guestAuthCredential.value,
+    );
+    newMap[auth.auth.type]?.remove(auth.id);
+    guestAuthCredential.value = newMap;
   }
 
   Future<void> refreshAll() async {
@@ -289,7 +322,11 @@ class AuthManager {
         _providers[auth.type]!.supportRefresh) {
       final refreshed = await _providers[auth.type]?.refresh(auth);
       if (refreshed != null) {
-        authCredential.value[id] = refreshed;
+        // 使用新Map强制响应
+        // authCredential.value[id] = refreshed;
+        var newMap = Map<String, AuthCredential>.from(authCredential.value);
+        newMap[id] = refreshed;
+        authCredential.value = newMap;
         return true;
       }
     }

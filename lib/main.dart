@@ -5,15 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_baidu_mapapi_base/flutter_baidu_mapapi_base.dart';
 import 'package:flutter_baidu_mapapi_map/flutter_baidu_mapapi_map.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:punklorde/app/main.dart';
 import 'package:mmkv/mmkv.dart';
-import 'package:punklorde/common/utils/etc/device.dart';
+import 'package:punklorde/app/main.dart';
 import 'package:punklorde/common/utils/etc/style.dart';
+import 'package:punklorde/common/utils/notification.dart';
+import 'package:punklorde/common/utils/permission/checker.dart';
 import 'package:punklorde/core/services/lbs/location.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/core/status/school.dart';
 import 'package:punklorde/core/status/store.dart';
+import 'package:punklorde/core/store/local/auth.dart';
 import 'package:punklorde/features/schools/schools.dart';
 
 Future main() async {
@@ -74,6 +76,17 @@ Future main() async {
   currentSchool.value = schools["cqupt"];
 
   authManager.initWithSchool(currentSchool.value!);
+
+  // 初始化存储器
+  final rootDir = await MMKV.initialize();
+
+  initAuthStore();
+
+  // 检查权限
+  checkAndRequestPermissions(.notice);
+
+  // 初始化通知服务
+  initNoticationPlugin();
 
   runApp(const MainApp());
 }
