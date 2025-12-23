@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/school.dart';
 import 'package:signals/signals_flutter.dart';
+import 'package:toastification/toastification.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 class AccountView extends StatefulWidget {
@@ -178,6 +179,55 @@ class _AccountViewState extends State<AccountView> {
                                               );
                                             },
                                           ),
+                                          (authManager
+                                                      .getProvider(
+                                                        authCred.type,
+                                                      )
+                                                      ?.supportRefresh ??
+                                                  false)
+                                              ? FItem(
+                                                  title: Text("刷新登录信息"),
+                                                  prefix: Icon(
+                                                    LucideIcons.rotateCw,
+                                                  ),
+                                                  onPress: () {
+                                                    authManager
+                                                        .refreshAuth(
+                                                          authCred.type,
+                                                        )
+                                                        .then((v) {
+                                                          if (context.mounted) {
+                                                            toastification.show(
+                                                              context: context,
+                                                              title: Text(
+                                                                (v)
+                                                                    ? "刷新成功"
+                                                                    : "刷新失败",
+                                                              ),
+                                                              description: Text(
+                                                                "刷新登录状态${(v) ? "成功" : "失败"}",
+                                                              ),
+                                                              autoCloseDuration:
+                                                                  const Duration(
+                                                                    seconds: 3,
+                                                                  ),
+                                                              primaryColor: (v)
+                                                                  ? Colors.green
+                                                                  : Colors.red,
+                                                              icon: Icon(
+                                                                (v)
+                                                                    ? LucideIcons
+                                                                          .circleCheck
+                                                                    : LucideIcons
+                                                                          .circleX,
+                                                              ),
+                                                            );
+                                                          }
+                                                        });
+                                                    Navigator.of(ctx).pop();
+                                                  },
+                                                )
+                                              : Container(),
                                           FItem(
                                             title: Text(
                                               "退出登录",

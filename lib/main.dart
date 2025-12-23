@@ -55,6 +55,9 @@ Future main() async {
 
   mmkvKey = dotenv.env["MMKV_KEY"]!;
 
+  // 初始化MMKV存储器
+  final rootDir = await MMKV.initialize();
+
   // 初始化百度地图
   BMFMapSDK.setAgreePrivacy(true);
   if (Platform.isAndroid) await BMFAndroidVersion.initAndroidVersion();
@@ -77,10 +80,11 @@ Future main() async {
 
   authManager.initWithSchool(currentSchool.value!);
 
-  // 初始化存储器
-  final rootDir = await MMKV.initialize();
-
+  // 初始化身份信息存储器
   initAuthStore();
+
+  // 刷新身份验证数据
+  authManager.refreshAll();
 
   // 检查权限
   checkAndRequestPermissions(.notice);

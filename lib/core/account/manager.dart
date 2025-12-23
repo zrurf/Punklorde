@@ -25,8 +25,6 @@ class AuthManager {
     for (final provider in school.accountProviders) {
       registerProvider(provider);
     }
-
-    refreshAll();
   }
 
   Future<bool> login(BuildContext context, String providerId) async {
