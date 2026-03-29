@@ -1,5 +1,7 @@
 import java.util.Properties
 import java.io.FileInputStream
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("com.android.application")
@@ -7,7 +9,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.21"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
 }
 
 val keystoreProperties = Properties()
@@ -27,12 +29,8 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "hacker.silverwolf.punklorde"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
-
-    lint {
-        baseline = file("lint-baseline.xml")
-    }
 
     signingConfigs {
         create("release") {
@@ -50,8 +48,12 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
+    kotlin {
+        jvmToolchain(21)
+        compilerOptions {
+            languageVersion = KotlinVersion.KOTLIN_2_3
+            jvmTarget = JvmTarget.JVM_21
+        }
     }
 
     defaultConfig {
@@ -59,7 +61,7 @@ android {
         applicationId = "hacker.silverwolf.punklorde"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 26 // flutter.minSdkVersion
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -71,8 +73,7 @@ android {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            // signingConfig = signingConfigs.getByName("debug")
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("debug")
 
             isMinifyEnabled = true
             multiDexEnabled = true
@@ -101,10 +102,11 @@ dependencies {
     implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.glance:glance-material3:1.1.1")
     implementation("androidx.glance:glance-material:1.1.1")
-    implementation("androidx.work:work-runtime-ktx:2.11.0")
+    implementation("androidx.work:work-runtime-ktx:2.11.1")
+    implementation("androidx.biometric:biometric:1.1.0")
 
-    implementation("com.baidu.lbsyun:BaiduMapSDK_Map:7.6.6")
-    implementation("com.baidu.lbsyun:BaiduMapSDK_Location_All:9.6.6")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Map:7.6.7")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Location_All:9.6.6.2")
 }
 
 composeCompiler {

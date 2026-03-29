@@ -1,0 +1,9 @@
+pub(crate) const EP_LOGIN_START: &'static str = "/por/login_auth.csp?apiversion=1";
+pub(crate) const EP_LOGIN_END: &'static str = "/por/login_psw.csp?anti_replay=1&encrypt=1&type=cs";
+pub(crate) const EP_LOGIN_2FA_SMS_REQUEST: &'static str = "/por/login_sms.csp?apiversion=1";
+pub(crate) const EP_LOGIN_2FA_SMS_SUBMIT: &'static str = "/por/login_sms1.csp?apiversion=1";
+pub(crate) const EP_LOGIN_2FA_TOTP: &'static str = "/por/login_token.csp";
+pub(crate) const EP_LOGIN_2FA_CERT_GET: &'static str = "/com/server.crt";
+pub(crate) const EP_LOGIN_2FA_CERT_SUBMIT: &'static str = "/por/login_cert.csp?anti_replay=1&encrypt=1&type=cs";
+pub(crate) const EP_CONF: &'static str = "/por/conf.csp";
+pub(crate) const EP_RESOURCE: &'static str = "/por/rclist.csp";

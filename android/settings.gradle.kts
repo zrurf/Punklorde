@@ -11,24 +11,25 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-        // google()
-        // mavenCentral()
-        // gradlePluginPortal()
+        maven { url = uri("https://storage.googleapis.com/download.flutter.io") }
         maven { url = uri("https://maven.aliyun.com/repository/public") }
         maven { url = uri("https://maven.aliyun.com/repository/google") }
         maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
         maven { url = uri("https://maven.aliyun.com/repository/central") }
         maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
         maven { url = uri("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/") }
-        // maven { url = uri("https://mirrors.163.com/maven/repository/maven-public/") }
+
+        google()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.13.1" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.21" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.21" apply false
+    id("com.android.application") version "8.13.2" apply false // Don't use AGP 9
+    id("org.jetbrains.kotlin.android") version "2.3.10" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10" apply false
 }
 
 include(":app")

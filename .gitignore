@@ -1,8 +1,3 @@
-# Environment
-*.env
-
-.key/
-
 # Miscellaneous
 *.class
 *.log
@@ -48,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+*.env
+env.g.dart
+.key

@@ -1,349 +1,179 @@
-import 'dart:convert';
-
+import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:forui/forui.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:punklorde/common/models/auth.dart';
-import 'package:punklorde/common/models/school.dart';
+import 'package:punklorde/core/account/utils.dart';
+import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
-import 'package:signals/signals_flutter.dart';
-import 'package:toastification/toastification.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:xxh3/xxh3.dart';
+import 'package:punklorde/module/model/auth.dart';
 
 class AuthManager {
-  final Map<String, AccountProvider> _providers = {};
-
-  AuthManager();
-
-  void registerProvider(AccountProvider provider) {
-    _providers[provider.id] = provider;
-  }
-
-  void initWithSchool(SchoolModel school) {
-    for (final provider in school.accountProviders) {
-      registerProvider(provider);
-    }
-  }
-
-  Future<bool> login(BuildContext context, String providerId) async {
-    if (_providers[providerId] == null) {
-      toastification.show(
-        context: context,
-        title: const Text("登录失败"),
-        description: const Text("找不到对应的登录方式"),
-        autoCloseDuration: const Duration(seconds: 3),
-        primaryColor: Colors.red,
-        icon: Icon(LucideIcons.circleX),
-      );
+  // 登录
+  Future<bool> login(BuildContext context, String platformId) async {
+    final credential = await currentSchoolSignal.value?.platforms[platformId]
+        ?.login(context);
+    if (credential == null) {
       return false;
     }
-    var prov = _providers[providerId]!;
-    Map<String, dynamic> param = {};
-
-    if (!prov.reqireUi) {
-      WoltModalSheet.show(
-        context: context,
-        pageListBuilder: (ctx) => [
-          WoltModalSheetPage(
-            child: Padding(
-              padding: .fromLTRB(16, 2, 16, 8),
-              child: Column(
-                spacing: 8,
-                children: [
-                  Text(
-                    "登录到 ${prov.name}",
-                    style: TextStyle(fontWeight: .bold, fontSize: 20),
-                  ),
-                  Column(
-                    spacing: 8,
-                    children: prov.inputSchema!
-                        .map<Widget>(
-                          (item) => FTextField(
-                            label: Text(item.lable),
-                            hint: item.hint,
-                            description: (item.desc == null)
-                                ? null
-                                : Text(item.desc!),
-                            obscureText: item.hidden,
-                            control: FTextFieldControl.managed(
-                              onChange: (value) {
-                                param[item.id] = value.text;
-                              },
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                  FButton(
-                    onPress: () async {
-                      var auth = await prov.login(context, param);
-                      if (auth != null) {
-                        // 由于Signal无法响应Map变化，所以使用新Map强制响应
-                        // authCredential.value[providerId] = auth;
-                        var newMap = Map<String, AuthCredential>.from(
-                          authCredential.value,
-                        );
-                        newMap[providerId] = auth;
-                        authCredential.value = newMap;
-                      }
-                      if (auth != null && ctx.mounted) {
-                        Navigator.of(ctx).pop();
-                      }
-                      if (context.mounted) {
-                        toastification.show(
-                          context: context,
-                          title: (auth != null)
-                              ? const Text("登录成功")
-                              : const Text("登录失败"),
-                          description: Text(
-                            "${prov.name} 登录${(auth != null) ? "成功" : "失败"}",
-                          ),
-                          autoCloseDuration: const Duration(seconds: 3),
-                          primaryColor: (auth != null)
-                              ? Colors.green
-                              : Colors.red,
-                          icon: (auth != null)
-                              ? Icon(LucideIcons.circleCheck)
-                              : Icon(LucideIcons.circleX),
-                        );
-                      }
-                    },
-                    child: Text("登录"),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {}
-
-    return false;
-  }
-
-  Future<bool> logout(AuthCredential auth) async {
-    if (!_providers.containsKey(auth.type)) {
-      return false;
-    }
-    bool res = await _providers[auth.type]?.logout(auth) ?? true;
-    // 由于Signal无法响应Map变化，所以使用新Map强制响应
-    //authCredential.value.remove(auth.type);
-    var newMap = Map<String, AuthCredential>.from(authCredential.value);
-    newMap.remove(auth.type);
-    authCredential.value = newMap;
-
-    return res;
-  }
-
-  Future<bool> guestLogin(BuildContext context) async {
-    String shareCode = "";
-    String guestName = "";
-
-    WoltModalSheet.show(
-      context: context,
-      pageListBuilder: (ctx) => [
-        WoltModalSheetPage(
-          child: Padding(
-            padding: .fromLTRB(16, 2, 16, 8),
-            child: Column(
-              spacing: 8,
-              children: [
-                Text("访客登录", style: TextStyle(fontWeight: .bold, fontSize: 20)),
-                FTextField(
-                  label: const Text("访客名称"),
-                  hint: "请输入访客名称",
-                  control: FTextFieldControl.managed(
-                    onChange: (value) {
-                      guestName = value.text;
-                    },
-                  ),
-                ),
-                FTextField.multiline(
-                  label: const Text("分享码"),
-                  hint: "分享码应该以 eyJ 开头...",
-                  description: Text("请输入访客的分享码"),
-                  control: FTextFieldControl.managed(
-                    onChange: (value) {
-                      shareCode = value.text;
-                    },
-                  ),
-                ),
-                FButton(
-                  onPress: () {
-                    if (shareCode.isEmpty || guestName.isEmpty) {
-                      toastification.show(
-                        context: context,
-                        title: const Text("登录失败"),
-                        description: const Text("请填写完整的信息"),
-                        autoCloseDuration: const Duration(seconds: 3),
-                        primaryColor: Colors.red,
-                        icon: Icon(LucideIcons.circleX),
-                      );
-                      return;
-                    }
-                    AuthCredential credential;
-                    try {
-                      credential = AuthCredential.fromJson(
-                        jsonDecode(utf8.decode(base64.decode(shareCode))),
-                      );
-                    } catch (e) {
-                      toastification.show(
-                        context: context,
-                        title: const Text("登录失败"),
-                        description: const Text("无法解析分享码，分享码格式错误"),
-                        autoCloseDuration: const Duration(seconds: 3),
-                        primaryColor: Colors.red,
-                        icon: Icon(LucideIcons.circleX),
-                      );
-                      return;
-                    }
-
-                    if (!_providers.containsKey(credential.type)) {
-                      toastification.show(
-                        context: context,
-                        title: const Text("登录失败"),
-                        description: const Text("没有分享码匹配的平台"),
-                        autoCloseDuration: const Duration(seconds: 3),
-                        primaryColor: Colors.red,
-                        icon: Icon(LucideIcons.circleX),
-                      );
-                      return;
-                    }
-
-                    String aid = xxh3String(utf8.encode(guestName));
-
-                    if (guestAuthCredential.value[credential.type]?.containsKey(
-                          aid,
-                        ) ??
-                        false) {
-                      toastification.show(
-                        context: context,
-                        title: const Text("登录失败"),
-                        description: const Text("访客名称已存在"),
-                        autoCloseDuration: const Duration(seconds: 3),
-                        primaryColor: Colors.red,
-                        icon: Icon(LucideIcons.circleX),
-                      );
-                      return;
-                    }
-
-                    var prov = _providers[credential.type]!;
-
-                    // 使用新Map强制响应
-                    /*
-                    if (guestAuthCredential.value[credential.type] == null) {
-                      guestAuthCredential.value[credential.type] = {};
-                    }
-
-                    guestAuthCredential.value[credential.type]![aid] =
-                        GuestAuthCredential(
-                          id: aid,
-                          name: guestName,
-                          auth: credential,
-                        );
-                    */
-                    var newMap =
-                        Map<String, Map<String, GuestAuthCredential>>.from(
-                          guestAuthCredential.value,
-                        );
-                    if (newMap[credential.type] == null) {
-                      newMap[credential.type] = {};
-                    }
-                    newMap[credential.type]![aid] = GuestAuthCredential(
-                      id: aid,
-                      name: guestName,
-                      auth: credential,
-                    );
-                    guestAuthCredential.value = newMap;
-
-                    Navigator.of(ctx).pop();
-                    if (context.mounted) {
-                      toastification.show(
-                        context: context,
-                        title: const Text("访客登录成功"),
-                        description: Text("${prov.name} 访客登录成功"),
-                        autoCloseDuration: const Duration(seconds: 3),
-                        primaryColor: Colors.green,
-                        icon: Icon(LucideIcons.circleCheck),
-                      );
-                    }
-                  },
-                  child: Text("登录"),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-
+    setAuthCredential(credential);
     return true;
   }
 
-  void guestLogout(GuestAuthCredential auth) {
-    // 使用新Map强制响应
-    // guestAuthCredential.value[auth.auth.type]?.remove(auth.id);
-    var newMap = Map<String, Map<String, GuestAuthCredential>>.from(
-      guestAuthCredential.value,
-    );
-    newMap[auth.auth.type]?.remove(auth.id);
-    guestAuthCredential.value = newMap;
-  }
-
-  Future<void> refreshAll() async {
-    final newMap = Map<String, AuthCredential>.from(authCredential.value);
-
-    for (final entry in authCredential.value.entries) {
-      final idx = entry.key;
-      final auth = entry.value;
-
-      if (_providers.containsKey(auth.type) &&
-          _providers[auth.type]!.supportRefresh) {
-        final refreshed = await _providers[auth.type]?.refresh(auth);
-        if (refreshed != null) {
-          newMap[idx] = refreshed;
-        }
-      }
-    }
-
-    authCredential.value = newMap;
-  }
-
-  Future<bool> refreshAuth(String id) async {
-    if (!authCredential.containsKey(id)) {
+  // 注销
+  Future<bool> logout(String platformId) async {
+    final credential = getPrimaryAuthCredentialByPlatform(platformId);
+    if (credential == null) {
       return false;
     }
-    final auth = authCredential.value[id]!;
-    if (_providers.containsKey(auth.type) &&
-        _providers[auth.type]!.supportRefresh) {
-      final refreshed = await _providers[auth.type]?.refresh(auth);
-      if (refreshed != null) {
-        // 使用新Map强制响应
-        // authCredential.value[id] = refreshed;
-        var newMap = Map<String, AuthCredential>.from(authCredential.value);
-        newMap[id] = refreshed;
-        authCredential.value = newMap;
-        return true;
+    logoutByCredential(credential);
+    return true;
+  }
+
+  // 注销
+  Future<bool> logoutByCredential(AuthCredential credential) async {
+    removeAuthCredentialByCredential(credential);
+    await currentSchoolSignal.value?.platforms[credential.type]?.logout(
+      credential,
+    );
+    return true;
+  }
+
+  // 刷新主账号
+  Future<bool> refreshPrimary(String platformId) async {
+    final credential = getPrimaryAuthCredentialByPlatform(platformId);
+    if (credential == null) {
+      return false;
+    }
+    final refreshResult = await currentSchoolSignal.value?.platforms[platformId]
+        ?.refresh(credential);
+    if (refreshResult == null) {
+      return false;
+    }
+    setAuthCredential(refreshResult.copyWith(guest: false));
+    return true;
+  }
+
+  // 刷新访客
+  Future<bool> refreshGuest(String platformId, String id) async {
+    final credential = getGuestAuthCredentialById(platformId, id);
+    if (credential == null) {
+      return false;
+    }
+    final refreshResult = await currentSchoolSignal.value?.platforms[platformId]
+        ?.refresh(credential);
+    if (refreshResult == null) {
+      return false;
+    }
+    setAuthCredential(refreshResult.copyWith(guest: true));
+    return true;
+  }
+
+  // 刷新平台下所有访客
+  Future<bool> refreshAllGuest(String platformId) async {
+    final credentials = getAllGuestAuthCredentialByPlatform(platformId);
+    if (credentials.isEmpty) {
+      return false;
+    }
+    bool result = true;
+    for (final credential in credentials) {
+      final refreshResult = await currentSchoolSignal
+          .value
+          ?.platforms[platformId]
+          ?.refresh(credential);
+      if (refreshResult == null) {
+        result = false;
+      } else {
+        setAuthCredential(refreshResult.copyWith(guest: true));
       }
     }
-    return false;
+    return result;
   }
 
-  AuthCredential? getAuth(String id) {
-    return authCredential.value[id];
+  // 刷新凭据
+  Future<bool> refreshByCredential(AuthCredential credential) async {
+    return (await refreshAndGetByCredential(credential)) != null;
   }
 
-  List<GuestAuthCredential> getGuestAuths(String id) {
-    return (guestAuthCredential.value[id] ?? {}).values.toList();
+  // 刷新凭据并获取
+  Future<AuthCredential?> refreshAndGetByCredential(
+    AuthCredential credential,
+  ) async {
+    final refreshResult = await currentSchoolSignal
+        .value
+        ?.platforms[credential.type]
+        ?.refresh(credential);
+    if (refreshResult == null) {
+      return null;
+    }
+    final newCredential = refreshResult.copyWith(guest: credential.guest);
+    setAuthCredential(newCredential);
+    return newCredential;
   }
 
-  GuestAuthCredential? getGuestAuth(String pid, String aid) {
-    return (guestAuthCredential.value[pid] ?? {})[aid];
+  // 刷新所有凭据
+  Future<bool> refreshAll() async {
+    bool result = true;
+    for (final credential in authCredentials.value.values) {
+      final refreshResult = await currentSchoolSignal
+          .value
+          ?.platforms[credential.type]
+          ?.refresh(credential);
+      if (refreshResult == null) {
+        result = false;
+      } else {
+        setAuthCredential(refreshResult.copyWith(guest: credential.guest));
+      }
+    }
+    return result;
   }
 
-  AccountProvider? getProvider(String id) {
-    return _providers[id];
+  // 刷新所有已过期的凭据（包括即将过期）
+  Future<bool> refreshAllOutDated() async {
+    bool result = true;
+    for (final credential in authCredentials.value.values) {
+      if (credential.expireAt.isAfter(DateTime.now().addHours(3))) continue;
+      final refreshResult = await currentSchoolSignal
+          .value
+          ?.platforms[credential.type]
+          ?.refresh(credential);
+      if (refreshResult == null) {
+        result = false;
+      } else {
+        setAuthCredential(refreshResult.copyWith(guest: credential.guest));
+      }
+    }
+    return result;
+  }
+
+  // 添加访客
+  void addGuest(AuthCredential credential) {
+    setAuthCredential(credential.copyWith(guest: true));
+  }
+
+  // 移除访客
+  void removeGuest(String platformId, String id) {
+    if (authIndexGuest.value[platformId] == null ||
+        authIndexGuest.value[platformId]?[id] == null) {
+      return;
+    }
+    removeAuthCredentialById(authIndexGuest.value[platformId]![id]!);
+  }
+
+  // 获取主账号
+  AuthCredential? getPrimaryAuthByPlatform(String platformId) {
+    return getPrimaryAuthCredentialByPlatform(platformId);
+  }
+
+  // 获取访客
+  AuthCredential? getGuestAuthById(String platformId, String id) {
+    return getGuestAuthCredentialById(platformId, id);
+  }
+
+  // 获取所有访客
+  List<AuthCredential> getAllGuestAuthByPlatform(String platformId) {
+    return getAllGuestAuthCredentialByPlatform(platformId);
+  }
+
+  // 检查访客是否存在
+  bool hasGuest(AuthCredential credential) {
+    return authCredentials.value.containsKey(genAuthCredentialGuid(credential));
   }
 }

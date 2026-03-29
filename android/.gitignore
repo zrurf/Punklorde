@@ -4,10 +4,9 @@ gradle-wrapper.jar
 /gradlew
 /gradlew.bat
 /local.properties
-/key.properties
+/.kotlin
 GeneratedPluginRegistrant.java
 .cxx/
-.idea
 
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore

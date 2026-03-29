@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
-import 'package:punklorde/app/views/pages/account.dart';
-import 'package:punklorde/app/views/pages/index/home.dart';
-import 'package:punklorde/app/views/pages/index/notify.dart';
-import 'package:punklorde/app/views/pages/index/profile.dart';
-import 'package:punklorde/app/views/pages/index/schedule.dart';
-import 'package:punklorde/app/views/pages/scanner.dart';
-import 'package:punklorde/common/utils/etc/style.dart';
-import 'package:punklorde/features/modules/cqupt/tongtian/index.dart';
+import 'package:punklorde/app/view/index/home.dart';
+import 'package:punklorde/app/view/index/launcher.dart';
+import 'package:punklorde/app/view/index/notify.dart';
+import 'package:punklorde/app/view/index/profile.dart';
+import 'package:punklorde/app/view/index/schedule.dart';
+import 'package:punklorde/app/view/page/account.dart';
+import 'package:punklorde/app/view/page/checkin_user_page.dart';
+import 'package:punklorde/app/view/page/guest.dart';
+import 'package:punklorde/app/view/page/scanner.dart';
+import 'package:punklorde/app/view/page/select_school.dart';
+import 'package:punklorde/i18n/strings.g.dart';
+import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
+import 'package:punklorde/module/feature/cqupt/sport/index.dart';
+import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
+import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -16,15 +24,19 @@ final moduleTitleSignal = signal<String>("");
 final navIndexSignal = signal<int>(0);
 
 final appRoute = GoRouter(
-  initialLocation: '/index/home',
+  initialLocation: '/index/launcher',
   routes: <RouteBase>[
-    GoRoute(path: '/', redirect: (context, state) => '/index/home'),
+    GoRoute(path: '/', redirect: (context, state) => '/index/launcher'),
     ShellRoute(
       builder: (context, state, child) {
+        final colors = context.theme.colors;
         resetSystemChromeStyle();
         return Scaffold(
           resizeToAvoidBottomInset: true,
+          extendBodyBehindAppBar: true,
+          extendBody: true,
           bottomNavigationBar: StylishBottomBar(
+            backgroundColor: colors.background,
             currentIndex: navIndexSignal.value,
             option: DotBarOptions(dotStyle: .tile),
             onTap: (value) {
@@ -46,24 +58,24 @@ final appRoute = GoRouter(
             },
             items: [
               BottomBarItem(
-                icon: Icon(LucideIcons.house),
-                title: const Text("首页"),
+                icon: const Icon(LucideIcons.house),
+                title: Text(t.page.home),
               ),
               BottomBarItem(
-                icon: Icon(LucideIcons.calendarDays),
-                title: const Text("日程"),
+                icon: const Icon(LucideIcons.calendarDays),
+                title: Text(t.page.schedule),
               ),
               BottomBarItem(
-                icon: Icon(LucideIcons.bell),
-                title: const Text("通知"),
+                icon: const Icon(LucideIcons.bell),
+                title: Text(t.page.notification),
               ),
               BottomBarItem(
-                icon: Icon(LucideIcons.userRound),
-                title: const Text("我"),
+                icon: const Icon(LucideIcons.userRound),
+                title: Text(t.page.profile),
               ),
             ],
           ),
-          body: SafeArea(child: child),
+          body: child,
         );
       },
       routes: <RouteBase>[
@@ -123,15 +135,56 @@ final appRoute = GoRouter(
       },
       routes: [
         GoRoute(
-          path: '/p/scanner',
+          path: '/index/launcher',
+          pageBuilder: (context, state) =>
+              const NoTransitionPage(child: LauncherView()),
+        ),
+      ],
+    ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return Scaffold(
+          body: child,
+          extendBodyBehindAppBar: true,
+          extendBody: true,
+          resizeToAvoidBottomInset: true,
+        );
+      },
+      routes: [
+        GoRoute(
+          path: "/p/select_school",
           pageBuilder: (context, state) {
-            return NoTransitionPage(child: ScannerView());
+            return const NoTransitionPage(child: SelectSchoolPageView());
           },
         ),
         GoRoute(
-          path: '/p/account',
+          path: "/p/scan",
           pageBuilder: (context, state) {
-            return NoTransitionPage(child: AccountView());
+            return const NoTransitionPage(child: ScannerPage());
+          },
+        ),
+        GoRoute(
+          path: "/p/universal_scan",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: UniversalScannerPage());
+          },
+        ),
+        GoRoute(
+          path: "/p/checkin_user",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: CheckinUserPage());
+          },
+        ),
+        GoRoute(
+          path: "/s/account/primary",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: PrimaryAccountPageView());
+          },
+        ),
+        GoRoute(
+          path: "/s/account/guest",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: GuestAccountPageView());
           },
         ),
       ],
@@ -142,47 +195,42 @@ final appRoute = GoRouter(
       },
       routes: [
         GoRoute(
-          path: '/mod/tongtian',
+          path: '/feat/cqupt/checkin',
           pageBuilder: (context, state) {
-            return NoTransitionPage(child: ModuleTontianView());
+            return const NoTransitionPage(child: FeatCquptCheckinView());
           },
         ),
-      ],
-    ),
-    ShellRoute(
-      builder: (context, state, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(moduleTitleSignal.watch(context)),
-            leading: IconButton(
-              onPressed: () {
-                context.pop();
-              },
-              icon: Icon(LucideIcons.x),
-            ),
-          ),
-          body: child,
-        );
-      },
-      routes: [
         GoRoute(
-          path: '/plat/wxwork/login/:id',
+          path: '/feat/cqupt/sport',
           pageBuilder: (context, state) {
-            moduleTitleSignal.value = '企业微信登录';
-            final id = state.pathParameters["id"];
-            final appId = state.uri.queryParameters['appid'];
-            final agentId = state.uri.queryParameters['agentid'];
-            final redirect = state.uri.queryParameters['redirect'];
-            if (id == null ||
-                appId == null ||
-                agentId == null ||
-                redirect == null) {
-              return NoTransitionPage(child: Text('参数错误'));
-            }
-            return NoTransitionPage(child: Container());
+            return const NoTransitionPage(child: FeatCquptSportView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cqupt/sport/record',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatSportCquptRecordView());
           },
         ),
       ],
     ),
   ],
 );
+
+void initAppRoute() {
+  // 监听路由变化，同步底部栏索引
+  appRoute.routerDelegate.addListener(() {
+    final String location =
+        appRoute.routerDelegate.currentConfiguration.fullPath;
+
+    if (location.startsWith('/index/home')) {
+      navIndexSignal.value = 0;
+    } else if (location.startsWith('/index/schedule')) {
+      navIndexSignal.value = 1;
+    } else if (location.startsWith('/index/notify')) {
+      navIndexSignal.value = 2;
+    } else if (location.startsWith('/index/profile')) {
+      navIndexSignal.value = 3;
+    }
+  });
+}

@@ -1,0 +1,35 @@
+[package]
+name = "rust_lib_punklorde"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+crossbeam-channel = "0.5.15"
+flutter_rust_bridge = "=2.11.1"
+geo = "0.32.0"
+noise = "0.9.0"
+quick-xml = "0.39.2"
+rand = "0.10.0"
+rayon = "1.11.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+tokio = {version = "1.50.0", features = ["full"]}
+tokio-stream = {version = "0.1.18", features = ["full"]}
+tun-rs = {version = "2.8.2", features = ["async"]}
+uuid = { version = "1.22.0", features = ["v4", "v7"] }
+chrono = "0.4.44"
+parking_lot = "0.12.5"
+tracing = "0.1.44"
+anyhow = "1.0.102"
+lazy_static = "1.5.0"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
+
+[profile.release]
+opt-level = 3
+lto = true
