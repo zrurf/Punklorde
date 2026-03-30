@@ -40,7 +40,7 @@ class RollcallModel {
     }
 
     return RollcallModel(
-      id: json['rollcall_id'],
+      id: json['rollcall_id'].toString(),
       state: json['rollcall_status'],
       title: json['course_title'],
       author: json['created_by_name'],

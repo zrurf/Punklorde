@@ -73,7 +73,7 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                 RollcallType.radar => CheckinType.position,
               },
               name: v.title ?? t.submodule.cqupt_checkin.check_in,
-              desc: v.author ?? v.dept,
+              desc: "${v.author ?? ''}-${v.dept ?? ''}",
               done: v.isDone(),
               onCall: switch (v.type) {
                 RollcallType.qr => (Set<AuthCredential> creds) async {
@@ -82,7 +82,7 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                 RollcallType.pin => (Set<AuthCredential> creds) async {
                   final r = await _openPinInputPanel(
                     v.title ?? t.submodule.cqupt_checkin.check_in,
-                    v.author ?? v.dept ?? '',
+                    "${v.author ?? ''}-${v.dept ?? ''}",
                   );
                   if (r == null) {
                     if (context.mounted) {
@@ -109,7 +109,7 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                 RollcallType.radar => (Set<AuthCredential> creds) async {
                   final r = await _openPosCheckinPanel(
                     v.title ?? t.submodule.cqupt_checkin.check_in,
-                    v.author ?? v.dept ?? '',
+                    "${v.author ?? ''}-${v.dept ?? ''}",
                   );
                   if (r) {
                     if (context.mounted) {
@@ -349,17 +349,13 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                               CheckinType.gesture => LucideIcons.lineSquiggle,
                               CheckinType.other => LucideIcons.circleDashed,
                             }, size: 36),
-                            onPress: (!event.done)
-                                ? () async {
-                                    await event.onCall(
-                                      checkinAuthSignal.value
-                                          .where(
-                                            (v) => v.type == event.platform.id,
-                                          )
-                                          .toSet(),
-                                    );
-                                  }
-                                : null,
+                            onPress: () async {
+                              await event.onCall(
+                                checkinAuthSignal.value
+                                    .where((v) => v.type == event.platform.id)
+                                    .toSet(),
+                              );
+                            },
                           ),
                         );
                       },
