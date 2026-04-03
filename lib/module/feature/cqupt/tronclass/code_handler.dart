@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/checkin.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/service.dart';
@@ -23,7 +24,11 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
   Future<void> handle(context, data) async {
     final credentilas = checkinAuthSignal.value
         .toList()
-        .where((v) => v.type == platCquptTronclass.id)
+        .map((v) {
+          final cred = authCredentials.value[v];
+          return (cred?.type == platCquptTronclass.id) ? cred : null;
+        })
+        .nonNulls
         .toList();
     final result = TronClassSignDecoder.decode(data);
 

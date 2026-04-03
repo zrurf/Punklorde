@@ -352,7 +352,13 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                             onPress: () async {
                               await event.onCall(
                                 checkinAuthSignal.value
-                                    .where((v) => v.type == event.platform.id)
+                                    .map((v) {
+                                      final cred = authCredentials.value[v];
+                                      return (cred?.type == event.platform.id)
+                                          ? cred
+                                          : null;
+                                    })
+                                    .nonNulls
                                     .toSet(),
                               );
                             },

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:punklorde/core/account/utils.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/checkin.dart';
 import 'package:punklorde/i18n/strings.g.dart';
-import 'package:punklorde/module/model/auth.dart';
 import 'package:signals/signals_flutter.dart';
 
 final Signal<String> _searchQuery = Signal('');
@@ -82,7 +82,7 @@ class _CheckinUserPageState extends State<CheckinUserPage> {
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
-                              value: credential,
+                              value: genAuthCredentialGuid(credential),
                             )
                           : null;
                     })
@@ -91,7 +91,7 @@ class _CheckinUserPageState extends State<CheckinUserPage> {
 
                 return (u.isEmpty)
                     ? null
-                    : FSelectTileGroup<AuthCredential>(
+                    : FSelectTileGroup<String>(
                         label: Text(v.name),
                         control: .managed(
                           initial: checkinAuthSignal.value,
