@@ -17,7 +17,6 @@ import 'package:signals/signals_flutter.dart';
 /// 课表主控件
 class ScheduleView extends StatefulWidget {
   const ScheduleView({super.key});
-
   @override
   State<ScheduleView> createState() => _ScheduleViewState();
 }
@@ -28,8 +27,8 @@ class _ScheduleViewState extends State<ScheduleView> {
   final Signal<DateTime> _currentTimeSignal = signal(DateTime.now());
   Timer? _timer;
 
-  // 每一节课(时间槽)的高度
-  static const double _slotHeight = 50.0;
+  // 动态计算的时间槽高度
+  double _slotHeight = 0.0;
   // 左侧时间轴宽度
   static const double _timeAxisWidth = 35.0;
 
@@ -39,6 +38,11 @@ class _ScheduleViewState extends State<ScheduleView> {
     _initController();
     _currentTimeSignal.value = DateTime.now();
 
+    // 初始化时间槽高度
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateSlotHeight();
+    });
+
     _timer = Timer(Duration(seconds: 60 - _currentTimeSignal.value.second), () {
       _currentTimeSignal.value = DateTime.now();
       _timer?.cancel();
@@ -46,6 +50,27 @@ class _ScheduleViewState extends State<ScheduleView> {
         _currentTimeSignal.value = DateTime.now();
       });
     });
+  }
+
+  void _calculateSlotHeight() {
+    final context = this.context;
+
+    // 获取可用屏幕高度（减去顶部导航栏和底部导航栏）
+    final screenHeight = MediaQuery.of(context).size.height;
+    final appBarHeight = kToolbarHeight;
+    final bottomBarHeight = kBottomNavigationBarHeight;
+    final availableHeight =
+        screenHeight - appBarHeight - bottomBarHeight - 80; // 减去额外 padding
+
+    // 获取时间槽数量
+    final slots = currentSchoolSignal.value?.scheduleServices.slots ?? [];
+    final slotCount = slots.length;
+
+    if (slotCount > 0) {
+      setState(() {
+        _slotHeight = availableHeight / slotCount;
+      });
+    }
   }
 
   void _initController() {
@@ -186,7 +211,12 @@ class _ScheduleViewState extends State<ScheduleView> {
 
   Widget _buildPageView(Semester? semester, ScheduleService? scheduleSrv) {
     if (semester == null || scheduleSrv == null) {
-      return const Center(child: Text("未加载学期信息"));
+      return Center(
+        child: Text(
+          t.notice.failed_get_data,
+          style: TextStyle(fontSize: 20, color: context.theme.colors.error),
+        ),
+      );
     }
 
     return PageView.builder(
@@ -453,7 +483,7 @@ class _WeekTable extends StatelessWidget {
     );
   }
 
-  /// 构建课程层 - 核心逻辑：计算位置以支持跨槽
+  /// 构建课程层
   Widget _buildEventLayer(
     BuildContext context,
     CalendarEventIndex eventIndex,
@@ -556,22 +586,22 @@ class _WeekTable extends StatelessWidget {
         padding: const .symmetric(vertical: 6, horizontal: 4),
         alignment: .topLeft,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: .center,
           children: [
             Text(
               event.title,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: .bold,
+                fontWeight: FontWeight.bold,
                 color: (isDarkMode(context))
                     ? colors.primaryForeground.withValues(alpha: 0.9)
                     : eventColor,
               ),
-              maxLines: isMultiSlot ? 4 : 2,
+              maxLines: isMultiSlot ? 3 : 2, // 根据是否跨槽调整最大行数
               overflow: .ellipsis,
               textAlign: .center,
             ),
-            Spacer(),
+            const Spacer(),
             if (event.location != null)
               Text(
                 event.location!,
@@ -581,6 +611,7 @@ class _WeekTable extends StatelessWidget {
                       ? colors.primaryForeground.withValues(alpha: 0.9)
                       : eventColor,
                 ),
+                maxLines: 2,
                 overflow: .fade,
                 textAlign: .center,
               ),
