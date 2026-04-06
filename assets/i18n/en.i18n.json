@@ -6,6 +6,8 @@
     "account": "Account",
     "sources": "Sources",
     "unify_id": "Unify ID",
+    "studnet_id": "Student ID",
+    "name": "Name",
     "password": "Password",
     "scan_qrcode": "Scan",
     "binary": "Binary",
@@ -48,7 +50,10 @@
     "err_guest_exist": "Guest accounts with the same ID already exist.",
     "current_guest_exist": "This guest already exists.",
     "not_support_plat": "The current school does not support the platform associated with this account.",
-    "invalid_data": "Invalid data"
+    "invalid_data": "Invalid data",
+    "not_impl_schedule_service": "This school has not implemented the schedule service.",
+    "never_updated": "Never updated",
+    "failed_get_data": "Failed to obtain data"
   },
   "title": {
     "id": "ID",
@@ -64,11 +69,21 @@
     "add_guest": "Add Guest Account",
     "select_checkin_user": "Select the Users",
     "select_checkin_user_hine": "These users will be used for checking in.",
-    "checkin_result": "Check-in Result"
+    "checkin_result": "Check-in Result",
+    "week_title": "Week $week",
+    "teacher": "Teacher",
+    "location": "Location",
+    "time": "Time",
+    "exam_position": "Seat",
+    "class_id": "Class",
+    "course_id": "Course",
+    "last_update": "Last update",
+    "student_list": "Students List"
   },
   "action": {
     "back": "Back",
     "refresh_login": "Refresh the login status",
+    "refresh_schedule": "Refresh schedule",
     "logout": "Logout",
     "re_login": "Re-login",
     "login_info": "Login Information",
@@ -78,12 +93,22 @@
     "open_with": "Open with...",
     "open_with_name": "Open with $name",
     "add_guest": "Add guest account",
-    "re_add_guest": "Re-add guest account"
+    "re_add_guest": "Re-add guest account",
+    "check_stu_list": "Check students list"
   },
   "label": {
     "primary": "Primary",
     "guest": "Guest",
-    "expired": "Expired"
+    "expired": "Expired",
+    "calender_mon": "Mon.",
+    "calender_tue": "Tue.",
+    "calender_wed": "Wed.",
+    "calender_thu": "Thu.",
+    "calender_fri": "Fri.",
+    "calender_sat": "Sat.",
+    "calender_sun": "Sun.",
+    "current_week": "Current",
+    "exam": "Exam"
   },
   "feat": {
     "all_function": "All Features", 

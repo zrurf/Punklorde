@@ -53,8 +53,7 @@ class CquptUnifyBasePlatform {
         },
         validateStatus: (status) => status != null && status < 500,
       ),
-    );
-    _dio.interceptors.add(CquptForwardInterceptor());
+    )..interceptors.add(CquptForwardInterceptor());
     _crypto = AesCbc.with128bits(
       macAlgorithm: .empty,
       paddingAlgorithm: .pkcs7,
@@ -153,7 +152,6 @@ class CquptUnifyBasePlatform {
     try {
       final String url1 = "$_baseUrl?service=${Uri.encodeComponent(url)}";
       final response1 = await _dio.get(url1);
-      print("测试：${response1.requestOptions.headers["cookie"]}");
       if (!(const [302, 303]).contains(response1.statusCode)) {
         return null;
       }

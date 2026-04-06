@@ -9,9 +9,11 @@ import 'package:punklorde/module/feature/scanner/code_handler.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/manifest.dart';
 import 'package:punklorde/module/model/feature.dart';
 import 'package:punklorde/module/model/school.dart';
+import 'package:punklorde/module/platform/cqupt/academic_portal.dart';
 import 'package:punklorde/module/platform/cqupt/sport.dart';
 import 'package:punklorde/module/platform/cqupt/sport_portal.dart';
 import 'package:punklorde/module/platform/cqupt/tronclass.dart';
+import 'package:punklorde/module/school/cqupt/services.dart';
 import 'package:punklorde/module/tab/common_tabs.dart';
 import 'package:punklorde/utils/etc/url.dart';
 
@@ -32,12 +34,14 @@ final School schoolCqupt = School(
   alias: {"重邮"},
   logo: "assets/images/logo/cqupt.png",
   platforms: {
+    platCquptAcademicPortal.id: platCquptAcademicPortal,
     platCquptTronclass.id: platCquptTronclass,
     platCquptSport.id: platCquptSport,
     platCquptSportPortal.id: platCquptSportPortal,
   },
   features: _features,
   dataInterfaces: {},
+  scheduleServices: CquptScheduleService(),
   codeHandlers: {handlerUrlLink, handlerGuestAccount, handlerCquptTronCheckin},
   tabs: [tabSchedule, tabFunctions(_features.values.toList())],
   defaultPinnedFeats: [

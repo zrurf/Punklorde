@@ -56,12 +56,14 @@ void storeAppStatus() {
 
 void loadAppStatus() {
   final storage = StorageService();
+
+  // 加载主题
+  themeModeSignal.value =
+      ThemeMode.values[storage.getInt('theme', instance: defaultMMKV)];
+
   // 加载学校
   final schoolId = storage.getString('school', instance: defaultMMKV);
   if (schoolId != null && isSchoolExist(schoolId)) {
     setCurrentSchool(getSchool(schoolId));
   }
-  // 加载主题
-  themeModeSignal.value =
-      ThemeMode.values[storage.getInt('theme', instance: defaultMMKV)];
 }

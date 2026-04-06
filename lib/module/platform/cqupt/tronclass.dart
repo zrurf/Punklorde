@@ -16,16 +16,16 @@ import 'package:punklorde/module/platform/cqupt/base/unify.dart';
 import 'package:punklorde/utils/ua.dart';
 import 'package:punklorde/utils/uuid.dart';
 
-const String _domainService = "lms.tc.cqupt.edu.cn";
-const String _domainCas = "ids.cqupt.edu.cn";
-const String _domainRelay = "identity.tc.cqupt.edu.cn";
-
-const String _baseUrl = "http://$_domainService";
-const String _apiVerify = "$_baseUrl/statistics/api/user-visits";
-const String _apiLogin = "$_baseUrl/login";
-const String _apiProfile = "$_baseUrl/api/profile";
-
 class CquptTronclassPlatform extends Platform {
+  static const String _domainService = "lms.tc.cqupt.edu.cn";
+  static const String _domainCas = "ids.cqupt.edu.cn";
+  static const String _domainRelay = "identity.tc.cqupt.edu.cn";
+
+  static const String _baseUrl = "http://$_domainService";
+  static const String _apiVerify = "$_baseUrl/statistics/api/user-visits";
+  static const String _apiLogin = "$_baseUrl/login";
+  static const String _apiProfile = "$_baseUrl/api/profile";
+
   @override
   String get id => "cqupt_tc";
 

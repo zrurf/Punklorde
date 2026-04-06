@@ -78,6 +78,12 @@ class TranslationsCommonEn {
 	/// en: 'Unify ID'
 	String get unify_id => 'Unify ID';
 
+	/// en: 'Student ID'
+	String get studnet_id => 'Student ID';
+
+	/// en: 'Name'
+	String get name => 'Name';
+
 	/// en: 'Password'
 	String get password => 'Password';
 
@@ -212,6 +218,15 @@ class TranslationsNoticeEn {
 
 	/// en: 'Invalid data'
 	String get invalid_data => 'Invalid data';
+
+	/// en: 'This school has not implemented the schedule service.'
+	String get not_impl_schedule_service => 'This school has not implemented the schedule service.';
+
+	/// en: 'Never updated'
+	String get never_updated => 'Never updated';
+
+	/// en: 'Failed to obtain data'
+	String get failed_get_data => 'Failed to obtain data';
 }
 
 // Path: title
@@ -263,6 +278,33 @@ class TranslationsTitleEn {
 
 	/// en: 'Check-in Result'
 	String get checkin_result => 'Check-in Result';
+
+	/// en: 'Week $week'
+	String week_title({required Object week}) => 'Week ${week}';
+
+	/// en: 'Teacher'
+	String get teacher => 'Teacher';
+
+	/// en: 'Location'
+	String get location => 'Location';
+
+	/// en: 'Time'
+	String get time => 'Time';
+
+	/// en: 'Seat'
+	String get exam_position => 'Seat';
+
+	/// en: 'Class'
+	String get class_id => 'Class';
+
+	/// en: 'Course'
+	String get course_id => 'Course';
+
+	/// en: 'Last update'
+	String get last_update => 'Last update';
+
+	/// en: 'Students List'
+	String get student_list => 'Students List';
 }
 
 // Path: action
@@ -278,6 +320,9 @@ class TranslationsActionEn {
 
 	/// en: 'Refresh the login status'
 	String get refresh_login => 'Refresh the login status';
+
+	/// en: 'Refresh schedule'
+	String get refresh_schedule => 'Refresh schedule';
 
 	/// en: 'Logout'
 	String get logout => 'Logout';
@@ -308,6 +353,9 @@ class TranslationsActionEn {
 
 	/// en: 'Re-add guest account'
 	String get re_add_guest => 'Re-add guest account';
+
+	/// en: 'Check students list'
+	String get check_stu_list => 'Check students list';
 }
 
 // Path: label
@@ -326,6 +374,33 @@ class TranslationsLabelEn {
 
 	/// en: 'Expired'
 	String get expired => 'Expired';
+
+	/// en: 'Mon.'
+	String get calender_mon => 'Mon.';
+
+	/// en: 'Tue.'
+	String get calender_tue => 'Tue.';
+
+	/// en: 'Wed.'
+	String get calender_wed => 'Wed.';
+
+	/// en: 'Thu.'
+	String get calender_thu => 'Thu.';
+
+	/// en: 'Fri.'
+	String get calender_fri => 'Fri.';
+
+	/// en: 'Sat.'
+	String get calender_sat => 'Sat.';
+
+	/// en: 'Sun.'
+	String get calender_sun => 'Sun.';
+
+	/// en: 'Current'
+	String get current_week => 'Current';
+
+	/// en: 'Exam'
+	String get exam => 'Exam';
 }
 
 // Path: feat
@@ -650,6 +725,8 @@ extension on Translations {
 			'common.account' => 'Account',
 			'common.sources' => 'Sources',
 			'common.unify_id' => 'Unify ID',
+			'common.studnet_id' => 'Student ID',
+			'common.name' => 'Name',
 			'common.password' => 'Password',
 			'common.scan_qrcode' => 'Scan',
 			'common.binary' => 'Binary',
@@ -689,6 +766,9 @@ extension on Translations {
 			'notice.current_guest_exist' => 'This guest already exists.',
 			'notice.not_support_plat' => 'The current school does not support the platform associated with this account.',
 			'notice.invalid_data' => 'Invalid data',
+			'notice.not_impl_schedule_service' => 'This school has not implemented the schedule service.',
+			'notice.never_updated' => 'Never updated',
+			'notice.failed_get_data' => 'Failed to obtain data',
 			'title.id' => 'ID',
 			'title.user' => 'User',
 			'title.platform' => 'Platform',
@@ -703,8 +783,18 @@ extension on Translations {
 			'title.select_checkin_user' => 'Select the Users',
 			'title.select_checkin_user_hine' => 'These users will be used for checking in.',
 			'title.checkin_result' => 'Check-in Result',
+			'title.week_title' => ({required Object week}) => 'Week ${week}',
+			'title.teacher' => 'Teacher',
+			'title.location' => 'Location',
+			'title.time' => 'Time',
+			'title.exam_position' => 'Seat',
+			'title.class_id' => 'Class',
+			'title.course_id' => 'Course',
+			'title.last_update' => 'Last update',
+			'title.student_list' => 'Students List',
 			'action.back' => 'Back',
 			'action.refresh_login' => 'Refresh the login status',
+			'action.refresh_schedule' => 'Refresh schedule',
 			'action.logout' => 'Logout',
 			'action.re_login' => 'Re-login',
 			'action.login_info' => 'Login Information',
@@ -715,9 +805,19 @@ extension on Translations {
 			'action.open_with_name' => ({required Object name}) => 'Open with ${name}',
 			'action.add_guest' => 'Add guest account',
 			'action.re_add_guest' => 'Re-add guest account',
+			'action.check_stu_list' => 'Check students list',
 			'label.primary' => 'Primary',
 			'label.guest' => 'Guest',
 			'label.expired' => 'Expired',
+			'label.calender_mon' => 'Mon.',
+			'label.calender_tue' => 'Tue.',
+			'label.calender_wed' => 'Wed.',
+			'label.calender_thu' => 'Thu.',
+			'label.calender_fri' => 'Fri.',
+			'label.calender_sat' => 'Sat.',
+			'label.calender_sun' => 'Sun.',
+			'label.current_week' => 'Current',
+			'label.exam' => 'Exam',
 			'feat.all_function' => 'All Features',
 			'feat.schedule' => 'Schedule',
 			'feat.workspace' => 'Workspace',

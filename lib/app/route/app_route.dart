@@ -15,6 +15,7 @@ import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
+import 'package:punklorde/module/school/cqupt/view/page/student_list.dart';
 import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -210,6 +211,14 @@ final appRoute = GoRouter(
           path: '/feat/cqupt/sport/record',
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: FeatSportCquptRecordView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cqupt/global/stulist/:id',
+          pageBuilder: (context, state) {
+            return NoTransitionPage(
+              child: StudentListPage(id: state.pathParameters['id']),
+            );
           },
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:punklorde/module/model/code_handler.dart';
 import 'package:punklorde/module/model/data_interface.dart';
 import 'package:punklorde/module/model/feature.dart';
 import 'package:punklorde/module/model/platform.dart';
+import 'package:punklorde/module/model/schedule.dart';
 
 class School {
   final String id; // 学校 ID
@@ -12,6 +13,7 @@ class School {
   final Map<String, Platform> platforms; // 支持的账号平台
   final Map<String, Feature> features; // 支持的功能
   final Map<Feature, DataInterface> dataInterfaces; // 数据接口
+  final ScheduleService scheduleServices; // 课表服务
   final Set<CodeHandler> codeHandlers; // 扫码处理器
   final List<SchoolTab> tabs; // 标签
 
@@ -25,6 +27,7 @@ class School {
     required this.platforms,
     required this.features,
     required this.dataInterfaces,
+    required this.scheduleServices,
     required this.codeHandlers,
     required this.tabs,
     required this.defaultPinnedFeats,

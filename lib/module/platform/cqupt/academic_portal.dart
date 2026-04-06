@@ -12,34 +12,32 @@ import 'package:punklorde/core/account/view/widget/login_panel.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/model/platform.dart';
+import 'package:punklorde/module/network/interceptor/cqupt.dart';
 import 'package:punklorde/module/platform/cqupt/base/unify.dart';
-import 'package:punklorde/module/platform/cqupt/interceptor/sport_portal.dart';
 import 'package:punklorde/utils/ua.dart';
 
-class CquptSportPortalPlatform extends Platform {
-  static const String _domain = "172.20.2.228";
-  static const String _baseUrl = "http://$_domain";
-  static const String _domainLogin = "$_baseUrl/portal/pages/casLogin/index";
-  static const String _apiLogin = "$_baseUrl/api/oauth/fs/sys/login";
-  static const String _apiInfo = "$_baseUrl/api/oauth/getUserInfo";
+class CquptAcademicPortalPlatform extends Platform {
+  static const String _domainLogin =
+      "http://jwzx.cqupt.edu.cn/tysfrz/index.php";
+  String _apiInfo(String uid) =>
+      "https://sport.cqupt.edu.cn/new_wxapp/wxUnifyId/getUserInfo?unifyId=$uid&studentNo=1";
+  static const String _apiTest =
+      "http://jwzx.cqupt.edu.cn/kebiao/kb_stuList.php?jxb=0";
 
   @override
-  String get id => "cqupt_sport_portal";
+  String get id => "cqupt_academic_portal";
 
   @override
-  String get name => "智慧体育门户";
+  String get name => "教务在线";
 
   @override
-  String get descript => "用于校园跑记录获取、申诉（需连接学校VPN使用）";
+  String get descript => "用于课表、考试等信息查询";
 
   late final Dio _dio;
 
-  late final CquptSportPortalInterceptor _interceptor;
-
   late final CquptUnifyBasePlatform _unifyBasePlatform;
 
-  CquptSportPortalPlatform() {
-    _interceptor = CquptSportPortalInterceptor();
+  CquptAcademicPortalPlatform() {
     _dio = Dio(
       BaseOptions(
         followRedirects: false,
@@ -48,12 +46,11 @@ class CquptSportPortalPlatform extends Platform {
         headers: {"User-Agent": UAUtil.getUA(.raw)},
         validateStatus: (status) => status != null && status < 500,
       ),
-    )..interceptors.add(_interceptor);
+    )..interceptors.add(CquptForwardInterceptor());
     _unifyBasePlatform = CquptUnifyBasePlatform();
   }
 
   Future<AuthCredential?> _login(String uid, String pwd, bool longTerm) async {
-    _interceptor.setToken(null);
     final CookieJar cookieJar = CookieJar();
     final url1 = await _unifyBasePlatform.passwordLogin(
       _domainLogin,
@@ -63,61 +60,46 @@ class CquptSportPortalPlatform extends Platform {
       cookieJar,
     );
     if (url1 == null) return null;
+
     final uri1 = Uri.parse(url1);
     final ticket = uri1.queryParameters["ticket"];
-    if (ticket == null) return null;
-    final r1 = await _dio.post(
-      _apiLogin,
+
+    await _dio.get(
+      url1,
       options: Options(
-        headers: {"User-Agent": UAUtil.getUA(.raw), "Referer": url1},
-        contentType: Headers.jsonContentType,
+        followRedirects: true,
+        headers: {
+          "User-Agent": UAUtil.getUA(.raw),
+          "Cookie": "PHPSESSID=$ticket",
+        },
       ),
-      data: {"ticket": ticket},
     );
+
+    if (ticket == null) return null;
+    final r1 = await _dio.get(_apiInfo(uid));
     if (r1.statusCode != 200 ||
         r1.data["code"] != "10200" ||
         r1.data["data"] == null) {
       return null;
     }
+    final String? stuId = r1.data["data"]["studentNo"];
+    final String? username = r1.data["data"]["username"];
+    final int? grade = int.tryParse(r1.data["data"]["grade"]);
+    final bool sex = r1.data["data"]["sex"] == "1";
 
-    final String? accessTk = r1.data["data"]["access_token"]?.toString();
-    final String? refreshTk = r1.data["data"]["refresh_token"]?.toString();
-    final String? tokenType = r1.data["data"]["token_type"]?.toString();
-    final num? expiresIn = r1.data["data"]["expires_in"];
-    if (accessTk == null ||
-        refreshTk == null ||
-        tokenType == null ||
-        expiresIn == null) {
-      return null;
-    }
-    _interceptor.setToken(accessTk);
-    final r2 = await _dio.get(
-      _apiInfo,
-      options: Options(
-        headers: {"User-Agent": UAUtil.getUA(.raw), "Referer": url1},
-      ),
-    );
-    if (r2.statusCode != 200 ||
-        r2.data["code"] != "10200" ||
-        r2.data["data"] == null) {
-      return null;
-    }
-    final String? uuid = r2.data["data"]["id"]?.toString();
-    final String? name = r2.data["data"]["realName"]?.toString();
-    final String? avatar = r2.data["data"]["avatar"]?.toString();
-    if (uuid == null || name == null || avatar == null) return null;
+    if (stuId == null || username == null || grade == null) return null;
+
     return AuthCredential(
       guest: false,
       type: id,
-      id: uuid,
-      name: name,
-      token: accessTk,
-      expireAt: DateTime.now().addSeconds(expiresIn.toInt()),
+      id: stuId,
+      name: username,
+      token: ticket,
+      expireAt: DateTime.now().addHours(1),
       ext: {
-        "uid": uid,
-        "refresh": refreshTk,
-        "token_type": tokenType,
-        "avatar": avatar,
+        "unify_id": uid,
+        "grade": grade,
+        "sex": sex,
         "cookie": await serializeCookieJar(
           cookieJar,
           CquptUnifyBasePlatform.cookieDomain,
@@ -137,43 +119,24 @@ class CquptSportPortalPlatform extends Platform {
     try {
       final url1 = await _unifyBasePlatform.refresh(_domainLogin, cookie);
       if (url1 == null) return null;
+
       final uri1 = Uri.parse(url1);
       final ticket = uri1.queryParameters["ticket"];
-      if (ticket == null) return null;
-      final r1 = await _dio.post(
-        _apiLogin,
+
+      await _dio.get(
+        url1,
         options: Options(
-          headers: {"User-Agent": UAUtil.getUA(.raw), "Referer": url1},
-          contentType: Headers.jsonContentType,
+          followRedirects: true,
+          headers: {
+            "User-Agent": UAUtil.getUA(.raw),
+            "Cookie": "PHPSESSID=$ticket",
+          },
         ),
-        data: {"ticket": ticket},
       );
-      if (r1.statusCode != 200 ||
-          r1.data["code"] != "10200" ||
-          r1.data["data"] == null) {
-        return null;
-      }
-      final String? accessTk = r1.data["data"]["access_token"]?.toString();
-      final String? refreshTk = r1.data["data"]["refresh_token"]?.toString();
-      final String? tokenType = r1.data["data"]["token_type"]?.toString();
-      final num? expiresIn = r1.data["data"]["expires_in"];
-      if (accessTk == null ||
-          refreshTk == null ||
-          tokenType == null ||
-          expiresIn == null) {
-        return null;
-      }
-      final ext = credential.ext ?? {};
-      ext["refresh"] = refreshTk;
-      ext["token_type"] = tokenType;
-      ext["cookie"] = await serializeCookieJar(
-        cookie,
-        CquptUnifyBasePlatform.cookieDomain,
-      );
+      if (ticket == null) return null;
       return credential.copyWith(
-        token: accessTk,
-        expireAt: DateTime.now().addSeconds(expiresIn.toInt()),
-        ext: ext,
+        token: ticket,
+        expireAt: DateTime.now().addHours(1),
       );
     } catch (e) {
       return null;
@@ -240,21 +203,21 @@ class CquptSportPortalPlatform extends Platform {
 
   @override
   Future<bool> validate(AuthCredential credential) async {
-    _interceptor.setToken(credential.token);
     try {
       final r1 = await _dio.get(
-        _apiInfo,
+        _apiTest,
         options: Options(
-          headers: {"User-Agent": UAUtil.getUA(.raw), "Referer": _baseUrl},
+          headers: {
+            "User-Agent": UAUtil.getUA(.raw),
+            "Cookie": "PHPSESSID=${credential.token}",
+          },
         ),
       );
-      return !(r1.statusCode != 200 ||
-          r1.data["code"] != "10200" ||
-          r1.data["data"] == null);
+      return r1.data is String && (r1.data as String).contains("<body>");
     } catch (e) {
       return false;
     }
   }
 }
 
-final platCquptSportPortal = CquptSportPortalPlatform();
+final platCquptAcademicPortal = CquptAcademicPortalPlatform();

@@ -6,6 +6,7 @@ import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/core/status/resource.dart';
+import 'package:punklorde/core/status/schedule.dart';
 import 'package:punklorde/core/storage/mmkv.dart';
 import 'package:punklorde/core/storage/storage.dart';
 import 'package:punklorde/env.dart';
@@ -54,8 +55,11 @@ Future<void> main() async {
   // 获取权限
   checkAndRequestPermission(.notice);
 
-  // 刷新所有已过时的凭据
-  authManager.refreshAllOutDated();
+  // 加载状态
+  await loadStatus().then((v) {
+    // 同步状态
+    syncStatus();
+  });
 
   FlutterNativeSplash.remove();
   runApp(TranslationProvider(child: MainMobileApp()));
@@ -72,4 +76,28 @@ Future<void> initStatus() async {
 
   initAppStatus();
   initAuthStatus();
+}
+
+// 加载状态
+Future<void> loadStatus() async {
+  try {
+    await loadSemester();
+    await loadScheduleStatus();
+  } catch (e) {
+    print(e);
+  }
+  initScheduleStatus();
+}
+
+// 同步状态
+Future<void> syncStatus() async {
+  // 刷新所有已过时的凭据
+  await authManager.refreshAllOutDated();
+  if (lastScheduleUpdateTimeSignal.value == null ||
+      DateTime.now().difference(
+            lastScheduleUpdateTimeSignal.value ?? DateTime.now(),
+          ) >=
+          const Duration(days: 1)) {
+    await pullSchedule();
+  }
 }

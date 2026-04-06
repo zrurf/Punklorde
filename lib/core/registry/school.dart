@@ -1,5 +1,5 @@
 import 'package:punklorde/module/model/school.dart';
-import 'package:punklorde/module/school/cqupt.dart';
+import 'package:punklorde/module/school/cqupt/manifest.dart';
 
 final Map<String, School> schoolsRegistry = {
   schoolCqupt.id.toLowerCase(): schoolCqupt, // CQUPT 重庆邮电大学

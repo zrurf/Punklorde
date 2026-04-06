@@ -61,6 +61,8 @@ class _TranslationsCommonZhCn implements TranslationsCommonEn {
 	@override String get account => '账户';
 	@override String get sources => '源';
 	@override String get unify_id => '统一认证码';
+	@override String get studnet_id => '学号';
+	@override String get name => '姓名';
 	@override String get password => '密码';
 	@override String get scan_qrcode => '扫码';
 	@override String get binary => '二进制';
@@ -118,6 +120,9 @@ class _TranslationsNoticeZhCn implements TranslationsNoticeEn {
 	@override String get current_guest_exist => '当前访客已经存在';
 	@override String get not_support_plat => '当前学校不支持该账号所属平台';
 	@override String get invalid_data => '数据无效';
+	@override String get not_impl_schedule_service => '当前学校未实现日程服务';
+	@override String get never_updated => '从未更新';
+	@override String get failed_get_data => '获取数据失败';
 }
 
 // Path: title
@@ -141,6 +146,15 @@ class _TranslationsTitleZhCn implements TranslationsTitleEn {
 	@override String get select_checkin_user => '谁要签到？';
 	@override String get select_checkin_user_hine => '将为这些用户进行签到';
 	@override String get checkin_result => '签到结果';
+	@override String week_title({required Object week}) => '第 ${week} 周';
+	@override String get teacher => '教师';
+	@override String get location => '地点';
+	@override String get time => '时间';
+	@override String get exam_position => '座位号';
+	@override String get class_id => '教学班';
+	@override String get course_id => '课程号';
+	@override String get last_update => '上次更新时间';
+	@override String get student_list => '学生名单';
 }
 
 // Path: action
@@ -152,6 +166,7 @@ class _TranslationsActionZhCn implements TranslationsActionEn {
 	// Translations
 	@override String get back => '返回';
 	@override String get refresh_login => '刷新登录';
+	@override String get refresh_schedule => '刷新日程';
 	@override String get logout => '退出登录';
 	@override String get re_login => '重新登录';
 	@override String get login_info => '登录信息';
@@ -162,6 +177,7 @@ class _TranslationsActionZhCn implements TranslationsActionEn {
 	@override String open_with_name({required Object name}) => '用 ${name} 打开';
 	@override String get add_guest => '添加访客账户';
 	@override String get re_add_guest => '重新添加访客账户';
+	@override String get check_stu_list => '查看选课学生名单';
 }
 
 // Path: label
@@ -174,6 +190,15 @@ class _TranslationsLabelZhCn implements TranslationsLabelEn {
 	@override String get primary => '主账号';
 	@override String get guest => '访客';
 	@override String get expired => '过期';
+	@override String get calender_mon => '周一';
+	@override String get calender_tue => '周二';
+	@override String get calender_wed => '周三';
+	@override String get calender_thu => '周四';
+	@override String get calender_fri => '周五';
+	@override String get calender_sat => '周六';
+	@override String get calender_sun => '周日';
+	@override String get current_week => '本周';
+	@override String get exam => '考试';
 }
 
 // Path: feat
@@ -324,6 +349,8 @@ extension on TranslationsZhCn {
 			'common.account' => '账户',
 			'common.sources' => '源',
 			'common.unify_id' => '统一认证码',
+			'common.studnet_id' => '学号',
+			'common.name' => '姓名',
 			'common.password' => '密码',
 			'common.scan_qrcode' => '扫码',
 			'common.binary' => '二进制',
@@ -363,6 +390,9 @@ extension on TranslationsZhCn {
 			'notice.current_guest_exist' => '当前访客已经存在',
 			'notice.not_support_plat' => '当前学校不支持该账号所属平台',
 			'notice.invalid_data' => '数据无效',
+			'notice.not_impl_schedule_service' => '当前学校未实现日程服务',
+			'notice.never_updated' => '从未更新',
+			'notice.failed_get_data' => '获取数据失败',
 			'title.id' => 'ID',
 			'title.user' => '用户',
 			'title.platform' => '平台',
@@ -377,8 +407,18 @@ extension on TranslationsZhCn {
 			'title.select_checkin_user' => '谁要签到？',
 			'title.select_checkin_user_hine' => '将为这些用户进行签到',
 			'title.checkin_result' => '签到结果',
+			'title.week_title' => ({required Object week}) => '第 ${week} 周',
+			'title.teacher' => '教师',
+			'title.location' => '地点',
+			'title.time' => '时间',
+			'title.exam_position' => '座位号',
+			'title.class_id' => '教学班',
+			'title.course_id' => '课程号',
+			'title.last_update' => '上次更新时间',
+			'title.student_list' => '学生名单',
 			'action.back' => '返回',
 			'action.refresh_login' => '刷新登录',
+			'action.refresh_schedule' => '刷新日程',
 			'action.logout' => '退出登录',
 			'action.re_login' => '重新登录',
 			'action.login_info' => '登录信息',
@@ -389,9 +429,19 @@ extension on TranslationsZhCn {
 			'action.open_with_name' => ({required Object name}) => '用 ${name} 打开',
 			'action.add_guest' => '添加访客账户',
 			'action.re_add_guest' => '重新添加访客账户',
+			'action.check_stu_list' => '查看选课学生名单',
 			'label.primary' => '主账号',
 			'label.guest' => '访客',
 			'label.expired' => '过期',
+			'label.calender_mon' => '周一',
+			'label.calender_tue' => '周二',
+			'label.calender_wed' => '周三',
+			'label.calender_thu' => '周四',
+			'label.calender_fri' => '周五',
+			'label.calender_sat' => '周六',
+			'label.calender_sun' => '周日',
+			'label.current_week' => '本周',
+			'label.exam' => '考试',
 			'feat.all_function' => '全部功能',
 			'feat.schedule' => '日程',
 			'feat.workspace' => '工作台',

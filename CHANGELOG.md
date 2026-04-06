@@ -6,6 +6,16 @@
 
 ## [未发布] | [Unreleased]
 
+### ✨ 新增 | Added
+- **课表功能**：现在可以查课表了。
+- **CQUPT教务在线平台**：现在支持登录到教务在线(jwzx.cqupt.edu.cn)。
+
+### 修复 | Fixed
+- **签到功能**：修复了学在重邮签到事件拉取错误的问题。
+- **签到身份凭据**：修复了签到时错误地使用过时的身份凭据。
+
+## [`75ad3de`](https://github.com/zrurf/Punklorde/commit/75ad3dee9a7cc66811b52a5d84203f7db1525b95) - 2026-3-29
+
 ### 🚨 重大破坏性改动 | Breaking Changes
 
 - **项目完全重构** ([`2434c60`](https://github.com/zrurf/Punklorde/commit/2434c607959b383ba2258dffee06fdfafba57d93) 之后)

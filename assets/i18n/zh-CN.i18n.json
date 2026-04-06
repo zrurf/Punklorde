@@ -6,6 +6,8 @@
     "account": "账户",
     "sources": "源",
     "unify_id": "统一认证码",
+    "studnet_id": "学号",
+    "name": "姓名",
     "password": "密码",
     "scan_qrcode": "扫码",
     "binary": "二进制",
@@ -48,7 +50,10 @@
     "err_guest_exist": "已经有相同ID的访客账号",
     "current_guest_exist": "当前访客已经存在",
     "not_support_plat": "当前学校不支持该账号所属平台",
-    "invalid_data": "数据无效"
+    "invalid_data": "数据无效",
+    "not_impl_schedule_service": "当前学校未实现日程服务",
+    "never_updated": "从未更新",
+    "failed_get_data": "获取数据失败"
   },
   "title": {
     "id": "ID",
@@ -64,11 +69,21 @@
     "add_guest": "添加访客账户",
     "select_checkin_user": "谁要签到？",
     "select_checkin_user_hine": "将为这些用户进行签到",
-    "checkin_result": "签到结果"
+    "checkin_result": "签到结果",
+    "week_title": "第 $week 周",
+    "teacher": "教师",
+    "location": "地点",
+    "time": "时间",
+    "exam_position": "座位号",
+    "class_id": "教学班",
+    "course_id": "课程号",
+    "last_update": "上次更新时间",
+    "student_list": "学生名单"
   },
   "action": {
     "back": "返回",
     "refresh_login": "刷新登录",
+    "refresh_schedule": "刷新日程",
     "logout": "退出登录",
     "re_login": "重新登录",
     "login_info": "登录信息",
@@ -78,12 +93,22 @@
     "open_with": "打开方式...",
     "open_with_name": "用 $name 打开",
     "add_guest": "添加访客账户",
-    "re_add_guest": "重新添加访客账户"
+    "re_add_guest": "重新添加访客账户",
+    "check_stu_list": "查看选课学生名单"
   },
   "label": {
     "primary": "主账号",
     "guest": "访客",
-    "expired": "过期"
+    "expired": "过期",
+    "calender_mon": "周一",
+    "calender_tue": "周二",
+    "calender_wed": "周三",
+    "calender_thu": "周四",
+    "calender_fri": "周五",
+    "calender_sat": "周六",
+    "calender_sun": "周日",
+    "current_week": "本周",
+    "exam": "考试"
   },
   "feat": {
     "all_function": "全部功能", 
