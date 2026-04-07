@@ -1,4 +1,5 @@
 -keep class com.baidu.** {*;}
 -keep class vi.com.** {*;}
 -keep class com.baidu.vi.** {*;}
+-keep class hacker.silverwolf.** {*;}
 -dontwarn com.baidu.**

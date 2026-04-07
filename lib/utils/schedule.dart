@@ -47,77 +47,161 @@ List<int> getActiveWeeks(ScheduleEvent event, Semester semester) {
   return List.generate(semester.week, (index) => index + 1);
 }
 
-/// 获取当前或下一个事件
-///
-/// 根据给定的时间，在日程索引中查找当天正在进行或即将开始的事件。
-/// 如果当前时间正在进行某个事件，则返回该事件。
-/// 如果没有正在进行的事件，则返回当天下一个即将开始的事件。
-/// 如果当天再无事件，返回 null。
-///
-/// [time] 查询的时间点
-/// [index] 日程索引数据
-/// [eventMap] 事件ID到事件对象的映射（用于解析详情）
-/// [slots] 时间槽配置（用于计算结束时间）
-/// [semester] 学期信息（用于计算周次）
-ScheduleEvent? getCurrentOrNextEvent({
+/// 获取当前正在进行的事件
+ScheduleEvent? getCurrentEvent({
   required DateTime time,
   required CalendarEventIndex index,
   required Map<String, ScheduleEvent> eventMap,
   required List<TimeSlot> slots,
   required Semester semester,
 }) {
-  // 1. 确定周次和星期
   final week = semester.getWeekIndex(time);
-  if (week == 0) return null; // 不在学期内
-
-  final day = time.weekday; // 1 (Mon) - 7 (Sun)
+  if (week == 0) return null;
+  final day = time.weekday;
   final currentMinute = time.hour * 60 + time.minute;
-
-  // 2. 获取当天的索引数据
-  // index 结构: Map<Week, Map<Day, Map<StartMinute, List<ID>>>>
   final dayIndex = index[week]?[day];
   if (dayIndex == null || dayIndex.isEmpty) return null;
 
-  // 获取所有开始时间并排序
   final startTimes = dayIndex.keys.toList()..sort();
 
-  ScheduleEvent? nextEvent;
-
-  // 3. 遍历查找
   for (final startTime in startTimes) {
-    if (startTime > currentMinute) {
-      // 找到第一个开始时间晚于当前时间的事件，这即是“下一个事件”
-      // 取该时间段的第一个事件（假设同一时间可能有多个事件，这里取一个）
-      final ids = dayIndex[startTime];
-      if (ids != null && ids.isNotEmpty) {
-        nextEvent = eventMap[ids.first];
-        break; // 找到最近的下一个，停止查找
-      }
-    } else {
-      // 开始时间早于或等于当前时间，检查是否正在进行
+    if (startTime <= currentMinute) {
       final ids = dayIndex[startTime];
       if (ids != null && ids.isNotEmpty) {
         for (final id in ids) {
           final event = eventMap[id];
           if (event == null) continue;
-
-          // 计算结束时间
           final endMinute = _getEndMinute(event, slots, startTime);
-
-          // 如果当前时间在 [startTime, endMinute) 范围内
+          // 如果当前时间在 [startTime, endMinute) 范围内，说明正在进行
           if (endMinute != null && currentMinute < endMinute) {
-            // 找到正在进行的事件，直接返回（优先级最高）
             return event;
           }
         }
       }
     }
   }
+  return null;
+}
 
-  // 4. 返回结果
-  // 如果有正在进行的事件，上面已经返回了。
-  // 这里返回下一个即将开始的事件（可能为 null）
-  return nextEvent;
+/// 获取下一个即将开始的事件
+ScheduleEvent? getNextEvent({
+  required DateTime time,
+  required CalendarEventIndex index,
+  required Map<String, ScheduleEvent> eventMap,
+  required List<TimeSlot> slots,
+  required Semester semester,
+}) {
+  final week = semester.getWeekIndex(time);
+  if (week == 0) return null;
+  final day = time.weekday;
+  final currentMinute = time.hour * 60 + time.minute;
+  final dayIndex = index[week]?[day];
+  if (dayIndex == null || dayIndex.isEmpty) return null;
+
+  final startTimes = dayIndex.keys.toList()..sort();
+
+  for (final startTime in startTimes) {
+    // 找到第一个开始时间晚于当前时间的事件
+    if (startTime > currentMinute) {
+      final ids = dayIndex[startTime];
+      if (ids != null && ids.isNotEmpty) {
+        return eventMap[ids.first];
+      }
+    }
+  }
+  return null;
+}
+
+/// 获取当天所有未完成的事件（包括正在进行和尚未开始的）
+/// 返回列表已按开始时间排序
+List<ScheduleEvent> getRemainingEvents({
+  required DateTime time,
+  required CalendarEventIndex index,
+  required Map<String, ScheduleEvent> eventMap,
+  required List<TimeSlot> slots,
+  required Semester semester,
+}) {
+  final week = semester.getWeekIndex(time);
+  if (week == 0) return [];
+
+  final day = time.weekday;
+  final currentMinute = time.hour * 60 + time.minute;
+
+  // 获取当天的索引
+  final dayIndex = index[week]?[day];
+  if (dayIndex == null || dayIndex.isEmpty) return [];
+
+  final remainingEvents = <ScheduleEvent>[];
+
+  // 获取所有开始时间并排序
+  final startTimes = dayIndex.keys.toList()..sort();
+
+  for (final startTime in startTimes) {
+    final ids = dayIndex[startTime];
+    if (ids == null) continue;
+
+    for (final id in ids) {
+      final event = eventMap[id];
+      if (event == null) continue;
+
+      // 计算该事件的结束时间
+      final endMinute = _getEndMinute(event, slots, startTime);
+
+      // 筛选逻辑：
+      // 1. 结束时间必须存在
+      // 2. 结束时间必须大于当前时间（说明事件还未结束）
+      // 注意：如果事件已经开始但未结束，也会被包含在内
+      if (endMinute != null && endMinute > currentMinute) {
+        remainingEvents.add(event);
+      }
+    }
+  }
+
+  return remainingEvents;
+}
+
+/// 检测某事件是否在进行中
+/// [event]: 要检测的事件
+/// [time]: 当前时间点
+/// [semester]: 当前学期信息
+/// [slots]: 时间槽配置
+bool isEventActive({
+  required ScheduleEvent event,
+  required DateTime time,
+  required Semester semester,
+  required List<TimeSlot> slots,
+}) {
+  // 1. 检查是否在激活的周次内
+  final activeWeeks = getActiveWeeks(event, semester);
+  final currentWeek = semester.getWeekIndex(time);
+  if (!activeWeeks.contains(currentWeek)) {
+    return false;
+  }
+
+  // 2. 获取归一化后的时间信息 (星期, 开始分钟数)
+  final timeInfo = normalizeEventTime(slots, event);
+  if (timeInfo == null) return false;
+
+  final eventDay = timeInfo.$1;
+  final startMinutes = timeInfo.$2;
+
+  // 3. 检查是否是当天
+  // DateTime.weekday: 1 (周一) - 7 (周日)
+  if (eventDay != time.weekday) {
+    return false;
+  }
+
+  // 4. 计算结束时间
+  final endMinutes = _getEndMinute(event, slots, startMinutes);
+  if (endMinutes == null) {
+    // 如果无法确定结束时间，通常认为无法判断正在进行，返回 false
+    return false;
+  }
+
+  // 5. 判断当前时间是否在区间内 [startMinutes, endMinutes)
+  final currentMinutes = time.hour * 60 + time.minute;
+
+  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
 }
 
 /// 辅助函数：计算事件的结束时间（距当天0点的分钟数）

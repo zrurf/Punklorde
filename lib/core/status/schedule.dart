@@ -1,9 +1,11 @@
 // 当前学期
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:punklorde/common/constant/endpoint.dart';
+import 'package:punklorde/core/service/widget_service.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/resource.dart';
 import 'package:punklorde/core/storage/mmkv.dart';
@@ -25,11 +27,36 @@ final Signal<BuiltMap<String, ScheduleEvent>> scheduleBaseEventsSignal = signal(
 final Signal<BuiltMap<String, ScheduleEvent>> scheduleCustomEventsSignal =
     signal(BuiltMap<String, ScheduleEvent>());
 
+/// 当前正在进行的事件
+final Signal<ScheduleEvent?> currentActiveEventSignal = signal(null);
+
+/// 下一个即将开始的事件
+final Signal<ScheduleEvent?> nextUpcomingEventSignal = signal(null);
+
+/// 当天所有未完成的事件列表（按时间正序排列）
+final Signal<List<ScheduleEvent>> todayRemainingEventsSignal = signal([]);
+
+bool isFirstTrigger = true;
+
 // 初始化应用状态
 void initScheduleStatus() {
   effect(() {
     storeScheduleStatus();
   });
+
+  effect(() {
+    if (isFirstTrigger) {
+      isFirstTrigger = false;
+      return;
+    }
+    pullSchedule();
+  });
+
+  // 初始化小组件服务
+  ScheduleWidgetService.init();
+
+  // 启动日程监控定时器
+  startScheduleMonitor();
 }
 
 /// 合成索引 Signal
@@ -115,18 +142,24 @@ final calendarEventIndexSignal = computed<CalendarEventIndex>(() {
   return resultBuilder.build();
 });
 
+/// 最后一次更新课表时间
 final Signal<DateTime?> lastScheduleUpdateTimeSignal = signal(null);
+
+// 事件检查定时器
+Timer? _scheduleCheckTimer;
 
 bool pullScheduleLock = false;
 
 /// 从学校配置拉取课表
 Future<bool> pullSchedule() async {
   try {
+    final school = currentSchoolSignal.value;
+    final semester = currentSemesterSignal.value;
+
     if (pullScheduleLock) throw Exception('Pull schedule locked');
     pullScheduleLock = true;
-    final scheduleService = currentSchoolSignal.value?.scheduleServices;
+    final scheduleService = school?.scheduleServices;
     if (scheduleService == null) throw Exception('No schedule service');
-    final semester = currentSemesterSignal.value;
     if (semester == null) throw Exception('No semester');
     final user = scheduleService.getCredential();
     if (user == null) throw Exception('No user');
@@ -249,4 +282,77 @@ Future<bool> loadSemester() async {
   } else {
     return false;
   }
+}
+
+/// 启动日程状态监控
+void startScheduleMonitor() {
+  // 取消已存在的定时器，防止重复
+  _scheduleCheckTimer?.cancel();
+
+  // 立即执行一次更新
+  _checkAndUpdateCurrentSchedule();
+
+  // 启动周期性定时器
+  _scheduleCheckTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+    _checkAndUpdateCurrentSchedule();
+    ScheduleWidgetService.updateWidget();
+  });
+}
+
+/// 停止监控
+void stopScheduleMonitor() {
+  _scheduleCheckTimer?.cancel();
+  _scheduleCheckTimer = null;
+}
+
+/// 核心检查与更新逻辑
+void _checkAndUpdateCurrentSchedule() {
+  final semester = currentSemesterSignal.value;
+  final school = currentSchoolSignal.value;
+  final index = calendarEventIndexSignal.value;
+  final eventMap = {
+    ...scheduleBaseEventsSignal.value.asMap(),
+    ...scheduleCustomEventsSignal.value.asMap(),
+  };
+
+  // 如果学期信息或学校服务未就绪，清空状态
+  if (semester == null || school == null) {
+    currentActiveEventSignal.value = null;
+    nextUpcomingEventSignal.value = null;
+    todayRemainingEventsSignal.value = [];
+    return;
+  }
+
+  final slots = school.scheduleServices.slots;
+  final now = DateTime.now();
+
+  // 获取当前和下一事件
+  final current = getCurrentEvent(
+    time: now,
+    index: index,
+    eventMap: eventMap,
+    slots: slots,
+    semester: semester,
+  );
+
+  final next = getNextEvent(
+    time: now,
+    index: index,
+    eventMap: eventMap,
+    slots: slots,
+    semester: semester,
+  );
+
+  final remainingList = getRemainingEvents(
+    time: now,
+    index: index,
+    eventMap: eventMap,
+    slots: slots,
+    semester: semester,
+  );
+
+  // 更新全局状态
+  currentActiveEventSignal.value = current;
+  nextUpcomingEventSignal.value = next;
+  todayRemainingEventsSignal.value = remainingList;
 }

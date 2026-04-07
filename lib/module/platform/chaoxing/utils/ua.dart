@@ -24,9 +24,11 @@ class UAConfig {
 
 /// 生成超星UA
 String genUA(UAConfig config) {
-  final header = config.iOS
-      ? UAUtil.getUA(.raw, useRealSystem: false, targetOS: 'ios_raw')
-      : "Dalvik/2.1.0 (Linux; U; Android ${device.deviceOSVersion}; ${device.deviceModel} Build/${device.deviceProduct})";
+  final header = UAUtil.getUA(
+    .raw,
+    useRealSystem: false,
+    targetOS: (config.iOS) ? 'ios_raw' : 'android',
+  );
   final body =
       "(device:${device.deviceModel}) Language/zh_CN ${(config.iOS) ? 'com.ssreader.ChaoXingStudy' : 'com.chaoxing.mobile'}/ChaoXingStudy_3_${config.appVersion}_${(config.iOS ? 'ios' : 'android')}_phone_${config.versionCode}_${config.apiVersion} (@Kalimdor)_${config.uniqueId}";
   final schild = md5.convert(

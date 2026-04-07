@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:punklorde/app/main.dart';
 import 'package:punklorde/core/resource/model.dart';
+import 'package:punklorde/core/service/widget_service.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
@@ -100,4 +101,6 @@ Future<void> syncStatus() async {
           const Duration(days: 1)) {
     await pullSchedule();
   }
+  // 更新小组件
+  await ScheduleWidgetService.updateWidget();
 }

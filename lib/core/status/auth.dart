@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:built_collection/built_collection.dart';
@@ -137,6 +138,9 @@ void rebuildIndex() {
   });
 }
 
+/// 认证状态更新定时器
+Timer? _authUpdateTimer;
+
 // 初始化认证状态
 void initAuthStatus() {
   effect(() {
@@ -148,6 +152,10 @@ void initAuthStatus() {
         .nonNulls
         .toList(),
   );
+  _authUpdateTimer?.cancel();
+  _authUpdateTimer = Timer.periodic(const Duration(minutes: 30), (timer) {
+    authManager.refreshAllOutDated();
+  });
 }
 
 // 存储认证状态

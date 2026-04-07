@@ -53,7 +53,8 @@
     "invalid_data": "数据无效",
     "not_impl_schedule_service": "当前学校未实现日程服务",
     "never_updated": "从未更新",
-    "failed_get_data": "获取数据失败"
+    "failed_get_data": "获取数据失败",
+    "schedule_empty": "今天已经没课了~"
   },
   "title": {
     "id": "ID",
@@ -108,7 +109,9 @@
     "calender_sat": "周六",
     "calender_sun": "周日",
     "current_week": "本周",
-    "exam": "考试"
+    "exam": "考试",
+    "ongoing": "进行中",
+    "upcoming": "即将开始"
   },
   "feat": {
     "all_function": "全部功能", 

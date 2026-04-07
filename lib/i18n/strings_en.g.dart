@@ -227,6 +227,9 @@ class TranslationsNoticeEn {
 
 	/// en: 'Failed to obtain data'
 	String get failed_get_data => 'Failed to obtain data';
+
+	/// en: 'There are no classes today ~'
+	String get schedule_empty => 'There are no classes today ~';
 }
 
 // Path: title
@@ -401,6 +404,12 @@ class TranslationsLabelEn {
 
 	/// en: 'Exam'
 	String get exam => 'Exam';
+
+	/// en: 'Ongoing'
+	String get ongoing => 'Ongoing';
+
+	/// en: 'Upcoming'
+	String get upcoming => 'Upcoming';
 }
 
 // Path: feat
@@ -769,6 +778,7 @@ extension on Translations {
 			'notice.not_impl_schedule_service' => 'This school has not implemented the schedule service.',
 			'notice.never_updated' => 'Never updated',
 			'notice.failed_get_data' => 'Failed to obtain data',
+			'notice.schedule_empty' => 'There are no classes today ~',
 			'title.id' => 'ID',
 			'title.user' => 'User',
 			'title.platform' => 'Platform',
@@ -818,6 +828,8 @@ extension on Translations {
 			'label.calender_sun' => 'Sun.',
 			'label.current_week' => 'Current',
 			'label.exam' => 'Exam',
+			'label.ongoing' => 'Ongoing',
+			'label.upcoming' => 'Upcoming',
 			'feat.all_function' => 'All Features',
 			'feat.schedule' => 'Schedule',
 			'feat.workspace' => 'Workspace',

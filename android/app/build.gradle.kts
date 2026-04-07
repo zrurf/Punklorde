@@ -87,6 +87,7 @@ android {
 
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -104,6 +105,10 @@ dependencies {
     implementation("androidx.glance:glance-material:1.1.1")
     implementation("androidx.work:work-runtime-ktx:2.11.1")
     implementation("androidx.biometric:biometric:1.1.0")
+
+    implementation(platform("androidx.compose:compose-bom:2026.03.01"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
 
     implementation("com.baidu.lbsyun:BaiduMapSDK_Map:7.6.7")
     implementation("com.baidu.lbsyun:BaiduMapSDK_Location_All:9.6.6.2")

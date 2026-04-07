@@ -95,7 +95,7 @@ class CquptAcademicPortalPlatform extends Platform {
       id: stuId,
       name: username,
       token: ticket,
-      expireAt: DateTime.now().addHours(1),
+      expireAt: DateTime.now().addMinutes(30),
       ext: {
         "unify_id": uid,
         "grade": grade,
@@ -136,7 +136,7 @@ class CquptAcademicPortalPlatform extends Platform {
       if (ticket == null) return null;
       return credential.copyWith(
         token: ticket,
-        expireAt: DateTime.now().addHours(1),
+        expireAt: DateTime.now().addMinutes(30),
       );
     } catch (e) {
       return null;

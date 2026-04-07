@@ -53,7 +53,8 @@
     "invalid_data": "Invalid data",
     "not_impl_schedule_service": "This school has not implemented the schedule service.",
     "never_updated": "Never updated",
-    "failed_get_data": "Failed to obtain data"
+    "failed_get_data": "Failed to obtain data",
+    "schedule_empty": "There are no classes today ~"
   },
   "title": {
     "id": "ID",
@@ -108,7 +109,9 @@
     "calender_sat": "Sat.",
     "calender_sun": "Sun.",
     "current_week": "Current",
-    "exam": "Exam"
+    "exam": "Exam",
+    "ongoing": "Ongoing",
+    "upcoming": "Upcoming"
   },
   "feat": {
     "all_function": "All Features", 

@@ -123,6 +123,7 @@ class _TranslationsNoticeZhCn implements TranslationsNoticeEn {
 	@override String get not_impl_schedule_service => '当前学校未实现日程服务';
 	@override String get never_updated => '从未更新';
 	@override String get failed_get_data => '获取数据失败';
+	@override String get schedule_empty => '今天已经没课了~';
 }
 
 // Path: title
@@ -199,6 +200,8 @@ class _TranslationsLabelZhCn implements TranslationsLabelEn {
 	@override String get calender_sun => '周日';
 	@override String get current_week => '本周';
 	@override String get exam => '考试';
+	@override String get ongoing => '进行中';
+	@override String get upcoming => '即将开始';
 }
 
 // Path: feat
@@ -393,6 +396,7 @@ extension on TranslationsZhCn {
 			'notice.not_impl_schedule_service' => '当前学校未实现日程服务',
 			'notice.never_updated' => '从未更新',
 			'notice.failed_get_data' => '获取数据失败',
+			'notice.schedule_empty' => '今天已经没课了~',
 			'title.id' => 'ID',
 			'title.user' => '用户',
 			'title.platform' => '平台',
@@ -442,6 +446,8 @@ extension on TranslationsZhCn {
 			'label.calender_sun' => '周日',
 			'label.current_week' => '本周',
 			'label.exam' => '考试',
+			'label.ongoing' => '进行中',
+			'label.upcoming' => '即将开始',
 			'feat.all_function' => '全部功能',
 			'feat.schedule' => '日程',
 			'feat.workspace' => '工作台',
