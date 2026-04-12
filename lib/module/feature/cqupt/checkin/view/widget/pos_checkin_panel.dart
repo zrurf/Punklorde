@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:punklorde/common/model/location.dart';
+import 'package:punklorde/core/status/location.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 
 class PosCheckinPanel extends StatefulWidget {
   final String title;
   final String desc;
-  final void Function(bool crack) onConfirm;
+  final void Function(Coordinate coord) onConfirm;
 
   const PosCheckinPanel({
     super.key,
@@ -69,18 +72,26 @@ class _PosCheckinPanelState extends State<PosCheckinPanel> {
                     const SizedBox(height: 8),
                     FButton(
                       variant: .secondary,
-                      onPress: () {
-                        widget.onConfirm(true);
-                      },
+                      onPress: () {},
+                      prefix: const Icon(LucideIcons.mapPinSearch),
                       child: Text(
                         t.submodule.cqupt_checkin.checkin_use_auto_loc,
                       ),
                     ),
                     FButton(
+                      variant: .secondary,
+                      onPress: () {},
+                      prefix: const Icon(LucideIcons.mousePointerClick),
+                      child: Text(t.action.manual_select_point),
+                    ),
+                    FButton(
                       variant: .primary,
                       onPress: () {
-                        widget.onConfirm(false);
+                        widget.onConfirm(
+                          Coordinate(lat: rawLat.value, lng: rawLng.value),
+                        );
                       },
+                      prefix: const Icon(LucideIcons.locateFixed),
                       child: Text(
                         t.submodule.cqupt_checkin.checkin_use_current_loc,
                       ),

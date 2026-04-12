@@ -5,7 +5,7 @@ import 'package:punklorde/i18n/strings.g.dart';
 class LoginInputEntry {
   final String id;
   final String lable;
-  final bool hidden;
+  final bool isPwd;
   final RegExp? pattern;
   final String? defaultValue;
   final String? hint;
@@ -14,7 +14,7 @@ class LoginInputEntry {
   const LoginInputEntry({
     required this.id,
     required this.lable,
-    this.hidden = false,
+    this.isPwd = false,
     this.pattern,
     this.defaultValue,
     this.hint,
@@ -94,19 +94,31 @@ class _LoginPanelState extends State<LoginPanel> {
                       spacing: 8,
                       children: widget.inputEntries
                           .map<Widget>(
-                            (item) => FTextField(
-                              label: Text(item.lable),
-                              hint: item.hint,
-                              description: (item.desc == null)
-                                  ? null
-                                  : Text(item.desc!),
-                              obscureText: item.hidden,
-                              control: .managed(
-                                onChange: (value) {
-                                  values[item.id] = value.text;
-                                },
-                              ),
-                            ),
+                            (item) => (item.isPwd)
+                                ? FTextField.password(
+                                    label: Text(item.lable),
+                                    hint: item.hint,
+                                    description: (item.desc == null)
+                                        ? null
+                                        : Text(item.desc!),
+                                    control: .managed(
+                                      onChange: (value) {
+                                        values[item.id] = value.text;
+                                      },
+                                    ),
+                                  )
+                                : FTextField(
+                                    label: Text(item.lable),
+                                    hint: item.hint,
+                                    description: (item.desc == null)
+                                        ? null
+                                        : Text(item.desc!),
+                                    control: .managed(
+                                      onChange: (value) {
+                                        values[item.id] = value.text;
+                                      },
+                                    ),
+                                  ),
                           )
                           .toList(),
                     ),

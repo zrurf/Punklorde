@@ -12,6 +12,7 @@ import 'package:punklorde/core/storage/mmkv.dart';
 import 'package:punklorde/core/storage/storage.dart';
 import 'package:punklorde/env.dart';
 import 'package:punklorde/i18n/strings.g.dart';
+import 'package:punklorde/module/feature/chaoxing/index.dart';
 import 'package:punklorde/module/service/lbs/location.dart';
 import 'package:punklorde/module/service/lbs/map.dart';
 import 'package:punklorde/src/rust/frb_generated.dart';
@@ -88,6 +89,8 @@ Future<void> loadStatus() async {
     print(e);
   }
   initScheduleStatus();
+
+  initChaoxingServices();
 }
 
 // 同步状态

@@ -54,18 +54,28 @@
     "not_impl_schedule_service": "当前学校未实现日程服务",
     "never_updated": "从未更新",
     "failed_get_data": "获取数据失败",
-    "schedule_empty": "今天已经没课了~"
+    "schedule_empty": "今天已经没课了~",
+    "phone_num_empty_hint": "手机号不能为空",
+    "ver_code_empty_hint": "验证码不能为空",
+    "pwd_empty_hint": "密码不能为空",
+    "share_qr_render_error": "二维码生成失败，请使用文件分享",
+    "share_failed": "分享失败",
+    "failed_open_file": "无法打开文件",
+    "checkin_code_hint": "请输入签到码"
   },
   "title": {
     "id": "ID",
     "user": "用户",
     "platform": "平台",
+    "phone_num": "手机号",
+    "verification_code": "验证码",
     "exprire_at": "有效期至",
     "select_school": "选择学校",
     "change_school": "切换学校",
     "login_to": "登录到",
     "already_login": "已经登录到",
     "unknown_platform": "未知平台",
+    "select_platform": "选择平台",
     "scan_result": "扫码结果",
     "add_guest": "添加访客账户",
     "select_checkin_user": "谁要签到？",
@@ -79,7 +89,10 @@
     "class_id": "教学班",
     "course_id": "课程号",
     "last_update": "上次更新时间",
-    "student_list": "学生名单"
+    "student_list": "学生名单",
+    "select_login_method": "选择登录方式",
+    "use_ios_ua": "使用 iOS UA",
+    "checkin_code": "签到码"
   },
   "action": {
     "back": "返回",
@@ -89,13 +102,21 @@
     "re_login": "重新登录",
     "login_info": "登录信息",
     "share_code": "分享码",
+    "file_sharing": "使用文件分享",
+    "send_sms_code": "发送验证码",
+    "pwd_login": "账号密码登录",
+    "sms_login": "短信验证码登录",
     "copy": "复制",
     "paste": "粘贴",
     "open_with": "打开方式...",
     "open_with_name": "用 $name 打开",
     "add_guest": "添加访客账户",
     "re_add_guest": "重新添加访客账户",
-    "check_stu_list": "查看选课学生名单"
+    "check_stu_list": "查看选课学生名单",
+    "guest_add_by_login": "登录添加",
+    "guest_add_by_code": "扫码添加",
+    "guest_add_by_file": "从分享文件添加",
+    "manual_select_point": "手动选择签到点"
   },
   "label": {
     "primary": "主账号",
@@ -111,7 +132,8 @@
     "current_week": "本周",
     "exam": "考试",
     "ongoing": "进行中",
-    "upcoming": "即将开始"
+    "upcoming": "即将开始",
+    "deadline": "截止"
   },
   "feat": {
     "all_function": "全部功能", 

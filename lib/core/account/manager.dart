@@ -1,22 +1,10 @@
 import 'package:dart_date/dart_date.dart';
-import 'package:flutter/material.dart';
 import 'package:punklorde/core/account/utils.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/module/model/auth.dart';
 
 class AuthManager {
-  // 登录
-  Future<bool> login(BuildContext context, String platformId) async {
-    final credential = await currentSchoolSignal.value?.platforms[platformId]
-        ?.login(context);
-    if (credential == null) {
-      return false;
-    }
-    setAuthCredential(credential);
-    return true;
-  }
-
   // 注销
   Future<bool> logout(String platformId) async {
     final credential = getPrimaryAuthCredentialByPlatform(platformId);

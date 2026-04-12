@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:punklorde/core/account/view/widget/info_panel.dart';
 import 'package:punklorde/core/status/app.dart';
-import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/i18n/strings.g.dart';
-import 'package:punklorde/module/model/auth.dart';
 import 'package:signals/signals_flutter.dart';
 
 final Signal<String> _searchQuery = Signal('');
@@ -23,74 +19,25 @@ final _filteredPlats = computed(() {
   return result;
 });
 
-class PrimaryAccountPageView extends StatefulWidget {
-  const PrimaryAccountPageView({super.key});
+class SelectPlatformPage extends StatefulWidget {
+  const SelectPlatformPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _PrimaryAccountPageViewState();
+  State<StatefulWidget> createState() => _SelectPlatformPageState();
 }
 
-class _PrimaryAccountPageViewState extends State<PrimaryAccountPageView> {
+class _SelectPlatformPageState extends State<SelectPlatformPage> {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
 
     final entries = _filteredPlats.watch(context)?.map((v) {
-      final guid = authIndexPrimary.watch(context)[v.id];
-      late final AuthCredential? credential;
-      if (guid == null) {
-        credential = null;
-      } else {
-        credential = authCredentials.watch(context)[guid];
-      }
       return FTile(
         title: Text(v.name),
-        suffix: (credential != null)
-            ? ((credential.isValid())
-                  ? const Icon(LucideIcons.circleCheck, color: Colors.green)
-                  : FBadge(variant: .destructive, child: Text(t.label.expired)))
-            : null,
-        subtitle: (credential != null)
-            ? Row(
-                spacing: 2,
-                children: [
-                  Text(t.notice.logged_in),
-                  Text(
-                    credential.name,
-                    style: TextStyle(color: colors.primary, fontWeight: .bold),
-                  ),
-                ],
-              )
-            : Text(t.notice.not_login),
-        onPress: (credential == null)
-            ? () async {
-                final newCredential = await v.login(context, false);
-                if (newCredential != null) {
-                  setAuthCredential(newCredential);
-                }
-                if (context.mounted) {
-                  showFToast(
-                    context: context,
-                    variant: (newCredential != null) ? .primary : .destructive,
-                    alignment: .topCenter,
-                    title: (newCredential != null)
-                        ? Text(t.notice.login_success)
-                        : Text(t.notice.login_failed),
-                    description: Text(v.name),
-                    duration: const Duration(seconds: 3),
-                    icon: (newCredential != null)
-                        ? const Icon(LucideIcons.circleCheck)
-                        : const Icon(LucideIcons.circleX),
-                  );
-                }
-              }
-            : () {
-                showFSheet(
-                  context: context,
-                  builder: (sheetContext) => InfoPanel(credential: credential!),
-                  side: .btt,
-                );
-              },
+        suffix: Icon(LucideIcons.chevronRight),
+        onPress: () {
+          Navigator.of(context).pop(v);
+        },
       );
     }).toList();
 
@@ -126,11 +73,11 @@ class _PrimaryAccountPageViewState extends State<PrimaryAccountPageView> {
           spacing: 8,
           children: [
             FHeader.nested(
-              title: Text(t.setting.primary_account),
+              title: Text(t.title.select_platform),
               prefixes: [
                 FHeaderAction.back(
                   onPress: () {
-                    context.pop();
+                    Navigator.of(context).pop(null);
                   },
                 ),
               ],

@@ -1,7 +1,7 @@
 import 'package:punklorde/module/model/code_handler.dart';
 
 /// 学在重邮签到
-class CquptTronCheckinCodeHandler extends CodeHandler {
+class CquptWxworkCheckinCodeHandler extends CodeHandler {
   @override
   String get id => "cqupt:wxwork:checkin";
 
@@ -31,4 +31,4 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
   }
 }
 
-final handlerCquptTronCheckin = CquptTronCheckinCodeHandler();
+final handlerCquptWxworkCheckin = CquptWxworkCheckinCodeHandler();

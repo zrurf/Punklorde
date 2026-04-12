@@ -54,18 +54,28 @@
     "not_impl_schedule_service": "This school has not implemented the schedule service.",
     "never_updated": "Never updated",
     "failed_get_data": "Failed to obtain data",
-    "schedule_empty": "There are no classes today ~"
+    "schedule_empty": "There are no classes today ~",
+    "phone_num_empty_hint": "Phone number cannot be blank",
+    "ver_code_empty_hint": "Verification code cannot be blank",
+    "pwd_empty_hint": "Password cannot be blank",
+    "share_qr_render_error": "QR code generation failed. Please use file sharing instead.",
+    "share_failed": "Share failed",
+    "failed_open_file": "Failed to open file",
+    "checkin_code_hint": "Please enter the check-in code"
   },
   "title": {
     "id": "ID",
     "user": "User",
     "platform": "Platform",
+    "phone_num": "Phone number",
+    "verification_code": "Verification code",
     "exprire_at": "Expires at",
     "select_school": "Select School",
     "change_school": "Change School",
     "login_to": "Login to",
     "already_login": "Already logged into",
     "unknown_platform": "Unknown Platform",
+    "select_platform": "Select Platform",
     "scan_result": "Scanning results",
     "add_guest": "Add Guest Account",
     "select_checkin_user": "Select the Users",
@@ -79,7 +89,10 @@
     "class_id": "Class",
     "course_id": "Course",
     "last_update": "Last update",
-    "student_list": "Students List"
+    "student_list": "Students List",
+    "select_login_method": "Select the login method",
+    "use_ios_ua": "Use iOS UA",
+    "checkin_code": "Check-in Code"
   },
   "action": {
     "back": "Back",
@@ -89,13 +102,21 @@
     "re_login": "Re-login",
     "login_info": "Login Information",
     "share_code": "Share Code",
+    "file_sharing": "Using file sharing",
+    "send_sms_code": "Send SMS Code",
+    "pwd_login": "Password Login",
+    "sms_login": "SMS Login",
     "copy": "Copy",
     "paste": "Paste",
     "open_with": "Open with...",
     "open_with_name": "Open with $name",
     "add_guest": "Add guest account",
     "re_add_guest": "Re-add guest account",
-    "check_stu_list": "Check students list"
+    "check_stu_list": "Check students list",
+    "guest_add_by_login": "Add by login",
+    "guest_add_by_code": "Add from share code",
+    "guest_add_by_file": "Add from share file",
+    "manual_select_point": "Manually select check-in point"
   },
   "label": {
     "primary": "Primary",
@@ -111,7 +132,8 @@
     "current_week": "Current",
     "exam": "Exam",
     "ongoing": "Ongoing",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "deadline": "Deadline"
   },
   "feat": {
     "all_function": "All Features", 

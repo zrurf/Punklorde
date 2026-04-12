@@ -41,6 +41,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.7.0"
+  asn1lib:
+    dependency: transitive
+    description:
+      name: asn1lib
+      sha256: "9a8f69025044eb466b9b60ef3bc3ac99b4dc6c158ae9c56d25eeccf5bc56d024"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.6.5"
   async:
     dependency: transitive
     description:
@@ -197,10 +205,10 @@ packages:
     dependency: "direct main"
     description:
       name: connectivity_plus
-      sha256: b8fe52979ff12432ecf8f0abf6ff70410b1bb734be1c9e4f2f86807ad7166c79
+      sha256: "62ffa266d9a23b79fb3fcbc206afc00bb979417ba57b1324c546b5aab95ba057"
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "7.1.0"
+    version: "7.1.1"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -234,7 +242,7 @@ packages:
     source: hosted
     version: "1.0.4"
   cross_file:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cross_file
       sha256: "28bb3ae56f117b5aec029d702a90f57d285cd975c3c5c281eaca38dbc47c5937"
@@ -289,6 +297,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.5.3"
+  dart_jsonwebtoken:
+    dependency: "direct main"
+    description:
+      name: dart_jsonwebtoken
+      sha256: cb79ed79baa02b4f59a597bf365873cbd83f9bb15273d63f7803802d21717c7d
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.4.0"
   dart_style:
     dependency: transitive
     description:
@@ -345,6 +361,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.2"
+  encrypt_next:
+    dependency: "direct main"
+    description:
+      name: encrypt_next
+      sha256: d8c34001f7e1fac85e058145143a6cc6ee850a1ed5cd5f3d1773af01bae4dd3c
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "5.0.5"
   envied:
     dependency: "direct main"
     description:
@@ -401,6 +425,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.0.1"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: f13a03000d942e476bc1ff0a736d2e9de711d2f89a95cd4c1d88f861c3348387
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "11.0.2"
   file_selector_linux:
     dependency: transitive
     description:
@@ -807,14 +839,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.1.2"
-  iconsax_flutter:
-    dependency: transitive
-    description:
-      name: iconsax_flutter
-      sha256: d14b4cec8586025ac15276bdd40f6eea308cb85748135965bb6255f14beb2564
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.0.1"
   image:
     dependency: transitive
     description:
@@ -1236,14 +1260,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.3.0"
-  pausable_timer:
-    dependency: transitive
-    description:
-      name: pausable_timer
-      sha256: "6ef1a95441ec3439de6fb63f39a011b67e693198e7dae14e20675c3c00e86074"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.1.0+3"
   permission_handler:
     dependency: "direct main"
     description:
@@ -1324,6 +1340,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.8"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      sha256: "92aa3841d083cc4b0f4709b5c74fd6409a3e6ba833ffc7dc6a8fee096366acf5"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.0.0"
   pool:
     dependency: transitive
     description:
@@ -1348,14 +1372,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.9.4"
-  pretty_qr_code:
-    dependency: "direct main"
-    description:
-      name: pretty_qr_code
-      sha256: "474f8a4512113fba06f14a6ec9bbf42353b4e651d7a520e3096f2a9b6bbe7a8a"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.6.0"
   process:
     dependency: transitive
     description:
@@ -1388,6 +1404,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.2"
+  qr_flutter:
+    dependency: "direct main"
+    description:
+      name: qr_flutter
+      sha256: "5095f0fc6e3f71d08adef8feccc8cea4f12eec18a2e31c2e8d82cb6019f4b097"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "4.1.0"
   recase:
     dependency: transitive
     description:
@@ -1419,6 +1443,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.5.2"
+  share_plus:
+    dependency: "direct main"
+    description:
+      name: share_plus
+      sha256: "223873d106614442ea6f20db5a038685cc5b32a2fba81cdecaefbbae0523f7fa"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "12.0.2"
+  share_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: share_plus_platform_interface
+      sha256: "88023e53a13429bd65d8e85e11a9b484f49d4c190abbd96c7932b74d6927cc9a"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.1.0"
   shared_preferences:
     dependency: transitive
     description:
@@ -1544,14 +1584,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.14.0"
-  sliver_sticky_collapsable_panel:
-    dependency: "direct main"
-    description:
-      name: sliver_sticky_collapsable_panel
-      sha256: "0f332f3caa6e2f3ac09ded071516be967f4c4d54ea7540d95fe3d28716744fdc"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "5.0.0"
   source_gen:
     dependency: transitive
     description:
@@ -1664,14 +1696,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.11.0"
-  toastification:
-    dependency: "direct main"
-    description:
-      name: toastification
-      sha256: "69db2bff425b484007409650d8bcd5ed1ce2e9666293ece74dcd917dacf23112"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.0.3"
   typed_data:
     dependency: transitive
     description:

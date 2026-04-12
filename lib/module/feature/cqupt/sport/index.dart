@@ -27,7 +27,7 @@ import 'package:punklorde/module/service/lbs/location.dart';
 import 'package:punklorde/src/rust/services/motion_sim/model.dart';
 import 'package:punklorde/utils/permission.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:toastification/toastification.dart';
+
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class FeatCquptSportView extends StatefulWidget {
@@ -112,12 +112,12 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
       canPop: !_isRunning.watch(context),
       onPopInvokedWithResult: (didPop, result) async {
         if (_isRunning.value) {
-          toastification.show(
+          showFToast(
             context: context,
+            variant: .destructive,
+            alignment: .topCenter,
             title: Text(t.submodule.cqupt_sport.tip_need_stop),
-            autoCloseDuration: const Duration(seconds: 3),
-            animationDuration: const Duration(milliseconds: 300),
-            primaryColor: Colors.red,
+            duration: const Duration(seconds: 3),
             icon: const Icon(LucideIcons.circleX),
           );
         }
@@ -371,17 +371,15 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                             label: t.submodule.cqupt_sport.record,
                             onTap: () {
                               if (_isRunning.value) {
-                                toastification.show(
+                                showFToast(
                                   context: context,
+                                  variant: .destructive,
+                                  alignment: .topCenter,
                                   title: Text(
                                     t.submodule.cqupt_sport.tip_need_stop,
                                   ),
                                   icon: const Icon(LucideIcons.circleX),
-                                  autoCloseDuration: const Duration(seconds: 3),
-                                  animationDuration: const Duration(
-                                    milliseconds: 300,
-                                  ),
-                                  primaryColor: Colors.red,
+                                  duration: const Duration(seconds: 3),
                                 );
                               } else {
                                 context.push("/feat/cqupt/sport/record");
@@ -393,16 +391,15 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                             label: t.submodule.cqupt_sport.configure,
                             onTap: () {
                               if (_isRunning.value) {
-                                toastification.show(
+                                showFToast(
                                   context: context,
+                                  variant: .destructive,
+                                  alignment: .topCenter,
                                   title: Text(
                                     t.submodule.cqupt_sport.tip_need_stop,
                                   ),
                                   icon: const Icon(LucideIcons.circleX),
-                                  autoCloseDuration: const Duration(seconds: 3),
-                                  animationDuration: const Duration(
-                                    microseconds: 300,
-                                  ),
+                                  duration: const Duration(seconds: 3),
                                 );
                                 return;
                               }
@@ -457,18 +454,15 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                                   currentUser: featCredential.watch(context),
                                   onSelect: (AuthCredential? credential) {
                                     if (_isRunning.value) {
-                                      toastification.show(
+                                      showFToast(
                                         context: context,
+                                        variant: .destructive,
+                                        alignment: .topCenter,
                                         title: Text(
                                           t.submodule.cqupt_sport.tip_need_stop,
                                         ),
                                         icon: const Icon(LucideIcons.circleX),
-                                        autoCloseDuration: const Duration(
-                                          seconds: 3,
-                                        ),
-                                        animationDuration: const Duration(
-                                          microseconds: 300,
-                                        ),
+                                        duration: const Duration(seconds: 3),
                                       );
                                       return;
                                     }
@@ -799,14 +793,14 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
       stopHeadingService();
       stopLocationService();
       if (context != null && context.mounted) {
-        toastification.show(
+        showFToast(
           context: context,
+          variant: .destructive,
+          alignment: .topCenter,
           title: Text(t.notice.location_service_failed),
           description: Text(t.notice.location_service_failed_msg),
           icon: const Icon(LucideIcons.circleX),
-          autoCloseDuration: const Duration(seconds: 3),
-          animationDuration: const Duration(milliseconds: 300),
-          primaryColor: Colors.red,
+          duration: const Duration(seconds: 3),
         );
       }
       return;
@@ -849,16 +843,18 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
     if (_isRunning.value) {
       return false;
     }
-
+    final context = widgetKey.currentContext;
     if (featCredential.value == null) {
-      toastification.show(
-        context: widgetKey.currentContext,
-        title: Text(t.notice.unselected_user),
-        icon: const Icon(LucideIcons.circleX),
-        autoCloseDuration: const Duration(seconds: 3),
-        animationDuration: const Duration(milliseconds: 300),
-        primaryColor: Colors.red,
-      );
+      if (context != null && context.mounted) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          alignment: .topCenter,
+          title: Text(t.notice.unselected_user),
+          icon: const Icon(LucideIcons.circleX),
+          duration: const Duration(seconds: 3),
+        );
+      }
       return false;
     }
 
@@ -866,14 +862,16 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
         featPlaceName.value == null ||
         featMotionProfile.value == null ||
         featVirtualPaths.value == null) {
-      toastification.show(
-        context: widgetKey.currentContext,
-        title: Text(t.notice.wait_reource_load),
-        icon: const Icon(LucideIcons.circleX),
-        autoCloseDuration: const Duration(seconds: 3),
-        animationDuration: const Duration(milliseconds: 300),
-        primaryColor: Colors.red,
-      );
+      if (context != null && context.mounted) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          alignment: .topCenter,
+          title: Text(t.notice.wait_reource_load),
+          icon: const Icon(LucideIcons.circleX),
+          duration: const Duration(seconds: 3),
+        );
+      }
       return false;
     }
 
@@ -1000,20 +998,23 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   }
 
   Future<String?> sportStartCallback() async {
+    final context = widgetKey.currentContext;
     final sportId = await _apiClient.startSport(
       featPlaceName.value!,
       featPlaceCode.value!,
     );
 
     if (sportId == null) {
-      toastification.show(
-        context: widgetKey.currentContext,
-        title: Text(t.notice.sport_start_failed),
-        icon: const Icon(LucideIcons.circleX),
-        autoCloseDuration: const Duration(seconds: 3),
-        animationDuration: const Duration(milliseconds: 300),
-        primaryColor: Colors.red,
-      );
+      if (context != null && context.mounted) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          alignment: .topCenter,
+          title: Text(t.notice.sport_start_failed),
+          icon: const Icon(LucideIcons.circleX),
+          duration: const Duration(seconds: 3),
+        );
+      }
       await _stopSport();
       return null;
     }

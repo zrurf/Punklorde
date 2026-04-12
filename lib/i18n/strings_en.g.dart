@@ -230,6 +230,27 @@ class TranslationsNoticeEn {
 
 	/// en: 'There are no classes today ~'
 	String get schedule_empty => 'There are no classes today ~';
+
+	/// en: 'Phone number cannot be blank'
+	String get phone_num_empty_hint => 'Phone number cannot be blank';
+
+	/// en: 'Verification code cannot be blank'
+	String get ver_code_empty_hint => 'Verification code cannot be blank';
+
+	/// en: 'Password cannot be blank'
+	String get pwd_empty_hint => 'Password cannot be blank';
+
+	/// en: 'QR code generation failed. Please use file sharing instead.'
+	String get share_qr_render_error => 'QR code generation failed. Please use file sharing instead.';
+
+	/// en: 'Share failed'
+	String get share_failed => 'Share failed';
+
+	/// en: 'Failed to open file'
+	String get failed_open_file => 'Failed to open file';
+
+	/// en: 'Please enter the check-in code'
+	String get checkin_code_hint => 'Please enter the check-in code';
 }
 
 // Path: title
@@ -249,6 +270,12 @@ class TranslationsTitleEn {
 	/// en: 'Platform'
 	String get platform => 'Platform';
 
+	/// en: 'Phone number'
+	String get phone_num => 'Phone number';
+
+	/// en: 'Verification code'
+	String get verification_code => 'Verification code';
+
 	/// en: 'Expires at'
 	String get exprire_at => 'Expires at';
 
@@ -266,6 +293,9 @@ class TranslationsTitleEn {
 
 	/// en: 'Unknown Platform'
 	String get unknown_platform => 'Unknown Platform';
+
+	/// en: 'Select Platform'
+	String get select_platform => 'Select Platform';
 
 	/// en: 'Scanning results'
 	String get scan_result => 'Scanning results';
@@ -308,6 +338,15 @@ class TranslationsTitleEn {
 
 	/// en: 'Students List'
 	String get student_list => 'Students List';
+
+	/// en: 'Select the login method'
+	String get select_login_method => 'Select the login method';
+
+	/// en: 'Use iOS UA'
+	String get use_ios_ua => 'Use iOS UA';
+
+	/// en: 'Check-in Code'
+	String get checkin_code => 'Check-in Code';
 }
 
 // Path: action
@@ -339,6 +378,18 @@ class TranslationsActionEn {
 	/// en: 'Share Code'
 	String get share_code => 'Share Code';
 
+	/// en: 'Using file sharing'
+	String get file_sharing => 'Using file sharing';
+
+	/// en: 'Send SMS Code'
+	String get send_sms_code => 'Send SMS Code';
+
+	/// en: 'Password Login'
+	String get pwd_login => 'Password Login';
+
+	/// en: 'SMS Login'
+	String get sms_login => 'SMS Login';
+
 	/// en: 'Copy'
 	String get copy => 'Copy';
 
@@ -359,6 +410,18 @@ class TranslationsActionEn {
 
 	/// en: 'Check students list'
 	String get check_stu_list => 'Check students list';
+
+	/// en: 'Add by login'
+	String get guest_add_by_login => 'Add by login';
+
+	/// en: 'Add from share code'
+	String get guest_add_by_code => 'Add from share code';
+
+	/// en: 'Add from share file'
+	String get guest_add_by_file => 'Add from share file';
+
+	/// en: 'Manually select check-in point'
+	String get manual_select_point => 'Manually select check-in point';
 }
 
 // Path: label
@@ -410,6 +473,9 @@ class TranslationsLabelEn {
 
 	/// en: 'Upcoming'
 	String get upcoming => 'Upcoming';
+
+	/// en: 'Deadline'
+	String get deadline => 'Deadline';
 }
 
 // Path: feat
@@ -779,15 +845,25 @@ extension on Translations {
 			'notice.never_updated' => 'Never updated',
 			'notice.failed_get_data' => 'Failed to obtain data',
 			'notice.schedule_empty' => 'There are no classes today ~',
+			'notice.phone_num_empty_hint' => 'Phone number cannot be blank',
+			'notice.ver_code_empty_hint' => 'Verification code cannot be blank',
+			'notice.pwd_empty_hint' => 'Password cannot be blank',
+			'notice.share_qr_render_error' => 'QR code generation failed. Please use file sharing instead.',
+			'notice.share_failed' => 'Share failed',
+			'notice.failed_open_file' => 'Failed to open file',
+			'notice.checkin_code_hint' => 'Please enter the check-in code',
 			'title.id' => 'ID',
 			'title.user' => 'User',
 			'title.platform' => 'Platform',
+			'title.phone_num' => 'Phone number',
+			'title.verification_code' => 'Verification code',
 			'title.exprire_at' => 'Expires at',
 			'title.select_school' => 'Select School',
 			'title.change_school' => 'Change School',
 			'title.login_to' => 'Login to',
 			'title.already_login' => 'Already logged into',
 			'title.unknown_platform' => 'Unknown Platform',
+			'title.select_platform' => 'Select Platform',
 			'title.scan_result' => 'Scanning results',
 			'title.add_guest' => 'Add Guest Account',
 			'title.select_checkin_user' => 'Select the Users',
@@ -802,6 +878,9 @@ extension on Translations {
 			'title.course_id' => 'Course',
 			'title.last_update' => 'Last update',
 			'title.student_list' => 'Students List',
+			'title.select_login_method' => 'Select the login method',
+			'title.use_ios_ua' => 'Use iOS UA',
+			'title.checkin_code' => 'Check-in Code',
 			'action.back' => 'Back',
 			'action.refresh_login' => 'Refresh the login status',
 			'action.refresh_schedule' => 'Refresh schedule',
@@ -809,6 +888,10 @@ extension on Translations {
 			'action.re_login' => 'Re-login',
 			'action.login_info' => 'Login Information',
 			'action.share_code' => 'Share Code',
+			'action.file_sharing' => 'Using file sharing',
+			'action.send_sms_code' => 'Send SMS Code',
+			'action.pwd_login' => 'Password Login',
+			'action.sms_login' => 'SMS Login',
 			'action.copy' => 'Copy',
 			'action.paste' => 'Paste',
 			'action.open_with' => 'Open with...',
@@ -816,6 +899,10 @@ extension on Translations {
 			'action.add_guest' => 'Add guest account',
 			'action.re_add_guest' => 'Re-add guest account',
 			'action.check_stu_list' => 'Check students list',
+			'action.guest_add_by_login' => 'Add by login',
+			'action.guest_add_by_code' => 'Add from share code',
+			'action.guest_add_by_file' => 'Add from share file',
+			'action.manual_select_point' => 'Manually select check-in point',
 			'label.primary' => 'Primary',
 			'label.guest' => 'Guest',
 			'label.expired' => 'Expired',
@@ -830,6 +917,7 @@ extension on Translations {
 			'label.exam' => 'Exam',
 			'label.ongoing' => 'Ongoing',
 			'label.upcoming' => 'Upcoming',
+			'label.deadline' => 'Deadline',
 			'feat.all_function' => 'All Features',
 			'feat.schedule' => 'Schedule',
 			'feat.workspace' => 'Workspace',

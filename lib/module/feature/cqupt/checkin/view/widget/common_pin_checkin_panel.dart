@@ -1,30 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:pinput/pinput.dart';
-import 'package:punklorde/app/theme/default.dart';
-import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/i18n/strings.g.dart';
-import 'package:signals/signals_flutter.dart';
 
-class PinCheckinPanel extends StatefulWidget {
+class CommonPinCheckinPanel extends StatefulWidget {
   final String title;
   final String desc;
-  final int length;
   final void Function(String value, bool crack) onConfirm;
 
-  const PinCheckinPanel({
+  const CommonPinCheckinPanel({
     super.key,
     required this.title,
     required this.desc,
-    required this.length,
     required this.onConfirm,
   });
 
   @override
-  State<StatefulWidget> createState() => _PinCheckinPanelState();
+  State<StatefulWidget> createState() => _CommonPinCheckinPanelState();
 }
 
-class _PinCheckinPanelState extends State<PinCheckinPanel> {
+class _CommonPinCheckinPanelState extends State<CommonPinCheckinPanel> {
   String value = "";
 
   @override
@@ -74,22 +68,10 @@ class _PinCheckinPanelState extends State<PinCheckinPanel> {
                       ),
                     ),
                     const FDivider(),
-                    Center(
-                      child: Pinput(
-                        length: widget.length,
-                        defaultPinTheme: switch (themeModeSignal.watch(
-                          context,
-                        )) {
-                          .system =>
-                            (MediaQuery.of(context).platformBrightness ==
-                                    Brightness.dark)
-                                ? pinDarkTheme
-                                : pinLightTheme,
-                          .light => pinLightTheme,
-                          .dark => pinDarkTheme,
-                        },
-                        onChanged: (v) => value = v,
-                      ),
+                    FTextField(
+                      control: .managed(onChange: (v) => value = v.text),
+                      label: Text(t.title.checkin_code),
+                      hint: t.notice.checkin_code_hint,
                     ),
                     const FDivider(),
                     const SizedBox(height: 8),

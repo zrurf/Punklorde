@@ -231,18 +231,17 @@ class _ResultDetailPage extends StatelessWidget {
                         variant: .primary,
                         size: .sm,
                         onPress: (candidates.isNotEmpty)
-                            ? () {
+                            ? () async {
                                 if (candidates.length == 1) {
                                   candidates.first.handle(context, result);
                                 } else {
-                                  showFSheet(
+                                  await showFSheet(
                                     context: context,
                                     builder: (sheetContext) => ScannerOpenPanel(
+                                      superContext: context,
                                       handlers: candidates,
                                       data: result,
-                                      onClose: () {
-                                        context.pop();
-                                      },
+                                      onClose: () {},
                                     ),
                                     side: .btt,
                                   );

@@ -79,7 +79,7 @@ class CquptSportPlatform extends Platform {
   }
 
   @override
-  Future<AuthCredential?> login(BuildContext context) async {
+  Future<AuthCredential?> login(BuildContext context, bool isGuest) async {
     final completer = Completer<Map<String, String>?>();
 
     await showFSheet(
@@ -91,7 +91,7 @@ class CquptSportPlatform extends Platform {
           LoginInputEntry(
             id: "openid",
             lable: t.submodule.cqupt_sport.openid,
-            hidden: false,
+            isPwd: false,
             defaultValue: '',
             hint: t.submodule.cqupt_sport.openid_hint,
           ),
@@ -112,7 +112,7 @@ class CquptSportPlatform extends Platform {
       if (context.mounted) context.loaderOverlay.show();
       return await _login(result['openid']!).then((v) {
         if (context.mounted) context.loaderOverlay.hide();
-        return v;
+        return v?.copyWith(guest: isGuest);
       });
     }
 

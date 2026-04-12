@@ -6,7 +6,7 @@ abstract class Platform {
   String get name; // 平台名称
   String get descript; // 描述
 
-  Future<AuthCredential?> login(BuildContext context);
+  Future<AuthCredential?> login(BuildContext context, bool isGuest);
   Future<void> logout(AuthCredential credential);
   Future<AuthCredential?> refresh(AuthCredential oldCredential);
   Future<bool> validate(AuthCredential credential);

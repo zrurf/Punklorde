@@ -6,7 +6,6 @@ import 'package:punklorde/app/theme/default.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:toastification/toastification.dart';
 
 class MainMobileApp extends StatelessWidget {
   const MainMobileApp({super.key});
@@ -26,32 +25,32 @@ class MainMobileApp extends StatelessWidget {
 
     initAppRoute();
 
-    return ToastificationWrapper(
-      child: MaterialApp.router(
-        title: t.app_name,
-        theme: lightTheme.toApproximateMaterialTheme(),
-        darkTheme: darkTheme.toApproximateMaterialTheme(),
-        themeMode: themeModeMaterial,
-        routerConfig: appRoute,
-        builder: (context, child) {
-          late final FThemeData theme;
-          switch (themeMode) {
-            case .light:
-              theme = lightTheme;
-            case .dark:
-              theme = darkTheme;
-            case .system:
-              theme =
-                  MediaQuery.of(context).platformBrightness == Brightness.light
-                  ? lightTheme
-                  : darkTheme;
-          }
-          return FTheme(
-            data: theme,
+    return MaterialApp.router(
+      title: t.app_name,
+      theme: lightTheme.toApproximateMaterialTheme(),
+      darkTheme: darkTheme.toApproximateMaterialTheme(),
+      themeMode: themeModeMaterial,
+      routerConfig: appRoute,
+      builder: (context, child) {
+        late final FThemeData theme;
+        switch (themeMode) {
+          case .light:
+            theme = lightTheme;
+          case .dark:
+            theme = darkTheme;
+          case .system:
+            theme =
+                MediaQuery.of(context).platformBrightness == Brightness.light
+                ? lightTheme
+                : darkTheme;
+        }
+        return FTheme(
+          data: theme,
+          child: FToaster(
             child: LoaderOverlay(child: child ?? const SizedBox()),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

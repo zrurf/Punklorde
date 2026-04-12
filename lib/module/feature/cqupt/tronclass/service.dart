@@ -10,18 +10,6 @@ import 'package:punklorde/module/platform/cqupt/tronclass.dart';
 class CquptTronCheckinService {
   final ApiClient _apiClient = ApiClient();
 
-  /// 辅助点A
-  static final Coordinate auxiliaryA = Coordinate(
-    lat: 29.536325,
-    lng: 106.611462,
-  );
-
-  /// 辅助点B
-  static final Coordinate auxiliaryB = Coordinate(
-    lat: 29.52154,
-    lng: 106.60160,
-  );
-
   /// 获取签到事件
   Future<List<RollcallModel>> getCheckinEvents(
     AuthCredential credentials,
@@ -105,11 +93,12 @@ class CquptTronCheckinService {
     BuildContext context,
     List<AuthCredential> credentials,
     String id,
+    Coordinate coordinate,
   ) async {
     final result = await _apiClient.checkinAllRadar(
       credentials,
       id,
-      Coordinate(lat: rawLat.value, lng: rawLng.value),
+      coordinate,
       rawSpeed.value,
       50,
     );
@@ -121,64 +110,7 @@ class CquptTronCheckinService {
             credentials: credentials,
             results: result,
             onRetry: (newCredentials) async {
-              await checkinRadar(context, newCredentials, id);
-            },
-          ),
-        ),
-      );
-    }
-  }
-
-  /// 主动探测雷达签到
-  Future<void> checkinRadarDetect(
-    BuildContext context,
-    List<AuthCredential> credentials,
-    String id,
-  ) async {
-    final list = await _apiClient.detectCheckinCoord(
-      credentials.first,
-      id,
-      auxiliaryA,
-      auxiliaryB,
-    );
-
-    Coordinate? realCoord;
-    List<bool> result = List.empty();
-    for (final coord in list) {
-      if (await _apiClient.checkinRadar(
-        credentials.first,
-        id,
-        coord,
-        rawSpeed.value,
-        50,
-      )) {
-        realCoord = coord;
-        break;
-      }
-    }
-
-    if (realCoord != null) {
-      result = [
-        true,
-        ...(await _apiClient.checkinAllRadar(
-          credentials.sublist(1),
-          id,
-          realCoord,
-          rawSpeed.value,
-          50,
-        )),
-      ];
-    }
-
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platCquptTronclass,
-            credentials: credentials,
-            results: result,
-            onRetry: (newCredentials) async {
-              await checkinRadar(context, newCredentials, id);
+              await checkinRadar(context, newCredentials, id, coordinate);
             },
           ),
         ),

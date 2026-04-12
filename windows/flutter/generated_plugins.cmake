@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_inappwebview_windows
   mmkv_win32
   permission_handler_windows
+  share_plus
   url_launcher_windows
   zstandard_windows
 )

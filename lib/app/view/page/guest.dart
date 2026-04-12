@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:punklorde/core/account/code_handler.dart';
+import 'package:punklorde/core/account/view/widget/guest_login_panel.dart';
 import 'package:punklorde/core/account/view/widget/info_panel.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:toastification/toastification.dart';
 
 final Signal<String> _searchQuery = Signal('');
 
@@ -122,28 +121,11 @@ class _GuestAccountPageViewState extends State<GuestAccountPageView> {
                 FHeaderAction(
                   icon: const Icon(LucideIcons.userRoundPlus),
                   onPress: () {
-                    context.push('/p/scan').then((v) async {
-                      final context = widgetKey.currentContext;
-                      if (v == null) return;
-                      if (handlerGuestAccount.match(v) &&
-                          context != null &&
-                          context.mounted) {
-                        await handlerGuestAccount.handle(context, v);
-                      } else {
-                        if (context != null && context.mounted) {
-                          toastification.show(
-                            context: context,
-                            title: Text(t.notice.invalid_qr_code),
-                            autoCloseDuration: const Duration(seconds: 3),
-                            animationDuration: const Duration(
-                              milliseconds: 300,
-                            ),
-                            primaryColor: Colors.red,
-                            icon: const Icon(LucideIcons.circleX),
-                          );
-                        }
-                      }
-                    });
+                    showFSheet(
+                      context: context,
+                      builder: (sheetContext) => GuestLoginPanel(),
+                      side: .btt,
+                    );
                   },
                 ),
               ],

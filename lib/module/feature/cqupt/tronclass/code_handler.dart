@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/checkin.dart';
@@ -7,7 +8,6 @@ import 'package:punklorde/module/feature/cqupt/tronclass/service.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/utils/link_parse.dart';
 import 'package:punklorde/module/model/code_handler.dart';
 import 'package:punklorde/module/platform/cqupt/tronclass.dart';
-import 'package:toastification/toastification.dart';
 
 /// 学在重邮签到
 class CquptTronCheckinCodeHandler extends CodeHandler {
@@ -22,7 +22,7 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
 
   @override
   Future<void> handle(context, data) async {
-    final credentilas = checkinAuthSignal.value
+    final credentials = checkinAuthSignal.value
         .toList()
         .map((v) {
           final cred = authCredentials.value[v];
@@ -32,13 +32,13 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
         .toList();
     final result = TronClassSignDecoder.decode(data);
 
-    if (credentilas.isEmpty) {
-      toastification.show(
+    if (credentials.isEmpty) {
+      showFToast(
         context: context,
+        variant: .destructive,
+        alignment: .topCenter,
         title: Text(t.notice.unselected_user),
-        autoCloseDuration: const Duration(seconds: 3),
-        animationDuration: const Duration(milliseconds: 300),
-        primaryColor: Colors.red,
+        duration: const Duration(seconds: 3),
         icon: const Icon(LucideIcons.circleX),
       );
       return;
@@ -48,12 +48,12 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
         result.isEmpty ||
         result["data"] == null ||
         result["rollcallId"] == null) {
-      toastification.show(
+      showFToast(
         context: context,
+        variant: .destructive,
+        alignment: .topCenter,
         title: Text(t.notice.invalid_qr_code),
-        autoCloseDuration: const Duration(seconds: 3),
-        animationDuration: const Duration(milliseconds: 300),
-        primaryColor: Colors.red,
+        duration: const Duration(seconds: 3),
         icon: const Icon(LucideIcons.circleX),
       );
       return;
@@ -61,7 +61,7 @@ class CquptTronCheckinCodeHandler extends CodeHandler {
 
     await serviceCquptTronCheckin.checkinQr(
       context,
-      credentilas,
+      credentials,
       result["rollcallId"].toString(),
       result["data"],
     );

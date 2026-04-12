@@ -103,14 +103,14 @@ class CquptSportPortalPlatform extends Platform {
       return null;
     }
     final String? uuid = r2.data["data"]["id"]?.toString();
-    final String? name = r2.data["data"]["realName"]?.toString();
+    final String? uname = r2.data["data"]["realName"]?.toString();
     final String? avatar = r2.data["data"]["avatar"]?.toString();
-    if (uuid == null || name == null || avatar == null) return null;
+    if (uuid == null || uname == null || avatar == null) return null;
     return AuthCredential(
       guest: false,
       type: id,
       id: uuid,
-      name: name,
+      name: uname,
       token: accessTk,
       expireAt: DateTime.now().addSeconds(expiresIn.toInt()),
       ext: {
@@ -183,7 +183,7 @@ class CquptSportPortalPlatform extends Platform {
   }
 
   @override
-  Future<AuthCredential?> login(BuildContext context) async {
+  Future<AuthCredential?> login(BuildContext context, bool isGuest) async {
     final completer = Completer<Map<String, String>?>();
 
     await showFSheet(
@@ -195,14 +195,14 @@ class CquptSportPortalPlatform extends Platform {
           LoginInputEntry(
             id: "id",
             lable: t.common.unify_id,
-            hidden: false,
+            isPwd: false,
             defaultValue: '',
             hint: t.common.unify_id,
           ),
           LoginInputEntry(
             id: "pwd",
             lable: t.common.password,
-            hidden: true,
+            isPwd: true,
             defaultValue: '',
             hint: t.common.password,
           ),
@@ -223,7 +223,7 @@ class CquptSportPortalPlatform extends Platform {
       if (context.mounted) context.loaderOverlay.show();
       return await _login(result['id']!, result['pwd']!, true).then((v) {
         if (context.mounted) context.loaderOverlay.hide();
-        return v;
+        return v?.copyWith(guest: isGuest);
       });
     }
 

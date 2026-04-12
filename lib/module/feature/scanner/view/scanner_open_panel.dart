@@ -5,12 +5,14 @@ import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/code_handler.dart';
 
 class ScannerOpenPanel extends StatefulWidget {
+  final BuildContext superContext;
   final List<CodeHandler> handlers;
   final dynamic data;
   final void Function() onClose;
 
   const ScannerOpenPanel({
     super.key,
+    required this.superContext,
     required this.handlers,
     required this.data,
     required this.onClose,
@@ -76,9 +78,14 @@ class _ScannerOpenPanelState extends State<ScannerOpenPanel> {
                                 LucideIcons.arrowRight,
                                 color: colors.primary,
                               ),
-                              onPress: () {
-                                item.handle(context, widget.data);
-                                Navigator.of(context).pop();
+                              onPress: () async {
+                                await item.handle(
+                                  widget.superContext,
+                                  widget.data,
+                                );
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                }
                                 widget.onClose();
                               },
                             ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/core/account/code_handler.dart';
+import 'package:punklorde/module/feature/chaoxing/code_handler.dart';
+import 'package:punklorde/module/feature/chaoxing/manifest.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/manifest.dart';
 import 'package:punklorde/module/feature/cqupt/sport/manifest.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/code_handler.dart';
@@ -9,6 +11,7 @@ import 'package:punklorde/module/feature/scanner/code_handler.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/manifest.dart';
 import 'package:punklorde/module/model/feature.dart';
 import 'package:punklorde/module/model/school.dart';
+import 'package:punklorde/module/platform/chaoxing/chaoxing.dart';
 import 'package:punklorde/module/platform/cqupt/academic_portal.dart';
 import 'package:punklorde/module/platform/cqupt/sport.dart';
 import 'package:punklorde/module/platform/cqupt/sport_portal.dart';
@@ -23,6 +26,7 @@ final Map<String, Feature> _features = {
   featSportCqupt.id: featSportCqupt, // 重邮智慧体育
   featCquptTron.id: featCquptTron, // 学在重邮
   featVpnSangfor.id: featVpnSangfor, // 深信服SSL VPN
+  featChaoxing.id: featChaoxing, // 学习通
   _featLinkAcademicPortal.id: _featLinkAcademicPortal, // 教务在线链接
   _featLinkAcademicPortalOld.id: _featLinkAcademicPortalOld, // 老版教务在线链接
 };
@@ -38,11 +42,17 @@ final School schoolCqupt = School(
     platCquptTronclass.id: platCquptTronclass,
     platCquptSport.id: platCquptSport,
     platCquptSportPortal.id: platCquptSportPortal,
+    platChaoxing.id: platChaoxing,
   },
   features: _features,
   dataInterfaces: {},
   scheduleServices: CquptScheduleService(),
-  codeHandlers: {handlerUrlLink, handlerGuestAccount, handlerCquptTronCheckin},
+  codeHandlers: {
+    handlerUrlLink,
+    handlerGuestAccount,
+    handlerCquptTronCheckin,
+    handlerChaoxingCheckin,
+  },
   tabs: [tabSchedule, tabFunctions(_features.values.toList())],
   defaultPinnedFeats: [
     featCquptCheckin.id,

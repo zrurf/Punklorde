@@ -146,7 +146,7 @@ class CquptAcademicPortalPlatform extends Platform {
   }
 
   @override
-  Future<AuthCredential?> login(BuildContext context) async {
+  Future<AuthCredential?> login(BuildContext context, bool isGuest) async {
     final completer = Completer<Map<String, String>?>();
 
     await showFSheet(
@@ -158,14 +158,14 @@ class CquptAcademicPortalPlatform extends Platform {
           LoginInputEntry(
             id: "id",
             lable: t.common.unify_id,
-            hidden: false,
+            isPwd: false,
             defaultValue: '',
             hint: t.common.unify_id,
           ),
           LoginInputEntry(
             id: "pwd",
             lable: t.common.password,
-            hidden: true,
+            isPwd: true,
             defaultValue: '',
             hint: t.common.password,
           ),
@@ -186,7 +186,7 @@ class CquptAcademicPortalPlatform extends Platform {
       if (context.mounted) context.loaderOverlay.show();
       return await _login(result['id']!, result['pwd']!, true).then((v) {
         if (context.mounted) context.loaderOverlay.hide();
-        return v;
+        return v?.copyWith(guest: isGuest);
       });
     }
 

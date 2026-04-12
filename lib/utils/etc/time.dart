@@ -20,6 +20,12 @@ String _twoDigits(int n) {
   return '0$n';
 }
 
+// 文件名时间格式化
+String formatFileNameDate(DateTime date) {
+  return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}_'
+      '${_twoDigits(date.hour)}_${_twoDigits(date.minute)}_${_twoDigits(date.second)}';
+}
+
 // 时长格式化
 String formatDuration(Duration d) {
   String twoDigits(int n) => n.toString().padLeft(2, '0');

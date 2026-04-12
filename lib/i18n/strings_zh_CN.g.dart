@@ -124,6 +124,13 @@ class _TranslationsNoticeZhCn implements TranslationsNoticeEn {
 	@override String get never_updated => '从未更新';
 	@override String get failed_get_data => '获取数据失败';
 	@override String get schedule_empty => '今天已经没课了~';
+	@override String get phone_num_empty_hint => '手机号不能为空';
+	@override String get ver_code_empty_hint => '验证码不能为空';
+	@override String get pwd_empty_hint => '密码不能为空';
+	@override String get share_qr_render_error => '二维码生成失败，请使用文件分享';
+	@override String get share_failed => '分享失败';
+	@override String get failed_open_file => '无法打开文件';
+	@override String get checkin_code_hint => '请输入签到码';
 }
 
 // Path: title
@@ -136,12 +143,15 @@ class _TranslationsTitleZhCn implements TranslationsTitleEn {
 	@override String get id => 'ID';
 	@override String get user => '用户';
 	@override String get platform => '平台';
+	@override String get phone_num => '手机号';
+	@override String get verification_code => '验证码';
 	@override String get exprire_at => '有效期至';
 	@override String get select_school => '选择学校';
 	@override String get change_school => '切换学校';
 	@override String get login_to => '登录到';
 	@override String get already_login => '已经登录到';
 	@override String get unknown_platform => '未知平台';
+	@override String get select_platform => '选择平台';
 	@override String get scan_result => '扫码结果';
 	@override String get add_guest => '添加访客账户';
 	@override String get select_checkin_user => '谁要签到？';
@@ -156,6 +166,9 @@ class _TranslationsTitleZhCn implements TranslationsTitleEn {
 	@override String get course_id => '课程号';
 	@override String get last_update => '上次更新时间';
 	@override String get student_list => '学生名单';
+	@override String get select_login_method => '选择登录方式';
+	@override String get use_ios_ua => '使用 iOS UA';
+	@override String get checkin_code => '签到码';
 }
 
 // Path: action
@@ -172,6 +185,10 @@ class _TranslationsActionZhCn implements TranslationsActionEn {
 	@override String get re_login => '重新登录';
 	@override String get login_info => '登录信息';
 	@override String get share_code => '分享码';
+	@override String get file_sharing => '使用文件分享';
+	@override String get send_sms_code => '发送验证码';
+	@override String get pwd_login => '账号密码登录';
+	@override String get sms_login => '短信验证码登录';
 	@override String get copy => '复制';
 	@override String get paste => '粘贴';
 	@override String get open_with => '打开方式...';
@@ -179,6 +196,10 @@ class _TranslationsActionZhCn implements TranslationsActionEn {
 	@override String get add_guest => '添加访客账户';
 	@override String get re_add_guest => '重新添加访客账户';
 	@override String get check_stu_list => '查看选课学生名单';
+	@override String get guest_add_by_login => '登录添加';
+	@override String get guest_add_by_code => '扫码添加';
+	@override String get guest_add_by_file => '从分享文件添加';
+	@override String get manual_select_point => '手动选择签到点';
 }
 
 // Path: label
@@ -202,6 +223,7 @@ class _TranslationsLabelZhCn implements TranslationsLabelEn {
 	@override String get exam => '考试';
 	@override String get ongoing => '进行中';
 	@override String get upcoming => '即将开始';
+	@override String get deadline => '截止';
 }
 
 // Path: feat
@@ -397,15 +419,25 @@ extension on TranslationsZhCn {
 			'notice.never_updated' => '从未更新',
 			'notice.failed_get_data' => '获取数据失败',
 			'notice.schedule_empty' => '今天已经没课了~',
+			'notice.phone_num_empty_hint' => '手机号不能为空',
+			'notice.ver_code_empty_hint' => '验证码不能为空',
+			'notice.pwd_empty_hint' => '密码不能为空',
+			'notice.share_qr_render_error' => '二维码生成失败，请使用文件分享',
+			'notice.share_failed' => '分享失败',
+			'notice.failed_open_file' => '无法打开文件',
+			'notice.checkin_code_hint' => '请输入签到码',
 			'title.id' => 'ID',
 			'title.user' => '用户',
 			'title.platform' => '平台',
+			'title.phone_num' => '手机号',
+			'title.verification_code' => '验证码',
 			'title.exprire_at' => '有效期至',
 			'title.select_school' => '选择学校',
 			'title.change_school' => '切换学校',
 			'title.login_to' => '登录到',
 			'title.already_login' => '已经登录到',
 			'title.unknown_platform' => '未知平台',
+			'title.select_platform' => '选择平台',
 			'title.scan_result' => '扫码结果',
 			'title.add_guest' => '添加访客账户',
 			'title.select_checkin_user' => '谁要签到？',
@@ -420,6 +452,9 @@ extension on TranslationsZhCn {
 			'title.course_id' => '课程号',
 			'title.last_update' => '上次更新时间',
 			'title.student_list' => '学生名单',
+			'title.select_login_method' => '选择登录方式',
+			'title.use_ios_ua' => '使用 iOS UA',
+			'title.checkin_code' => '签到码',
 			'action.back' => '返回',
 			'action.refresh_login' => '刷新登录',
 			'action.refresh_schedule' => '刷新日程',
@@ -427,6 +462,10 @@ extension on TranslationsZhCn {
 			'action.re_login' => '重新登录',
 			'action.login_info' => '登录信息',
 			'action.share_code' => '分享码',
+			'action.file_sharing' => '使用文件分享',
+			'action.send_sms_code' => '发送验证码',
+			'action.pwd_login' => '账号密码登录',
+			'action.sms_login' => '短信验证码登录',
 			'action.copy' => '复制',
 			'action.paste' => '粘贴',
 			'action.open_with' => '打开方式...',
@@ -434,6 +473,10 @@ extension on TranslationsZhCn {
 			'action.add_guest' => '添加访客账户',
 			'action.re_add_guest' => '重新添加访客账户',
 			'action.check_stu_list' => '查看选课学生名单',
+			'action.guest_add_by_login' => '登录添加',
+			'action.guest_add_by_code' => '扫码添加',
+			'action.guest_add_by_file' => '从分享文件添加',
+			'action.manual_select_point' => '手动选择签到点',
 			'label.primary' => '主账号',
 			'label.guest' => '访客',
 			'label.expired' => '过期',
@@ -448,6 +491,7 @@ extension on TranslationsZhCn {
 			'label.exam' => '考试',
 			'label.ongoing' => '进行中',
 			'label.upcoming' => '即将开始',
+			'label.deadline' => '截止',
 			'feat.all_function' => '全部功能',
 			'feat.schedule' => '日程',
 			'feat.workspace' => '工作台',

@@ -6,7 +6,7 @@ final featCquptTron = Feature(
   id: 'cqupt_tron',
   name: '学在重邮',
   desc: '',
-  icon: Image.asset('assets/icon/icon_tronclass.png'),
+  icon: Image.asset('assets/images/app/tronclass.png'),
   bgColor: const Color(0xff1177b0),
   version: '1',
   action: (BuildContext context) {
