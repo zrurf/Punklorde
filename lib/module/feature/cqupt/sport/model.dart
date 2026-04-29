@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/src/rust/services/motion_sim/model.dart';
 import 'package:xxh3/xxh3.dart';
@@ -315,4 +316,45 @@ class SportStatistics {
         runAddCount: json["raceAttachTime"],
         otherAddCount: json["otherAttachTime"],
       );
+}
+
+class SportFaceRecord {
+  final String recordId;
+  final String userName;
+  final String placeName;
+  final DateTime time;
+  final String cameraName;
+  final int cameraType;
+  final bool isValid;
+  final bool isClass;
+  final String img;
+
+  const SportFaceRecord({
+    required this.recordId,
+    required this.userName,
+    required this.placeName,
+    required this.time,
+    required this.cameraName,
+    required this.cameraType,
+    required this.isValid,
+    required this.isClass,
+    required this.img,
+  });
+
+  factory SportFaceRecord.fromJson(Map<String, dynamic> json) {
+    final imgUrl = json['imgUrl'] as String? ?? '';
+    final recordId = md5.convert(utf8.encode(imgUrl)).toString();
+    return SportFaceRecord(
+      recordId: recordId,
+      userName: json['personName'] as String? ?? '',
+      placeName: json['placeName'] as String? ?? '',
+      time: DateTime.parse(json['recordTime'] as String? ?? ''),
+      cameraName: json['cameraChannelName'] as String? ?? '',
+      cameraType:
+          int.tryParse(json['cameraFunctionType'] as String? ?? '0') ?? 0,
+      isValid: (json['isValid'] as String? ?? '0') == '0',
+      isClass: (json['isClass'] as String? ?? '0') != '0',
+      img: json['imgUrl'] as String? ?? '',
+    );
+  }
 }

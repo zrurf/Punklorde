@@ -358,6 +358,13 @@ class _TranslationsSubmoduleCquptSportZhCn implements TranslationsSubmoduleCqupt
 	@override String get total_count => '总次数';
 	@override String get run_count => '跑步次数';
 	@override String get other_count => '其他次数';
+	@override String get start_run_notice => '跑步开始';
+	@override String get start_run_notice_hint => '请保持应用在前台运行';
+	@override String get stop_run_notice => '跑步结束';
+	@override String get face_notice => '扫脸通知';
+	@override String get face_type_enter => '进场';
+	@override String get face_type_leave => '离场';
+	@override String get face_type_run => '跑步';
 }
 
 /// The flat map containing all translations for locale <zh-CN>.
@@ -579,6 +586,13 @@ extension on TranslationsZhCn {
 			'submodule.cqupt_sport.total_count' => '总次数',
 			'submodule.cqupt_sport.run_count' => '跑步次数',
 			'submodule.cqupt_sport.other_count' => '其他次数',
+			'submodule.cqupt_sport.start_run_notice' => '跑步开始',
+			'submodule.cqupt_sport.start_run_notice_hint' => '请保持应用在前台运行',
+			'submodule.cqupt_sport.stop_run_notice' => '跑步结束',
+			'submodule.cqupt_sport.face_notice' => '扫脸通知',
+			'submodule.cqupt_sport.face_type_enter' => '进场',
+			'submodule.cqupt_sport.face_type_leave' => '离场',
+			'submodule.cqupt_sport.face_type_run' => '跑步',
 			_ => null,
 		};
 	}

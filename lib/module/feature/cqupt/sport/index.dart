@@ -13,6 +13,7 @@ import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/core/status/location.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/cqupt/sport/api/client.dart';
+import 'package:punklorde/module/feature/cqupt/sport/constant.dart';
 import 'package:punklorde/module/feature/cqupt/sport/data.dart';
 import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/feature/cqupt/sport/resource/resource.dart';
@@ -25,6 +26,7 @@ import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/platform/cqupt/sport.dart';
 import 'package:punklorde/module/service/lbs/location.dart';
 import 'package:punklorde/src/rust/services/motion_sim/model.dart';
+import 'package:punklorde/utils/notification.dart';
 import 'package:punklorde/utils/permission.dart';
 import 'package:signals/signals_flutter.dart';
 
@@ -65,8 +67,12 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   final _distance = signal(0.0); // 当前距离
   final _speed = signal(0.0); // 速度
 
+  final Set<String> _faceRecordCache = {}; // 人脸记录缓存
+  bool _faceRecordUpdateLock = false;
+
   // 定时器
   Timer? _updateTimer;
+  Timer? _faceRecordTimer;
 
   @override
   void initState() {
@@ -94,6 +100,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
     _mapService?.stop();
     _sportService = null;
     _mapService = null;
+    _faceRecordTimer?.cancel();
     super.dispose();
   }
 
@@ -837,6 +844,8 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   // 切换用户
   void _changeUser(AuthCredential? cred) {
     featCredential.value = cred;
+
+    initFaceRecordNotice();
   }
 
   Future<bool> _startSport() async {
@@ -964,7 +973,13 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
     if (!ok) return false;
     WakelockPlus.enable();
     _isRunning.value = true;
-
+    showNotification(
+      t.submodule.cqupt_sport.start_run_notice,
+      t.submodule.cqupt_sport.start_run_notice_hint,
+      id: noticeChannelId,
+      channelId: noticeChannelStrId,
+      channelName: noticeChannelName,
+    );
     _duration.value = Duration.zero;
     _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _duration.value += const Duration(seconds: 1);
@@ -1023,6 +1038,14 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
 
   Future<void> sportStopCallback(String sportId) async {
     await _apiClient.endSport(sportId);
+
+    showNotification(
+      t.submodule.cqupt_sport.stop_run_notice,
+      "",
+      id: noticeChannelId,
+      channelId: noticeChannelStrId,
+      channelName: noticeChannelName,
+    );
   }
 
   Future<void> sportRecordCallback(String sportId, TrajPoint point) async {
@@ -1076,6 +1099,54 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
       featPlaceName.value!,
       featPlaceCode.value!,
       sportId,
+    );
+  }
+
+  Future<void> initFaceRecordNotice() async {
+    _faceRecordUpdateLock = true;
+
+    final list = await _apiClient.getSportFaceRecordList(DateTime.now());
+    if (list != null) {
+      _faceRecordCache.addAll(list.map((v) => v.recordId));
+    }
+    _faceRecordUpdateLock = false;
+
+    _faceRecordTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      fetchFaceRecordNotice();
+    });
+  }
+
+  Future<void> fetchFaceRecordNotice() async {
+    if (_faceRecordUpdateLock) return;
+    _faceRecordUpdateLock = true;
+    final list = await _apiClient.getSportFaceRecordList(DateTime.now());
+    if (list != null) {
+      for (final (i, v) in list.indexed) {
+        if (_faceRecordCache.contains(v.recordId)) continue;
+        showFaceNotice(
+          noticeChannelId2 + _faceRecordCache.length + i,
+          switch (v.cameraType) {
+            1 => t.submodule.cqupt_sport.face_type_enter,
+            2 => t.submodule.cqupt_sport.face_type_leave,
+            3 => t.submodule.cqupt_sport.face_type_run,
+            _ => "",
+          },
+          v.cameraName,
+        );
+        _faceRecordCache.add(v.recordId);
+      }
+    }
+    _faceRecordUpdateLock = false;
+  }
+
+  void showFaceNotice(int id, String type, String message) {
+    showNotification(
+      "${t.submodule.cqupt_sport.face_notice}-$type",
+      message,
+      id: id,
+      channelId: noticeChannelStrId,
+      channelName: noticeChannelName,
+      importance: 4,
     );
   }
 

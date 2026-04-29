@@ -55,3 +55,7 @@ String apiSportGetRecords() => "$baseUrl/sportsResult/list";
 
 // 获取运动统计接口
 String apiSportStat() => "$basePortalUrl/api/sunlight/mobile/statistics";
+
+// 获取人脸记录接口
+String apiSportFace(String date) =>
+    "$basePortalUrl/api/sunlight/mobile/cameraRecord/list?dateStr=$date";

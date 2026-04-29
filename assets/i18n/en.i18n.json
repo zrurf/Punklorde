@@ -229,7 +229,14 @@
       "portal_user_not_login": "The portal account of the current user is not logged in.",
       "total_count": "Total",
       "run_count": "Run",
-      "other_count": "Other"
+      "other_count": "Other",
+      "start_run_notice": "Running Begins",
+      "start_run_notice_hint": "Please ensure the app remains running in the foreground",
+      "stop_run_notice": "Running Completed",
+      "face_notice": "Face Recognition",
+      "face_type_enter": "Entry",
+      "face_type_leave": "Exit",
+      "face_type_run": "Running"
     }
   }
 }

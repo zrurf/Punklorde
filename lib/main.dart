@@ -17,6 +17,7 @@ import 'package:punklorde/module/service/lbs/location.dart';
 import 'package:punklorde/module/service/lbs/map.dart';
 import 'package:punklorde/src/rust/frb_generated.dart';
 import 'package:punklorde/utils/etc/style.dart';
+import 'package:punklorde/utils/notification.dart';
 import 'package:punklorde/utils/permission.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -53,6 +54,9 @@ Future<void> main() async {
   // 初始化服务
   await initMapService(Env.keyBaiduMapIOS);
   initLocationService();
+
+  // 初始化通知插件
+  initNoticationPlugin();
 
   // 获取权限
   checkAndRequestPermission(.notice);

@@ -784,6 +784,27 @@ class TranslationsSubmoduleCquptSportEn {
 
 	/// en: 'Other'
 	String get other_count => 'Other';
+
+	/// en: 'Running Begins'
+	String get start_run_notice => 'Running Begins';
+
+	/// en: 'Please ensure the app remains running in the foreground'
+	String get start_run_notice_hint => 'Please ensure the app remains running in the foreground';
+
+	/// en: 'Running Completed'
+	String get stop_run_notice => 'Running Completed';
+
+	/// en: 'Face Recognition'
+	String get face_notice => 'Face Recognition';
+
+	/// en: 'Entry'
+	String get face_type_enter => 'Entry';
+
+	/// en: 'Exit'
+	String get face_type_leave => 'Exit';
+
+	/// en: 'Running'
+	String get face_type_run => 'Running';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -1005,6 +1026,13 @@ extension on Translations {
 			'submodule.cqupt_sport.total_count' => 'Total',
 			'submodule.cqupt_sport.run_count' => 'Run',
 			'submodule.cqupt_sport.other_count' => 'Other',
+			'submodule.cqupt_sport.start_run_notice' => 'Running Begins',
+			'submodule.cqupt_sport.start_run_notice_hint' => 'Please ensure the app remains running in the foreground',
+			'submodule.cqupt_sport.stop_run_notice' => 'Running Completed',
+			'submodule.cqupt_sport.face_notice' => 'Face Recognition',
+			'submodule.cqupt_sport.face_type_enter' => 'Entry',
+			'submodule.cqupt_sport.face_type_leave' => 'Exit',
+			'submodule.cqupt_sport.face_type_run' => 'Running',
 			_ => null,
 		};
 	}

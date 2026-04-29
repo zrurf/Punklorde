@@ -229,7 +229,14 @@
       "portal_user_not_login": "当前用户的门户账号未登录",
       "total_count": "总次数",
       "run_count": "跑步次数",
-      "other_count": "其他次数"
+      "other_count": "其他次数",
+      "start_run_notice": "跑步开始",
+      "start_run_notice_hint": "请保持应用在前台运行",
+      "stop_run_notice": "跑步结束",
+      "face_notice": "扫脸通知",
+      "face_type_enter": "进场",
+      "face_type_leave": "离场",
+      "face_type_run": "跑步"
     }
   }
 }

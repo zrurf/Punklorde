@@ -77,17 +77,20 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                       child: Column(
                         children: [
                           const FDivider(),
-                          FPagination(
-                            control: .managed(
-                              initial: _currentPage.watch(context),
-                              pages: max(totalPage, 1),
-                              onChange: (v) => _currentPage.value = v,
+                          FittedBox(
+                            child: FPagination(
+                              control: .managed(
+                                initial: _currentPage.watch(context),
+                                pages: max(totalPage, 1),
+                                onChange: (v) => _currentPage.value = v,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     );
                   }
+
                   final record = currentPageRecords[index - 1];
                   return Padding(
                     padding: const .symmetric(vertical: 4),
@@ -123,7 +126,7 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                   // 运动总次数
                   _buildStatColumn(
                     context,
-                    mainValue: _statistics.watch(context)?.totalCount ?? 0,
+                    mainValue: _statistics.watch(context)?.totalExamCount ?? 0,
                     mainDeno: _statistics.watch(context)?.targetTotalCount ?? 0,
                     mainLabel: t.submodule.cqupt_sport.total_count,
                     subValue: _statistics.watch(context)?.totalAddCount ?? 0,
@@ -133,7 +136,7 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                   // 跑步次数
                   _buildStatColumn(
                     context,
-                    mainValue: _statistics.watch(context)?.runCount ?? 0,
+                    mainValue: _statistics.watch(context)?.runExamCount ?? 0,
                     mainDeno: _statistics.watch(context)?.targetRunCount ?? 0,
                     mainLabel: t.submodule.cqupt_sport.run_count,
                     subValue: _statistics.watch(context)?.runAddCount ?? 0,

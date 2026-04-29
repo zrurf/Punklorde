@@ -2,3 +2,7 @@ const int uploadThreshold = 8; // 上传阈值（累积n个坐标后提交，由
 
 const int taskServiceId = 3011; // 前台任务服务 ID
 const int noticeChannelId = 2102; // 通知渠道 ID
+const int noticeChannelId2 = 212000; // 通知渠道2（人脸）
+
+const String noticeChannelStrId = 'feat_cqupt_sport_channel';
+const String noticeChannelName = '重邮智慧体育通知';

@@ -20,6 +20,10 @@ String _twoDigits(int n) {
   return '0$n';
 }
 
+// 日期格式化
+String formatDay(DateTime date) =>
+    '${date.year}${_twoDigits(date.month)}${_twoDigits(date.day)}';
+
 // 文件名时间格式化
 String formatFileNameDate(DateTime date) {
   return '${date.year}-${_twoDigits(date.month)}-${_twoDigits(date.day)}_'

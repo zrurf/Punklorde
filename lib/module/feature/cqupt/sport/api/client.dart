@@ -6,6 +6,7 @@ import 'package:punklorde/module/feature/cqupt/sport/api/model/sport.dart';
 import 'package:punklorde/module/feature/cqupt/sport/data.dart';
 import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/platform/cqupt/interceptor/sport_portal.dart';
+import 'package:punklorde/utils/etc/time.dart';
 
 class ApiClient {
   late final Dio _dio;
@@ -149,6 +150,29 @@ class ApiClient {
       }
       final data = response.data['data'];
       return SportStatistics.fromJson(Map<String, dynamic>.from(data));
+    } catch (e) {
+      return null;
+    } finally {
+      _dio.interceptors.remove(_interceptor);
+    }
+  }
+
+  Future<List<SportFaceRecord>?> getSportFaceRecordList(DateTime date) async {
+    if (featPortalCredential.value == null) return null;
+    final dateStr = formatDay(date);
+    _interceptor.setToken(featPortalCredential.value!.token);
+    _dio.interceptors.add(_interceptor);
+    try {
+      final response = await _dio.get(apiSportFace(dateStr));
+      if (response.statusCode != 200 || response.data['code'] != "10200") {
+        return null;
+      }
+      final data = response.data['data'];
+      if (data is List<dynamic>) {
+        return data.map((v) => SportFaceRecord.fromJson(v)).toList();
+      } else {
+        return [];
+      }
     } catch (e) {
       return null;
     } finally {

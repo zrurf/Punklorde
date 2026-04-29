@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/common/model/location.dart';
 import 'package:punklorde/core/status/location.dart';
 import 'package:punklorde/i18n/strings.g.dart';
+import 'package:punklorde/module/service/lbs/location.dart';
 
 class PosCheckinPanel extends StatefulWidget {
   final String title;
@@ -22,6 +23,18 @@ class PosCheckinPanel extends StatefulWidget {
 }
 
 class _PosCheckinPanelState extends State<PosCheckinPanel> {
+  @override
+  void initState() {
+    startLocationService(LocationServiceOptions());
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    stopLocationService();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
