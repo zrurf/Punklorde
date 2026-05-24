@@ -248,4 +248,53 @@ class ApiClient {
     }
     return result;
   }
+
+  /// 普通/手势签到（无额外参数）
+  Future<List<bool>> checkinAllNormal(
+    List<AuthCredentialCache> credentials,
+    String id,
+  ) async {
+    final Map<String, String> param = {
+      "appType": "15",
+      "fid": "0",
+      "activeId": id,
+      "latitude": "-1",
+      "longitude": "-1",
+      "vpProbability": "-1",
+      "uid": "",
+      "name": "",
+      "deviceCode": "",
+    };
+    final List<bool> result = List.filled(credentials.length, false);
+    for (final (i, cred) in credentials.indexed) {
+      final deviceCode = genDeviceFingerprint(
+        cred.credential.ext?["device_id"] ??
+            DeterministicUuidUtil.generate(cred.credential.id),
+      );
+      final CookieManager cookie = CookieManager(cred.cookie);
+      _dio.interceptors.add(cookie);
+      param["uid"] = cred.credential.id;
+      param["name"] = cred.credential.name;
+      param["deviceCode"] = deviceCode;
+      try {
+        final ua = cred.credential.ext!["ua"];
+        final r1 = await _dio.get(
+          apiCommonSign,
+          queryParameters: param,
+          options: Options(headers: {"User-Agent": ua}),
+        );
+        if (r1.statusCode != 200) continue;
+        final r2 = await _dio.get(
+          apiSignResult(id),
+          options: Options(headers: {"User-Agent": ua}),
+        );
+        result[i] = (r2.statusCode == 200 && r2.data?["data"]?["status"] == 1);
+      } catch (e) {
+        continue;
+      } finally {
+        _dio.interceptors.remove(cookie);
+      }
+    }
+    return result;
+  }
 }

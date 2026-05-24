@@ -48,20 +48,28 @@ class _FeatChaonxingViewState extends State<FeatChaonxingView> {
     // 仅当不在作业 Tab 或作业 WebView 在首页时显示底部导航栏
     final showBottomNav = index != 1 || _isAtHomeworkHome.watch(context);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 紧凑顶部栏
-            _buildHeader(context, colors, index),
-            // 内容区域 — IndexedStack 保活
-            Expanded(
-              child: IndexedStack(index: index, children: _pages),
-            ),
-            // 仅主页/作业首页显示底部导航
-            if (showBottomNav) _buildBottomNav(index, tab, colors),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _onBackPressed(context, index);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // 紧凑顶部栏
+              _buildHeader(context, colors, index),
+              // 内容区域 — IndexedStack 保活
+              Expanded(
+                child: IndexedStack(index: index, children: _pages),
+              ),
+              // 仅主页/作业首页显示底部导航
+              if (showBottomNav) _buildBottomNav(index, tab, colors),
+            ],
+          ),
         ),
       ),
     );

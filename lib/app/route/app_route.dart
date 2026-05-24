@@ -15,11 +15,13 @@ import 'package:punklorde/app/view/page/sources_list.dart';
 import 'package:punklorde/app/view/page/dl_cache.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/chaoxing/index.dart';
+import 'package:punklorde/module/feature/chaoxing/manifest.dart';
 import 'package:punklorde/module/feature/chaoxing/view/pages/course_active_page.dart';
 import 'package:punklorde/module/feature/chaoxing/view/pages/webview_page.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
+import 'package:punklorde/module/feature/cqupt/tronclass/index.dart';
 import 'package:punklorde/module/school/cqupt/view/page/student_list.dart';
 import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
@@ -248,24 +250,33 @@ final appRoute = GoRouter(
           },
         ),
         GoRoute(
+          path: '/feat/cqupt/tronclass',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatCquptTronclassView());
+          },
+        ),
+        GoRoute(
           path: '/feat/chaoxing',
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: FeatChaonxingView());
           },
         ),
         GoRoute(
-          path: '/feat/chaoxing/active/:classId/:courseId',
+          path: '/feat/chaoxing/active/:classId/:courseId/:personId',
           pageBuilder: (context, state) {
             final classId =
                 int.tryParse(state.pathParameters['classId'] ?? '') ?? 0;
             final courseId =
                 int.tryParse(state.pathParameters['courseId'] ?? '') ?? 0;
+            final personId =
+                int.tryParse(state.pathParameters['personId'] ?? '') ?? 0;
             final className = state.uri.queryParameters['className'] ?? '';
             final courseName = state.uri.queryParameters['courseName'] ?? '';
             return NoTransitionPage(
               child: CourseActivePage(
                 classId: classId,
                 courseId: courseId,
+                personId: personId,
                 className: className,
                 courseName: courseName,
               ),
@@ -275,11 +286,10 @@ final appRoute = GoRouter(
         GoRoute(
           path: '/feat/chaoxing/webview',
           pageBuilder: (context, state) {
-            final extra = state.extra as Map<String, dynamic>?;
             return NoTransitionPage(
               child: ChaoxingWebViewPage(
-                url: extra?['url'] as String? ?? '',
-                title: extra?['title'] as String?,
+                url: state.extra as String? ?? '',
+                title: featChaoxing.name,
               ),
             );
           },

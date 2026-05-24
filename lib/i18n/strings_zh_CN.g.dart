@@ -425,6 +425,7 @@ class _TranslationsSubmoduleChaoxingZhCn implements TranslationsSubmoduleChaoxin
 	// Translations
 	@override String get courses => '课程';
 	@override String get homework => '作业';
+	@override String get exam => '考试';
 	@override String get messages => '消息';
 	@override String get profile => '我';
 	@override String get no_courses => '暂无课程';
@@ -710,6 +711,7 @@ extension on TranslationsZhCn {
 			'submodule.cqupt_sport.face_type_run' => '跑步',
 			'submodule.chaoxing.courses' => '课程',
 			'submodule.chaoxing.homework' => '作业',
+			'submodule.chaoxing.exam' => '考试',
 			'submodule.chaoxing.messages' => '消息',
 			'submodule.chaoxing.profile' => '我',
 			'submodule.chaoxing.no_courses' => '暂无课程',

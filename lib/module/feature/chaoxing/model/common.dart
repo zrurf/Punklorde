@@ -3,6 +3,7 @@ enum ActiveType {
   signIn, // 签到(2)
   signOut, // 签退(74)
   scheduledSignIn, // 定时签到(54)
+  notification, // 通知(45)
 }
 
 /// 课程数据模型
@@ -282,6 +283,9 @@ class ActiveResult {
   /// 状态
   final int? status;
 
+  /// 内容（JSON 字符串，如通知中的 idCode）
+  final String? content;
+
   const ActiveResult({
     required this.id,
     required this.activeType,
@@ -301,11 +305,13 @@ class ActiveResult {
     this.logo,
     this.flagLogo,
     this.status,
+    this.content,
   });
 
   /// 获取事件类型
   ActiveType get getActiveType => switch (activeType) {
     2 => .signIn,
+    45 => .notification,
     54 => .scheduledSignIn,
     74 => .signOut,
     _ => .unknown,
@@ -358,6 +364,7 @@ class ActiveResult {
       logo: json['logo'] as String?,
       flagLogo: json['flagLogo'] as bool?,
       status: json['status'] as int?,
+      content: json['content'] as String?,
     );
   }
 
@@ -382,6 +389,7 @@ class ActiveResult {
       'logo': logo,
       'flagLogo': flagLogo,
       'status': status,
+      'content': content,
     };
   }
 

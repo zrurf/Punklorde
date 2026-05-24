@@ -127,7 +127,7 @@ class _CoursePageState extends State<CoursePage> {
     return GestureDetector(
       onTap: () {
         context.push(
-          '/feat/chaoxing/active/${classData.id}/${course.id}'
+          '/feat/chaoxing/active/${classData.id}/${course.id}/${classData.personalId}'
           '?className=${Uri.encodeComponent(classData.name)}'
           '&courseName=${Uri.encodeComponent(course.name)}',
         );

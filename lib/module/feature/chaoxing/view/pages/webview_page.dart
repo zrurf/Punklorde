@@ -52,35 +52,43 @@ class _ChaoxingWebViewPageState extends State<ChaoxingWebViewPage> {
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(colors),
-            Expanded(
-              child: ChaoxingWebView(
-                config: ChaoxingWebViewConfig(
-                  url: widget.url,
-                  credential: credential,
-                  userAgent: credential.ext?["ua"],
-                  onPageStarted: (controller, url) {
-                    _controller = controller;
-                    _jsHandler = ChaoxingJSHandler(
-                      controller,
-                      onOpenUrl: (newUrl) async {
-                        _controller?.loadUrl(
-                          urlRequest: URLRequest(url: WebUri(newUrl)),
-                        );
-                      },
-                    );
-                  },
-                  onJSBridgeNotification: (name, payload) {
-                    _jsHandler?.handle(name, payload);
-                  },
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          _onBackPressed();
+        }
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(colors),
+              Expanded(
+                child: ChaoxingWebView(
+                  config: ChaoxingWebViewConfig(
+                    url: widget.url,
+                    credential: credential,
+                    userAgent: credential.ext?["ua"],
+                    onPageStarted: (controller, url) {
+                      _controller = controller;
+                      _jsHandler = ChaoxingJSHandler(
+                        controller,
+                        onOpenUrl: (newUrl) async {
+                          _controller?.loadUrl(
+                            urlRequest: URLRequest(url: WebUri(newUrl)),
+                          );
+                        },
+                      );
+                    },
+                    onJSBridgeNotification: (name, payload) {
+                      _jsHandler?.handle(name, payload);
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

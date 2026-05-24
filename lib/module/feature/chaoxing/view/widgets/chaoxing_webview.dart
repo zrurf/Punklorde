@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:punklorde/common/model/cookie.dart';
@@ -105,6 +106,7 @@ class _ChaoxingWebViewState extends State<ChaoxingWebView> {
         scrollBarStyle: ScrollBarStyle.SCROLLBARS_OUTSIDE_OVERLAY,
         verticalScrollBarEnabled: true,
         horizontalScrollBarEnabled: false,
+        isInspectable: kDebugMode,
       ),
       onWebViewCreated: (controller) async {
         _webViewController = controller;
@@ -146,6 +148,10 @@ class _ChaoxingWebViewState extends State<ChaoxingWebView> {
       },
       onLoadStart: (controller, url) async {
         _bridgeReady = false;
+        if (_jsBridge != null && !_bridgeReady) {
+          await _jsBridge!.reinject();
+          await _jsBridge!.setClientInfo(clientCid, clientSc);
+        }
         widget.config.onPageStarted?.call(controller, url?.toString());
       },
       shouldInterceptRequest: widget.config.onShouldInterceptRequest != null

@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:punklorde/app/main.dart';
 import 'package:punklorde/core/account/pkld_file_handler.dart';
 import 'package:punklorde/core/service/widget_service.dart';
@@ -56,13 +59,17 @@ Future<void> main() async {
   initNoticationPlugin();
 
   // 获取权限
-  checkAndRequestPermission(.notice);
+  requestPermission();
 
   // 加载状态
   await loadStatus().then((v) {
     // 同步状态
     syncStatus();
   });
+
+  if (kDebugMode) {
+    await setDebugger();
+  }
 
   FlutterNativeSplash.remove();
   runApp(TranslationProvider(child: MainMobileApp()));
@@ -108,4 +115,16 @@ Future<void> syncStatus() async {
   }
   // 更新小组件
   await ScheduleWidgetService.updateWidget();
+}
+
+Future<void> requestPermission() async {
+  await checkAndRequestPermission(.notice);
+  await checkAndRequestPermission(.microphone);
+}
+
+Future<void> setDebugger() async {
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  }
+  PlatformInAppWebViewController.debugLoggingSettings.enabled = true;
 }

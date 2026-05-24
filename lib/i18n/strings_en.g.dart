@@ -966,6 +966,9 @@ class TranslationsSubmoduleChaoxingEn {
 	/// en: 'Homework'
 	String get homework => 'Homework';
 
+	/// en: 'Exam'
+	String get exam => 'Exam';
+
 	/// en: 'Messages'
 	String get messages => 'Messages';
 
@@ -1264,6 +1267,7 @@ extension on Translations {
 			'submodule.cqupt_sport.face_type_run' => 'Running',
 			'submodule.chaoxing.courses' => 'Courses',
 			'submodule.chaoxing.homework' => 'Homework',
+			'submodule.chaoxing.exam' => 'Exam',
 			'submodule.chaoxing.messages' => 'Messages',
 			'submodule.chaoxing.profile' => 'Me',
 			'submodule.chaoxing.no_courses' => 'No courses available',
