@@ -22,6 +22,7 @@ import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/index.dart';
+import 'package:punklorde/module/feature/vpn/sangfor/index.dart';
 import 'package:punklorde/module/school/cqupt/view/page/student_list.dart';
 import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
@@ -239,6 +240,18 @@ final appRoute = GoRouter(
           path: '/feat/cqupt/sport/record',
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: FeatSportCquptRecordView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/vpn/sangfor',
+          pageBuilder: (context, state) {
+            String? server = state.uri.queryParameters['server'];
+            if (server != null) {
+              server = Uri.decodeComponent(server);
+            }
+            return NoTransitionPage(
+              child: FeatSangforVpnView(defaultServer: server),
+            );
           },
         ),
         GoRoute(

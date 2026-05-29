@@ -169,9 +169,65 @@ class CargoKitPlugin implements Plugin<Project> {
                     targetPlatforms = platforms
                     pluginFile = CargoKitPlugin.file
                 }
+                // Map flutter platform names to Rust target triples (from cargokit target.dart)
+                def flutterToRust = [
+                    'android-arm64': 'aarch64-linux-android',
+                    'android-arm': 'armv7-linux-androideabi',
+                    'android-x64': 'x86_64-linux-android',
+                    'android-x86': 'i686-linux-android',
+                ]
+
+                // Copy libtunnel.so (Go library built by Rust build.rs) to jniLibs output dir
+                def copyTunnelSoTask = project.tasks.create(
+                    "copyTunnelSo${buildType.capitalize()}"
+                ) {
+                    dependsOn task
+                    doLast {
+                        platforms.each { platform ->
+                            def rustTarget = flutterToRust[platform]
+                            if (rustTarget == null) return
+                            // buildType is "debug" or "release", matching Rust profile
+                            def profile = buildType == 'debug' ? 'debug' : 'release'
+                            def srcDir = project.file("${cargoBuildDir}/${rustTarget}/${profile}")
+                            def tunnelSo = new File(srcDir, 'libtunnel.so')
+                            if (tunnelSo.exists()) {
+                                def abiMap = [
+                                    'android-arm64': 'arm64-v8a',
+                                    'android-arm': 'armeabi-v7a',
+                                    'android-x64': 'x86_64',
+                                    'android-x86': 'x86',
+                                ]
+                                def abi = abiMap[platform]
+                                if (abi != null) {
+                                    def destDir = project.file("${cargoOutputDir}/${abi}")
+                                    destDir.mkdirs()
+                                    def dest = new File(destDir, 'libtunnel.so')
+                                    if (!dest.exists() || tunnelSo.lastModified() > dest.lastModified()) {
+                                        java.nio.file.Files.copy(
+                                            tunnelSo.toPath(),
+                                            dest.toPath(),
+                                            java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                                        )
+                                        println("copyTunnelSo${buildType.capitalize()}: Copied libtunnel.so -> ${dest}")
+                                    }
+                                }
+                            } else {
+                                println("copyTunnelSo${buildType.capitalize()}: WARNING libtunnel.so not found at ${tunnelSo}")
+                            }
+                        }
+                    }
+                }
+
+                // Ensure copyTunnelSo runs immediately after cargo build
+                task.finalizedBy(copyTunnelSoTask)
+
                 def onTask = { newTask ->
-                    if (newTask.name == "merge${buildType.capitalize()}NativeLibs") {
+                    // AGP 7.x:   merge<variant>NativeLibs
+                    // AGP 8.x+:  merge<variant>JniLibFolders (library modules)
+                    if ((newTask.name == "merge${buildType.capitalize()}NativeLibs") ||
+                        (newTask.name == "merge${buildType.capitalize()}JniLibFolders")) {
                         newTask.dependsOn task
+                        newTask.dependsOn copyTunnelSoTask
                         // Fix gradle 7.4.2 not picking up JNI library changes
                         newTask.outputs.upToDateWhen { false }
                     }

@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/motion_sim.dart';
+import 'api/sangfor.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -11,6 +12,7 @@ import 'frb_generated.io.dart'
     if (dart.library.js_interop) 'frb_generated.web.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'services/motion_sim/model.dart';
+import 'services/sangfor.dart';
 
 /// Main entrypoint of the Rust API
 class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
@@ -67,7 +69,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -2094800348;
+  int get rustContentHash => -1279356890;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -78,12 +80,27 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  String crateApiSangforAuthenticateVpnAndGetIp({required String handleId});
+
+  void crateApiSangforConnectVpn({required String handleId});
+
+  String crateApiSangforContinueVpnAuthAndGetIp({
+    required String handleId,
+    required String code,
+  });
+
   String crateApiMotionSimCreateSimulator({
     required SimulatorConfig config,
     required List<Trajectory> trajectories,
   });
 
+  String crateApiSangforCreateVpn({required VpnConfig config});
+
+  void crateApiSangforDisconnectVpn({required String handleId});
+
   void crateApiMotionSimDisposeSimulator({required String handleId});
+
+  void crateApiSangforDisposeVpn({required String handleId});
 
   CommandResult crateApiMotionSimExecuteCommand({
     required String handleId,
@@ -96,11 +113,29 @@ abstract class RustLibApi extends BaseApi {
 
   SimulatorStats? crateApiMotionSimGetStats({required String handleId});
 
+  String? crateApiSangforGetVpnAssignedIp({required String handleId});
+
+  VpnConfig? crateApiSangforGetVpnConfig({required String handleId});
+
+  String? crateApiSangforGetVpnLastError({required String handleId});
+
+  VpnState? crateApiSangforGetVpnState({required String handleId});
+
+  VpnTrafficStats? crateApiSangforGetVpnTrafficStats({
+    required String handleId,
+  });
+
   Future<void> crateApiInitApp();
+
+  bool? crateApiSangforIsVpnRunning({required String handleId});
+
+  void crateApiSangforOpenVpnChannelsAndRelay({required String handleId});
 
   void crateApiMotionSimPauseSimulator({required String handleId});
 
   void crateApiMotionSimResumeSimulator({required String handleId});
+
+  void crateApiSangforSetTunFd({required String handleId, required int fd});
 
   void crateApiMotionSimStartSimulator({required String handleId});
 
@@ -109,7 +144,16 @@ abstract class RustLibApi extends BaseApi {
     required StopReason reason,
   });
 
+  void crateApiSangforSubmit2Fa({
+    required String handleId,
+    required String code,
+  });
+
   Future<Stream<SimulatorUpdate>> crateApiMotionSimSubscribeSimulator({
+    required String handleId,
+  });
+
+  Future<Stream<VpnState>> crateApiSangforSubscribeVpnState({
     required String handleId,
   });
 
@@ -128,6 +172,85 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
+  String crateApiSangforAuthenticateVpnAndGetIp({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforAuthenticateVpnAndGetIpConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforAuthenticateVpnAndGetIpConstMeta =>
+      const TaskConstMeta(
+        debugName: "authenticate_vpn_and_get_ip",
+        argNames: ["handleId"],
+      );
+
+  @override
+  void crateApiSangforConnectVpn({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforConnectVpnConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforConnectVpnConstMeta =>
+      const TaskConstMeta(debugName: "connect_vpn", argNames: ["handleId"]);
+
+  @override
+  String crateApiSangforContinueVpnAuthAndGetIp({
+    required String handleId,
+    required String code,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          sse_encode_String(code, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforContinueVpnAuthAndGetIpConstMeta,
+        argValues: [handleId, code],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforContinueVpnAuthAndGetIpConstMeta =>
+      const TaskConstMeta(
+        debugName: "continue_vpn_auth_and_get_ip",
+        argNames: ["handleId", "code"],
+      );
+
+  @override
   String crateApiMotionSimCreateSimulator({
     required SimulatorConfig config,
     required List<Trajectory> trajectories,
@@ -138,7 +261,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_box_autoadd_simulator_config(config, serializer);
           sse_encode_list_trajectory(trajectories, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 1)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -158,13 +281,59 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  String crateApiSangforCreateVpn({required VpnConfig config}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_vpn_config(config, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforCreateVpnConstMeta,
+        argValues: [config],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforCreateVpnConstMeta =>
+      const TaskConstMeta(debugName: "create_vpn", argNames: ["config"]);
+
+  @override
+  void crateApiSangforDisconnectVpn({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforDisconnectVpnConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforDisconnectVpnConstMeta =>
+      const TaskConstMeta(debugName: "disconnect_vpn", argNames: ["handleId"]);
+
+  @override
   void crateApiMotionSimDisposeSimulator({required String handleId}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 7)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -184,6 +353,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiSangforDisposeVpn({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforDisposeVpnConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforDisposeVpnConstMeta =>
+      const TaskConstMeta(debugName: "dispose_vpn", argNames: ["handleId"]);
+
+  @override
   CommandResult crateApiMotionSimExecuteCommand({
     required String handleId,
     required Command command,
@@ -194,7 +386,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
           sse_encode_box_autoadd_command(command, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_command_result,
@@ -220,7 +412,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 4)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_simulator_config,
@@ -243,7 +435,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_simulator_state,
@@ -266,7 +458,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 12)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_simulator_stats,
@@ -283,6 +475,132 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_stats", argNames: ["handleId"]);
 
   @override
+  String? crateApiSangforGetVpnAssignedIp({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_String,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforGetVpnAssignedIpConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforGetVpnAssignedIpConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_vpn_assigned_ip",
+        argNames: ["handleId"],
+      );
+
+  @override
+  VpnConfig? crateApiSangforGetVpnConfig({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_vpn_config,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforGetVpnConfigConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforGetVpnConfigConstMeta =>
+      const TaskConstMeta(debugName: "get_vpn_config", argNames: ["handleId"]);
+
+  @override
+  String? crateApiSangforGetVpnLastError({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_String,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforGetVpnLastErrorConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforGetVpnLastErrorConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_vpn_last_error",
+        argNames: ["handleId"],
+      );
+
+  @override
+  VpnState? crateApiSangforGetVpnState({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 16)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_vpn_state,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforGetVpnStateConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforGetVpnStateConstMeta =>
+      const TaskConstMeta(debugName: "get_vpn_state", argNames: ["handleId"]);
+
+  @override
+  VpnTrafficStats? crateApiSangforGetVpnTrafficStats({
+    required String handleId,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_vpn_traffic_stats,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforGetVpnTrafficStatsConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforGetVpnTrafficStatsConstMeta =>
+      const TaskConstMeta(
+        debugName: "get_vpn_traffic_stats",
+        argNames: ["handleId"],
+      );
+
+  @override
   Future<void> crateApiInitApp() {
     return handler.executeNormal(
       NormalTask(
@@ -291,7 +609,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 18,
             port: port_,
           );
         },
@@ -310,13 +628,62 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
+  bool? crateApiSangforIsVpnRunning({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 19)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiSangforIsVpnRunningConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforIsVpnRunningConstMeta =>
+      const TaskConstMeta(debugName: "is_vpn_running", argNames: ["handleId"]);
+
+  @override
+  void crateApiSangforOpenVpnChannelsAndRelay({required String handleId}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 20)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforOpenVpnChannelsAndRelayConstMeta,
+        argValues: [handleId],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforOpenVpnChannelsAndRelayConstMeta =>
+      const TaskConstMeta(
+        debugName: "open_vpn_channels_and_relay",
+        argNames: ["handleId"],
+      );
+
+  @override
   void crateApiMotionSimPauseSimulator({required String handleId}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -339,7 +706,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 22)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -359,13 +726,39 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiSangforSetTunFd({required String handleId, required int fd}) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          sse_encode_i_32(fd, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 23)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforSetTunFdConstMeta,
+        argValues: [handleId, fd],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforSetTunFdConstMeta => const TaskConstMeta(
+    debugName: "set_tun_fd",
+    argNames: ["handleId", "fd"],
+  );
+
+  @override
   void crateApiMotionSimStartSimulator({required String handleId}) {
     return handler.executeSync(
       SyncTask(
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 24)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -392,7 +785,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
           sse_encode_stop_reason(reason, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
@@ -412,6 +805,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  void crateApiSangforSubmit2Fa({
+    required String handleId,
+    required String code,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          sse_encode_String(code, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 26)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforSubmit2FaConstMeta,
+        argValues: [handleId, code],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiSangforSubmit2FaConstMeta => const TaskConstMeta(
+    debugName: "submit_2fa",
+    argNames: ["handleId", "code"],
+  );
+
+  @override
   Future<Stream<SimulatorUpdate>> crateApiMotionSimSubscribeSimulator({
     required String handleId,
   }) async {
@@ -425,7 +847,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 27,
             port: port_,
           );
         },
@@ -448,6 +870,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Stream<VpnState>> crateApiSangforSubscribeVpnState({
+    required String handleId,
+  }) async {
+    final sink = RustStreamSink<VpnState>();
+    await handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(handleId, serializer);
+          sse_encode_StreamSink_vpn_state_Sse(sink, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 28,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiSangforSubscribeVpnStateConstMeta,
+        argValues: [handleId, sink],
+        apiImpl: this,
+      ),
+    );
+    return sink.stream;
+  }
+
+  TaskConstMeta get kCrateApiSangforSubscribeVpnStateConstMeta =>
+      const TaskConstMeta(
+        debugName: "subscribe_vpn_state",
+        argNames: ["handleId", "sink"],
+      );
+
+  @override
   SensorData? crateApiMotionSimUpdateSimulator({
     required String handleId,
     required double dt,
@@ -458,7 +916,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(handleId, serializer);
           sse_encode_f_64(dt, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 29)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_opt_box_autoadd_sensor_data,
@@ -487,6 +945,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   RustStreamSink<SimulatorUpdate> dco_decode_StreamSink_simulator_update_Sse(
     dynamic raw,
   ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    throw UnimplementedError();
+  }
+
+  @protected
+  RustStreamSink<VpnState> dco_decode_StreamSink_vpn_state_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -538,6 +1002,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BarometerData dco_decode_box_autoadd_barometer_data(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_barometer_data(raw);
+  }
+
+  @protected
+  bool dco_decode_box_autoadd_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as bool;
   }
 
   @protected
@@ -628,6 +1098,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Trajectory dco_decode_box_autoadd_trajectory(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_trajectory(raw);
+  }
+
+  @protected
+  VpnConfig dco_decode_box_autoadd_vpn_config(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_vpn_config(raw);
+  }
+
+  @protected
+  VpnState dco_decode_box_autoadd_vpn_state(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_vpn_state(raw);
+  }
+
+  @protected
+  VpnTrafficStats dco_decode_box_autoadd_vpn_traffic_stats(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_vpn_traffic_stats(raw);
   }
 
   @protected
@@ -873,6 +1361,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool? dco_decode_opt_box_autoadd_bool(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_bool(raw);
+  }
+
+  @protected
   CompassData? dco_decode_opt_box_autoadd_compass_data(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_compass_data(raw);
@@ -936,6 +1430,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   SimulatorStats? dco_decode_opt_box_autoadd_simulator_stats(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_box_autoadd_simulator_stats(raw);
+  }
+
+  @protected
+  VpnConfig? dco_decode_opt_box_autoadd_vpn_config(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_vpn_config(raw);
+  }
+
+  @protected
+  VpnState? dco_decode_opt_box_autoadd_vpn_state(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_vpn_state(raw);
+  }
+
+  @protected
+  VpnTrafficStats? dco_decode_opt_box_autoadd_vpn_traffic_stats(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_vpn_traffic_stats(raw);
   }
 
   @protected
@@ -1152,6 +1664,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int dco_decode_u_16(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
   int dco_decode_u_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -1182,6 +1700,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  VpnConfig dco_decode_vpn_config(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 10)
+      throw Exception('unexpected arr length: expect 10 but see ${arr.length}');
+    return VpnConfig(
+      server: dco_decode_String(arr[0]),
+      username: dco_decode_String(arr[1]),
+      password: dco_decode_String(arr[2]),
+      totpSecret: dco_decode_String(arr[3]),
+      customDns: dco_decode_opt_String(arr[4]),
+      tunName: dco_decode_opt_String(arr[5]),
+      tunAddress: dco_decode_String(arr[6]),
+      tunNetmask: dco_decode_String(arr[7]),
+      mtu: dco_decode_u_16(arr[8]),
+      splitRoutes: dco_decode_opt_String(arr[9]),
+    );
+  }
+
+  @protected
+  VpnState dco_decode_vpn_state(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return VpnState.values[raw as int];
+  }
+
+  @protected
+  VpnTrafficStats dco_decode_vpn_traffic_stats(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return VpnTrafficStats(
+      bytesSent: dco_decode_u_64(arr[0]),
+      bytesReceived: dco_decode_u_64(arr[1]),
+      packetsSent: dco_decode_u_64(arr[2]),
+      packetsReceived: dco_decode_u_64(arr[3]),
+    );
+  }
+
+  @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_String(deserializer);
@@ -1190,6 +1748,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   RustStreamSink<SimulatorUpdate> sse_decode_StreamSink_simulator_update_Sse(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    throw UnimplementedError('Unreachable ()');
+  }
+
+  @protected
+  RustStreamSink<VpnState> sse_decode_StreamSink_vpn_state_Sse(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -1245,6 +1811,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_barometer_data(deserializer));
+  }
+
+  @protected
+  bool sse_decode_box_autoadd_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_bool(deserializer));
   }
 
   @protected
@@ -1349,6 +1921,26 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Trajectory sse_decode_box_autoadd_trajectory(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_trajectory(deserializer));
+  }
+
+  @protected
+  VpnConfig sse_decode_box_autoadd_vpn_config(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_vpn_config(deserializer));
+  }
+
+  @protected
+  VpnState sse_decode_box_autoadd_vpn_state(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_vpn_state(deserializer));
+  }
+
+  @protected
+  VpnTrafficStats sse_decode_box_autoadd_vpn_traffic_stats(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_vpn_traffic_stats(deserializer));
   }
 
   @protected
@@ -1672,6 +2264,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_bool(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   CompassData? sse_decode_opt_box_autoadd_compass_data(
     SseDeserializer deserializer,
   ) {
@@ -1801,6 +2404,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
     if (sse_decode_bool(deserializer)) {
       return (sse_decode_box_autoadd_simulator_stats(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  VpnConfig? sse_decode_opt_box_autoadd_vpn_config(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_vpn_config(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  VpnState? sse_decode_opt_box_autoadd_vpn_state(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_vpn_state(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  VpnTrafficStats? sse_decode_opt_box_autoadd_vpn_traffic_stats(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_vpn_traffic_stats(deserializer));
     } else {
       return null;
     }
@@ -2072,6 +2712,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_u_16(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint16();
+  }
+
+  @protected
   int sse_decode_u_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint32();
@@ -2101,6 +2747,55 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  VpnConfig sse_decode_vpn_config(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_server = sse_decode_String(deserializer);
+    var var_username = sse_decode_String(deserializer);
+    var var_password = sse_decode_String(deserializer);
+    var var_totpSecret = sse_decode_String(deserializer);
+    var var_customDns = sse_decode_opt_String(deserializer);
+    var var_tunName = sse_decode_opt_String(deserializer);
+    var var_tunAddress = sse_decode_String(deserializer);
+    var var_tunNetmask = sse_decode_String(deserializer);
+    var var_mtu = sse_decode_u_16(deserializer);
+    var var_splitRoutes = sse_decode_opt_String(deserializer);
+    return VpnConfig(
+      server: var_server,
+      username: var_username,
+      password: var_password,
+      totpSecret: var_totpSecret,
+      customDns: var_customDns,
+      tunName: var_tunName,
+      tunAddress: var_tunAddress,
+      tunNetmask: var_tunNetmask,
+      mtu: var_mtu,
+      splitRoutes: var_splitRoutes,
+    );
+  }
+
+  @protected
+  VpnState sse_decode_vpn_state(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return VpnState.values[inner];
+  }
+
+  @protected
+  VpnTrafficStats sse_decode_vpn_traffic_stats(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_bytesSent = sse_decode_u_64(deserializer);
+    var var_bytesReceived = sse_decode_u_64(deserializer);
+    var var_packetsSent = sse_decode_u_64(deserializer);
+    var var_packetsReceived = sse_decode_u_64(deserializer);
+    return VpnTrafficStats(
+      bytesSent: var_bytesSent,
+      bytesReceived: var_bytesReceived,
+      packetsSent: var_packetsSent,
+      packetsReceived: var_packetsReceived,
+    );
+  }
+
+  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -2119,6 +2814,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       self.setupAndSerialize(
         codec: SseCodec(
           decodeSuccessData: sse_decode_simulator_update,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+      ),
+      serializer,
+    );
+  }
+
+  @protected
+  void sse_encode_StreamSink_vpn_state_Sse(
+    RustStreamSink<VpnState> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(
+      self.setupAndSerialize(
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_vpn_state,
           decodeErrorData: sse_decode_AnyhowException,
         ),
       ),
@@ -2172,6 +2884,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_barometer_data(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_bool(self, serializer);
   }
 
   @protected
@@ -2295,6 +3013,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_trajectory(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_vpn_config(
+    VpnConfig self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_vpn_config(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_vpn_state(
+    VpnState self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_vpn_state(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_vpn_traffic_stats(
+    VpnTrafficStats self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_vpn_traffic_stats(self, serializer);
   }
 
   @protected
@@ -2571,6 +3316,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_bool(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_box_autoadd_compass_data(
     CompassData? self,
     SseSerializer serializer,
@@ -2707,6 +3462,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self != null, serializer);
     if (self != null) {
       sse_encode_box_autoadd_simulator_stats(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_vpn_config(
+    VpnConfig? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_vpn_config(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_vpn_state(
+    VpnState? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_vpn_state(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_vpn_traffic_stats(
+    VpnTrafficStats? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_vpn_traffic_stats(self, serializer);
     }
   }
 
@@ -2918,6 +3712,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_u_16(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint16(self);
+  }
+
+  @protected
   void sse_encode_u_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint32(self);
@@ -2944,5 +3744,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
+  }
+
+  @protected
+  void sse_encode_vpn_config(VpnConfig self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.server, serializer);
+    sse_encode_String(self.username, serializer);
+    sse_encode_String(self.password, serializer);
+    sse_encode_String(self.totpSecret, serializer);
+    sse_encode_opt_String(self.customDns, serializer);
+    sse_encode_opt_String(self.tunName, serializer);
+    sse_encode_String(self.tunAddress, serializer);
+    sse_encode_String(self.tunNetmask, serializer);
+    sse_encode_u_16(self.mtu, serializer);
+    sse_encode_opt_String(self.splitRoutes, serializer);
+  }
+
+  @protected
+  void sse_encode_vpn_state(VpnState self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_vpn_traffic_stats(
+    VpnTrafficStats self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_64(self.bytesSent, serializer);
+    sse_encode_u_64(self.bytesReceived, serializer);
+    sse_encode_u_64(self.packetsSent, serializer);
+    sse_encode_u_64(self.packetsReceived, serializer);
   }
 }

@@ -44,20 +44,20 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	/// en: 'Punklorde'
 	String get app_name => 'Punklorde';
 
-	late final TranslationsCommonEn common = TranslationsCommonEn._(_root);
-	late final TranslationsPageEn page = TranslationsPageEn._(_root);
-	late final TranslationsNoticeEn notice = TranslationsNoticeEn._(_root);
-	late final TranslationsTitleEn title = TranslationsTitleEn._(_root);
-	late final TranslationsActionEn action = TranslationsActionEn._(_root);
-	late final TranslationsLabelEn label = TranslationsLabelEn._(_root);
-	late final TranslationsFeatEn feat = TranslationsFeatEn._(_root);
-	late final TranslationsSettingEn setting = TranslationsSettingEn._(_root);
-	late final TranslationsSubmoduleEn submodule = TranslationsSubmoduleEn._(_root);
+	late final Translations$common$en common = Translations$common$en._(_root);
+	late final Translations$page$en page = Translations$page$en._(_root);
+	late final Translations$notice$en notice = Translations$notice$en._(_root);
+	late final Translations$title$en title = Translations$title$en._(_root);
+	late final Translations$action$en action = Translations$action$en._(_root);
+	late final Translations$label$en label = Translations$label$en._(_root);
+	late final Translations$feat$en feat = Translations$feat$en._(_root);
+	late final Translations$setting$en setting = Translations$setting$en._(_root);
+	late final Translations$submodule$en submodule = Translations$submodule$en._(_root);
 }
 
 // Path: common
-class TranslationsCommonEn {
-	TranslationsCommonEn._(this._root);
+class Translations$common$en {
+	Translations$common$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -101,8 +101,8 @@ class TranslationsCommonEn {
 }
 
 // Path: page
-class TranslationsPageEn {
-	TranslationsPageEn._(this._root);
+class Translations$page$en {
+	Translations$page$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -122,8 +122,8 @@ class TranslationsPageEn {
 }
 
 // Path: notice
-class TranslationsNoticeEn {
-	TranslationsNoticeEn._(this._root);
+class Translations$notice$en {
+	Translations$notice$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -266,8 +266,8 @@ class TranslationsNoticeEn {
 }
 
 // Path: title
-class TranslationsTitleEn {
-	TranslationsTitleEn._(this._root);
+class Translations$title$en {
+	Translations$title$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -425,8 +425,8 @@ class TranslationsTitleEn {
 }
 
 // Path: action
-class TranslationsActionEn {
-	TranslationsActionEn._(this._root);
+class Translations$action$en {
+	Translations$action$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -524,8 +524,8 @@ class TranslationsActionEn {
 }
 
 // Path: label
-class TranslationsLabelEn {
-	TranslationsLabelEn._(this._root);
+class Translations$label$en {
+	Translations$label$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -581,8 +581,8 @@ class TranslationsLabelEn {
 }
 
 // Path: feat
-class TranslationsFeatEn {
-	TranslationsFeatEn._(this._root);
+class Translations$feat$en {
+	Translations$feat$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -599,8 +599,8 @@ class TranslationsFeatEn {
 }
 
 // Path: setting
-class TranslationsSettingEn {
-	TranslationsSettingEn._(this._root);
+class Translations$setting$en {
+	Translations$setting$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -725,20 +725,21 @@ class TranslationsSettingEn {
 }
 
 // Path: submodule
-class TranslationsSubmoduleEn {
-	TranslationsSubmoduleEn._(this._root);
+class Translations$submodule$en {
+	Translations$submodule$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
 	// Translations
-	late final TranslationsSubmoduleCquptCheckinEn cqupt_checkin = TranslationsSubmoduleCquptCheckinEn._(_root);
-	late final TranslationsSubmoduleCquptSportEn cqupt_sport = TranslationsSubmoduleCquptSportEn._(_root);
-	late final TranslationsSubmoduleChaoxingEn chaoxing = TranslationsSubmoduleChaoxingEn._(_root);
+	late final Translations$submodule$cqupt_checkin$en cqupt_checkin = Translations$submodule$cqupt_checkin$en._(_root);
+	late final Translations$submodule$cqupt_sport$en cqupt_sport = Translations$submodule$cqupt_sport$en._(_root);
+	late final Translations$submodule$chaoxing$en chaoxing = Translations$submodule$chaoxing$en._(_root);
+	late final Translations$submodule$sangfor_vpn$en sangfor_vpn = Translations$submodule$sangfor_vpn$en._(_root);
 }
 
 // Path: submodule.cqupt_checkin
-class TranslationsSubmoduleCquptCheckinEn {
-	TranslationsSubmoduleCquptCheckinEn._(this._root);
+class Translations$submodule$cqupt_checkin$en {
+	Translations$submodule$cqupt_checkin$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -806,8 +807,8 @@ class TranslationsSubmoduleCquptCheckinEn {
 }
 
 // Path: submodule.cqupt_sport
-class TranslationsSubmoduleCquptSportEn {
-	TranslationsSubmoduleCquptSportEn._(this._root);
+class Translations$submodule$cqupt_sport$en {
+	Translations$submodule$cqupt_sport$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1001,8 +1002,8 @@ class TranslationsSubmoduleCquptSportEn {
 }
 
 // Path: submodule.chaoxing
-class TranslationsSubmoduleChaoxingEn {
-	TranslationsSubmoduleChaoxingEn._(this._root);
+class Translations$submodule$chaoxing$en {
+	Translations$submodule$chaoxing$en._(this._root);
 
 	final Translations _root; // ignore: unused_field
 
@@ -1037,6 +1038,153 @@ class TranslationsSubmoduleChaoxingEn {
 
 	/// en: 'Messages feature coming soon'
 	String get messages_placeholder => 'Messages feature coming soon';
+}
+
+// Path: submodule.sangfor_vpn
+class Translations$submodule$sangfor_vpn$en {
+	Translations$submodule$sangfor_vpn$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'SSL VPN'
+	String get title => 'SSL VPN';
+
+	/// en: 'Connect to campus VPN via Sangfor EasyConnect'
+	String get desc => 'Connect to campus VPN via Sangfor EasyConnect';
+
+	/// en: 'Connect'
+	String get connect => 'Connect';
+
+	/// en: 'Disconnect'
+	String get disconnect => 'Disconnect';
+
+	/// en: 'Please fill in server and username'
+	String get fill_server_username => 'Please fill in server and username';
+
+	/// en: 'VPN setup failed'
+	String get vpn_setup_failed => 'VPN setup failed';
+
+	/// en: 'VPN fd timeout'
+	String get vpn_fd_timeout => 'VPN fd timeout';
+
+	/// en: 'Configuration'
+	String get configuration => 'Configuration';
+
+	/// en: 'Server'
+	String get server => 'Server';
+
+	/// en: 'rvpn.example.com:443'
+	String get server_hint => 'rvpn.example.com:443';
+
+	/// en: 'Username'
+	String get username => 'Username';
+
+	/// en: 'Password'
+	String get password => 'Password';
+
+	/// en: 'Advanced Settings'
+	String get advanced_settings => 'Advanced Settings';
+
+	/// en: 'TOTP Secret'
+	String get totp_secret => 'TOTP Secret';
+
+	/// en: 'Optional 2FA seed'
+	String get totp_secret_hint => 'Optional 2FA seed';
+
+	/// en: 'Custom DNS'
+	String get custom_dns => 'Custom DNS';
+
+	/// en: 'e.g. 223.5.5.5 (optional)'
+	String get custom_dns_hint => 'e.g. 223.5.5.5 (optional)';
+
+	/// en: 'TOTP Verification'
+	String get totp_verification => 'TOTP Verification';
+
+	/// en: 'SMS Verification'
+	String get sms_verification => 'SMS Verification';
+
+	/// en: 'Enter code'
+	String get enter_code => 'Enter code';
+
+	/// en: 'Submit'
+	String get submit => 'Submit';
+
+	/// en: 'Connected'
+	String get status_connected => 'Connected';
+
+	/// en: 'VPN tunnel is active'
+	String get status_tunnel_active => 'VPN tunnel is active';
+
+	/// en: 'Disconnected'
+	String get status_disconnected => 'Disconnected';
+
+	/// en: 'Not connected to VPN'
+	String get status_not_connected => 'Not connected to VPN';
+
+	/// en: 'Connecting...'
+	String get status_connecting => 'Connecting...';
+
+	/// en: 'Establishing connection'
+	String get status_establishing => 'Establishing connection';
+
+	/// en: 'Authenticating...'
+	String get status_authenticating => 'Authenticating...';
+
+	/// en: 'Requesting login session'
+	String get status_login_session => 'Requesting login session';
+
+	/// en: 'Verifying credentials...'
+	String get status_verifying => 'Verifying credentials...';
+
+	/// en: 'Submitting login info'
+	String get status_submitting => 'Submitting login info';
+
+	/// en: 'SMS Required'
+	String get status_sms_required => 'SMS Required';
+
+	/// en: 'Enter SMS verification code'
+	String get status_sms_hint => 'Enter SMS verification code';
+
+	/// en: 'TOTP Required'
+	String get status_totp_required => 'TOTP Required';
+
+	/// en: 'Enter TOTP verification code'
+	String get status_totp_hint => 'Enter TOTP verification code';
+
+	/// en: 'Getting token...'
+	String get status_getting_token => 'Getting token...';
+
+	/// en: 'Exchanging credentials for token'
+	String get status_exchanging => 'Exchanging credentials for token';
+
+	/// en: 'Fetching resources...'
+	String get status_fetching => 'Fetching resources...';
+
+	/// en: 'Retrieving network resources'
+	String get status_retrieving => 'Retrieving network resources';
+
+	/// en: 'Assigning IP...'
+	String get status_assigning_ip => 'Assigning IP...';
+
+	/// en: 'Requesting virtual IP address'
+	String get status_requesting_ip => 'Requesting virtual IP address';
+
+	/// en: 'Opening channels...'
+	String get status_opening => 'Opening channels...';
+
+	/// en: 'Establishing data channels'
+	String get status_channels => 'Establishing data channels';
+
+	/// en: 'Connection Failed'
+	String get status_failed => 'Connection Failed';
+
+	/// en: 'An error occurred'
+	String get status_error_occurred => 'An error occurred';
+
+	/// en: 'Check logcat for details (tag: rust_lib_punklorde)'
+	String get status_check_logcat => 'Check logcat for details (tag: rust_lib_punklorde)';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -1098,6 +1246,8 @@ extension on Translations {
 			'notice.never_updated' => 'Never updated',
 			'notice.failed_get_data' => 'Failed to obtain data',
 			'notice.schedule_empty' => 'There are no classes today ~',
+			'notice.schedule_title_hint' => 'Enter event title',
+			'notice.schedule_location_hint' => 'Optional, tap the button to pick on map',
 			'notice.phone_num_empty_hint' => 'Phone number cannot be blank',
 			'notice.ver_code_empty_hint' => 'Verification code cannot be blank',
 			'notice.pwd_empty_hint' => 'Password cannot be blank',
@@ -1121,10 +1271,22 @@ extension on Translations {
 			'title.select_platform' => 'Select Platform',
 			'title.scan_result' => 'Scanning results',
 			'title.add_guest' => 'Add Guest Account',
+			'title.add_custom_event' => 'Add Custom Event',
+			'title.edit_custom_event' => 'Edit Custom Event',
+			'title.pick_location' => 'Pick Location',
 			'title.select_checkin_user' => 'Select the Users',
 			'title.select_checkin_user_hine' => 'These users will be used for checking in.',
 			'title.checkin_result' => 'Check-in Result',
 			'title.week_title' => ({required Object week}) => 'Week ${week}',
+			'title.schedule_title' => 'Title',
+			'title.schedule_description' => 'Description',
+			'title.schedule_weeks' => 'Weeks',
+			'title.schedule_day' => 'Day',
+			'title.schedule_slot' => 'Time Slot',
+			'title.schedule_color' => 'Color',
+			'title.basic_info' => 'Basic Info',
+			'title.time_schedule' => 'Time Schedule',
+			'title.slot_span' => 'Span',
 			'title.teacher' => 'Teacher',
 			'title.location' => 'Location',
 			'title.time' => 'Time',
@@ -1171,6 +1333,8 @@ extension on Translations {
 			'action.guest_add_by_code' => 'Add from share code',
 			'action.guest_add_by_file' => 'Add from share file',
 			'action.manual_select_point' => 'Manually select check-in point',
+			'action.pick_on_map' => 'Pick on Map',
+			'action.confirm_location' => 'Confirm Location',
 			'action.custom_device_info' => 'Custom Device Info',
 			'action.reset_device_info' => 'Reset Device Info',
 			'label.primary' => 'Primary',
@@ -1323,6 +1487,52 @@ extension on Translations {
 			'submodule.chaoxing.course_activities' => 'Course Activities',
 			'submodule.chaoxing.teacher' => 'Teacher',
 			'submodule.chaoxing.messages_placeholder' => 'Messages feature coming soon',
+			'submodule.sangfor_vpn.title' => 'SSL VPN',
+			'submodule.sangfor_vpn.desc' => 'Connect to campus VPN via Sangfor EasyConnect',
+			'submodule.sangfor_vpn.connect' => 'Connect',
+			'submodule.sangfor_vpn.disconnect' => 'Disconnect',
+			'submodule.sangfor_vpn.fill_server_username' => 'Please fill in server and username',
+			'submodule.sangfor_vpn.vpn_setup_failed' => 'VPN setup failed',
+			'submodule.sangfor_vpn.vpn_fd_timeout' => 'VPN fd timeout',
+			'submodule.sangfor_vpn.configuration' => 'Configuration',
+			'submodule.sangfor_vpn.server' => 'Server',
+			'submodule.sangfor_vpn.server_hint' => 'rvpn.example.com:443',
+			'submodule.sangfor_vpn.username' => 'Username',
+			'submodule.sangfor_vpn.password' => 'Password',
+			'submodule.sangfor_vpn.advanced_settings' => 'Advanced Settings',
+			'submodule.sangfor_vpn.totp_secret' => 'TOTP Secret',
+			'submodule.sangfor_vpn.totp_secret_hint' => 'Optional 2FA seed',
+			'submodule.sangfor_vpn.custom_dns' => 'Custom DNS',
+			'submodule.sangfor_vpn.custom_dns_hint' => 'e.g. 223.5.5.5 (optional)',
+			'submodule.sangfor_vpn.totp_verification' => 'TOTP Verification',
+			'submodule.sangfor_vpn.sms_verification' => 'SMS Verification',
+			'submodule.sangfor_vpn.enter_code' => 'Enter code',
+			'submodule.sangfor_vpn.submit' => 'Submit',
+			'submodule.sangfor_vpn.status_connected' => 'Connected',
+			'submodule.sangfor_vpn.status_tunnel_active' => 'VPN tunnel is active',
+			'submodule.sangfor_vpn.status_disconnected' => 'Disconnected',
+			'submodule.sangfor_vpn.status_not_connected' => 'Not connected to VPN',
+			'submodule.sangfor_vpn.status_connecting' => 'Connecting...',
+			'submodule.sangfor_vpn.status_establishing' => 'Establishing connection',
+			'submodule.sangfor_vpn.status_authenticating' => 'Authenticating...',
+			'submodule.sangfor_vpn.status_login_session' => 'Requesting login session',
+			'submodule.sangfor_vpn.status_verifying' => 'Verifying credentials...',
+			'submodule.sangfor_vpn.status_submitting' => 'Submitting login info',
+			'submodule.sangfor_vpn.status_sms_required' => 'SMS Required',
+			'submodule.sangfor_vpn.status_sms_hint' => 'Enter SMS verification code',
+			'submodule.sangfor_vpn.status_totp_required' => 'TOTP Required',
+			'submodule.sangfor_vpn.status_totp_hint' => 'Enter TOTP verification code',
+			'submodule.sangfor_vpn.status_getting_token' => 'Getting token...',
+			'submodule.sangfor_vpn.status_exchanging' => 'Exchanging credentials for token',
+			'submodule.sangfor_vpn.status_fetching' => 'Fetching resources...',
+			'submodule.sangfor_vpn.status_retrieving' => 'Retrieving network resources',
+			'submodule.sangfor_vpn.status_assigning_ip' => 'Assigning IP...',
+			'submodule.sangfor_vpn.status_requesting_ip' => 'Requesting virtual IP address',
+			'submodule.sangfor_vpn.status_opening' => 'Opening channels...',
+			'submodule.sangfor_vpn.status_channels' => 'Establishing data channels',
+			'submodule.sangfor_vpn.status_failed' => 'Connection Failed',
+			'submodule.sangfor_vpn.status_error_occurred' => 'An error occurred',
+			'submodule.sangfor_vpn.status_check_logcat' => 'Check logcat for details (tag: rust_lib_punklorde)',
 			_ => null,
 		};
 	}

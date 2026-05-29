@@ -1,4 +1,5 @@
 pub mod motion_sim;
+pub mod sangfor;
 
 #[flutter_rust_bridge::frb(init)]
 pub fn init_app() {

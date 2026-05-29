@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -2094800348;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1279356890;
 
 // Section: executor
 
@@ -45,6 +45,98 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__sangfor__authenticate_vpn_and_get_ip_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "authenticate_vpn_and_get_ip",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::authenticate_vpn_and_get_ip(api_handle_id)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__connect_vpn_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "connect_vpn",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::connect_vpn(api_handle_id)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__continue_vpn_auth_and_get_ip_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "continue_vpn_auth_and_get_ip",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            let api_code = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok =
+                    crate::api::sangfor::continue_vpn_auth_and_get_ip(api_handle_id, api_code)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__motion_sim__create_simulator_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -82,6 +174,68 @@ fn wire__crate__api__motion_sim__create_simulator_impl(
         },
     )
 }
+fn wire__crate__api__sangfor__create_vpn_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "create_vpn",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_config = <crate::services::sangfor::VpnConfig>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::create_vpn(api_config)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__disconnect_vpn_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "disconnect_vpn",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok({
+                    crate::api::sangfor::disconnect_vpn(api_handle_id);
+                })?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__motion_sim__dispose_simulator_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -107,6 +261,36 @@ fn wire__crate__api__motion_sim__dispose_simulator_impl(
             deserializer.end();
             transform_result_sse::<_, String>((move || {
                 let output_ok = crate::api::motion_sim::dispose_simulator(api_handle_id)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__dispose_vpn_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "dispose_vpn",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::dispose_vpn(api_handle_id)?;
                 Ok(output_ok)
             })())
         },
@@ -240,6 +424,161 @@ fn wire__crate__api__motion_sim__get_stats_impl(
         },
     )
 }
+fn wire__crate__api__sangfor__get_vpn_assigned_ip_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_vpn_assigned_ip",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::get_vpn_assigned_ip(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__get_vpn_config_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_vpn_config",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::get_vpn_config(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__get_vpn_last_error_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_vpn_last_error",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::get_vpn_last_error(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__get_vpn_state_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_vpn_state",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::get_vpn_state(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__get_vpn_traffic_stats_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_vpn_traffic_stats",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::get_vpn_traffic_stats(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__init_app_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -271,6 +610,67 @@ fn wire__crate__api__init_app_impl(
                     Ok(output_ok)
                 })())
             }
+        },
+    )
+}
+fn wire__crate__api__sangfor__is_vpn_running_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "is_vpn_running",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::sangfor::is_vpn_running(api_handle_id))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__open_vpn_channels_and_relay_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "open_vpn_channels_and_relay",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::open_vpn_channels_and_relay(api_handle_id)?;
+                Ok(output_ok)
+            })())
         },
     )
 }
@@ -333,6 +733,37 @@ fn wire__crate__api__motion_sim__resume_simulator_impl(
                 let output_ok = Result::<_, ()>::Ok({
                     crate::api::motion_sim::resume_simulator(api_handle_id);
                 })?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__sangfor__set_tun_fd_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "set_tun_fd",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            let api_fd = <i32>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::set_tun_fd(api_handle_id, api_fd)?;
                 Ok(output_ok)
             })())
         },
@@ -402,6 +833,37 @@ fn wire__crate__api__motion_sim__stop_simulator_impl(
         },
     )
 }
+fn wire__crate__api__sangfor__submit_2fa_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "submit_2fa",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            let api_code = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, String>((move || {
+                let output_ok = crate::api::sangfor::submit_2fa(api_handle_id, api_code)?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__motion_sim__subscribe_simulator_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -434,6 +896,44 @@ fn wire__crate__api__motion_sim__subscribe_simulator_impl(
                 transform_result_sse::<_, String>((move || {
                     let output_ok =
                         crate::api::motion_sim::subscribe_simulator(api_handle_id, api_sink)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__sangfor__subscribe_vpn_state_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "subscribe_vpn_state",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_handle_id = <String>::sse_decode(&mut deserializer);
+            let api_sink = <StreamSink<
+                crate::services::sangfor::VpnState,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, String>((move || {
+                    let output_ok =
+                        crate::api::sangfor::subscribe_vpn_state(api_handle_id, api_sink)?;
                     Ok(output_ok)
                 })())
             }
@@ -490,6 +990,16 @@ impl SseDecode
         crate::services::motion_sim::model::SimulatorUpdate,
         flutter_rust_bridge::for_generated::SseCodec,
     >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
+    }
+}
+
+impl SseDecode
+    for StreamSink<crate::services::sangfor::VpnState, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -920,6 +1430,17 @@ impl SseDecode for Option<crate::services::motion_sim::model::BarometerData> {
     }
 }
 
+impl SseDecode for Option<bool> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<bool>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::services::motion_sim::model::CompassData> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1055,6 +1576,45 @@ impl SseDecode for Option<crate::services::motion_sim::model::SimulatorStats> {
             return Some(
                 <crate::services::motion_sim::model::SimulatorStats>::sse_decode(deserializer),
             );
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::services::sangfor::VpnConfig> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::services::sangfor::VpnConfig>::sse_decode(
+                deserializer,
+            ));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::services::sangfor::VpnState> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::services::sangfor::VpnState>::sse_decode(
+                deserializer,
+            ));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::services::sangfor::VpnTrafficStats> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::services::sangfor::VpnTrafficStats>::sse_decode(
+                deserializer,
+            ));
         } else {
             return None;
         }
@@ -1413,6 +1973,13 @@ impl SseDecode for crate::services::motion_sim::model::TrajectoryMode {
     }
 }
 
+impl SseDecode for u16 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u16::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1446,6 +2013,72 @@ impl SseDecode for usize {
     }
 }
 
+impl SseDecode for crate::services::sangfor::VpnConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_server = <String>::sse_decode(deserializer);
+        let mut var_username = <String>::sse_decode(deserializer);
+        let mut var_password = <String>::sse_decode(deserializer);
+        let mut var_totpSecret = <String>::sse_decode(deserializer);
+        let mut var_customDns = <Option<String>>::sse_decode(deserializer);
+        let mut var_tunName = <Option<String>>::sse_decode(deserializer);
+        let mut var_tunAddress = <String>::sse_decode(deserializer);
+        let mut var_tunNetmask = <String>::sse_decode(deserializer);
+        let mut var_mtu = <u16>::sse_decode(deserializer);
+        let mut var_splitRoutes = <Option<String>>::sse_decode(deserializer);
+        return crate::services::sangfor::VpnConfig {
+            server: var_server,
+            username: var_username,
+            password: var_password,
+            totp_secret: var_totpSecret,
+            custom_dns: var_customDns,
+            tun_name: var_tunName,
+            tun_address: var_tunAddress,
+            tun_netmask: var_tunNetmask,
+            mtu: var_mtu,
+            split_routes: var_splitRoutes,
+        };
+    }
+}
+
+impl SseDecode for crate::services::sangfor::VpnState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::services::sangfor::VpnState::Disconnected,
+            1 => crate::services::sangfor::VpnState::Connecting,
+            2 => crate::services::sangfor::VpnState::LoginStart,
+            3 => crate::services::sangfor::VpnState::LoginPassword,
+            4 => crate::services::sangfor::VpnState::WaitingSms,
+            5 => crate::services::sangfor::VpnState::WaitingTotp,
+            6 => crate::services::sangfor::VpnState::GettingToken,
+            7 => crate::services::sangfor::VpnState::GettingResources,
+            8 => crate::services::sangfor::VpnState::GettingIp,
+            9 => crate::services::sangfor::VpnState::OpeningChannels,
+            10 => crate::services::sangfor::VpnState::Connected,
+            11 => crate::services::sangfor::VpnState::Error,
+            _ => unreachable!("Invalid variant for VpnState: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::services::sangfor::VpnTrafficStats {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_bytesSent = <u64>::sse_decode(deserializer);
+        let mut var_bytesReceived = <u64>::sse_decode(deserializer);
+        let mut var_packetsSent = <u64>::sse_decode(deserializer);
+        let mut var_packetsReceived = <u64>::sse_decode(deserializer);
+        return crate::services::sangfor::VpnTrafficStats {
+            bytes_sent: var_bytesSent,
+            bytes_received: var_bytesReceived,
+            packets_sent: var_packetsSent,
+            packets_received: var_packetsReceived,
+        };
+    }
+}
+
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -1455,13 +2088,16 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        7 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__motion_sim__subscribe_simulator_impl(
+        18 => wire__crate__api__init_app_impl(port, ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__motion_sim__subscribe_simulator_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
+        28 => {
+            wire__crate__api__sangfor__subscribe_vpn_state_impl(port, ptr, rust_vec_len, data_len)
+        }
         _ => unreachable!(),
     }
 }
@@ -1474,17 +2110,40 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        1 => wire__crate__api__motion_sim__create_simulator_impl(ptr, rust_vec_len, data_len),
-        2 => wire__crate__api__motion_sim__dispose_simulator_impl(ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__motion_sim__execute_command_impl(ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__motion_sim__get_config_impl(ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__motion_sim__get_state_impl(ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__motion_sim__get_stats_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__motion_sim__pause_simulator_impl(ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__motion_sim__resume_simulator_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__motion_sim__start_simulator_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__motion_sim__stop_simulator_impl(ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__motion_sim__update_simulator_impl(ptr, rust_vec_len, data_len),
+        1 => {
+            wire__crate__api__sangfor__authenticate_vpn_and_get_ip_impl(ptr, rust_vec_len, data_len)
+        }
+        2 => wire__crate__api__sangfor__connect_vpn_impl(ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__sangfor__continue_vpn_auth_and_get_ip_impl(
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        4 => wire__crate__api__motion_sim__create_simulator_impl(ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__sangfor__create_vpn_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__sangfor__disconnect_vpn_impl(ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__motion_sim__dispose_simulator_impl(ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__sangfor__dispose_vpn_impl(ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__motion_sim__execute_command_impl(ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__motion_sim__get_config_impl(ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__motion_sim__get_state_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__motion_sim__get_stats_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__sangfor__get_vpn_assigned_ip_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__sangfor__get_vpn_config_impl(ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__sangfor__get_vpn_last_error_impl(ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__sangfor__get_vpn_state_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__sangfor__get_vpn_traffic_stats_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__sangfor__is_vpn_running_impl(ptr, rust_vec_len, data_len),
+        20 => {
+            wire__crate__api__sangfor__open_vpn_channels_and_relay_impl(ptr, rust_vec_len, data_len)
+        }
+        21 => wire__crate__api__motion_sim__pause_simulator_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__motion_sim__resume_simulator_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__sangfor__set_tun_fd_impl(ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__motion_sim__start_simulator_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__motion_sim__stop_simulator_impl(ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__sangfor__submit_2fa_impl(ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__motion_sim__update_simulator_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2188,6 +2847,89 @@ impl flutter_rust_bridge::IntoIntoDart<crate::services::motion_sim::model::Traje
         self
     }
 }
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::services::sangfor::VpnConfig {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.server.into_into_dart().into_dart(),
+            self.username.into_into_dart().into_dart(),
+            self.password.into_into_dart().into_dart(),
+            self.totp_secret.into_into_dart().into_dart(),
+            self.custom_dns.into_into_dart().into_dart(),
+            self.tun_name.into_into_dart().into_dart(),
+            self.tun_address.into_into_dart().into_dart(),
+            self.tun_netmask.into_into_dart().into_dart(),
+            self.mtu.into_into_dart().into_dart(),
+            self.split_routes.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::services::sangfor::VpnConfig
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::services::sangfor::VpnConfig>
+    for crate::services::sangfor::VpnConfig
+{
+    fn into_into_dart(self) -> crate::services::sangfor::VpnConfig {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::services::sangfor::VpnState {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Disconnected => 0.into_dart(),
+            Self::Connecting => 1.into_dart(),
+            Self::LoginStart => 2.into_dart(),
+            Self::LoginPassword => 3.into_dart(),
+            Self::WaitingSms => 4.into_dart(),
+            Self::WaitingTotp => 5.into_dart(),
+            Self::GettingToken => 6.into_dart(),
+            Self::GettingResources => 7.into_dart(),
+            Self::GettingIp => 8.into_dart(),
+            Self::OpeningChannels => 9.into_dart(),
+            Self::Connected => 10.into_dart(),
+            Self::Error => 11.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::services::sangfor::VpnState
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::services::sangfor::VpnState>
+    for crate::services::sangfor::VpnState
+{
+    fn into_into_dart(self) -> crate::services::sangfor::VpnState {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::services::sangfor::VpnTrafficStats {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.bytes_sent.into_into_dart().into_dart(),
+            self.bytes_received.into_into_dart().into_dart(),
+            self.packets_sent.into_into_dart().into_dart(),
+            self.packets_received.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::services::sangfor::VpnTrafficStats
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::services::sangfor::VpnTrafficStats>
+    for crate::services::sangfor::VpnTrafficStats
+{
+    fn into_into_dart(self) -> crate::services::sangfor::VpnTrafficStats {
+        self
+    }
+}
 
 impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -2201,6 +2943,15 @@ impl SseEncode
         crate::services::motion_sim::model::SimulatorUpdate,
         flutter_rust_bridge::for_generated::SseCodec,
     >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
+    }
+}
+
+impl SseEncode
+    for StreamSink<crate::services::sangfor::VpnState, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2542,6 +3293,16 @@ impl SseEncode for Option<crate::services::motion_sim::model::BarometerData> {
     }
 }
 
+impl SseEncode for Option<bool> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <bool>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::services::motion_sim::model::CompassData> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2648,6 +3409,36 @@ impl SseEncode for Option<crate::services::motion_sim::model::SimulatorStats> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <crate::services::motion_sim::model::SimulatorStats>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::services::sangfor::VpnConfig> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::services::sangfor::VpnConfig>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::services::sangfor::VpnState> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::services::sangfor::VpnState>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::services::sangfor::VpnTrafficStats> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::services::sangfor::VpnTrafficStats>::sse_encode(value, serializer);
         }
     }
 }
@@ -2957,6 +3748,13 @@ impl SseEncode for crate::services::motion_sim::model::TrajectoryMode {
     }
 }
 
+impl SseEncode for u16 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u16::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -2990,6 +3788,58 @@ impl SseEncode for usize {
             .cursor
             .write_u64::<NativeEndian>(self as _)
             .unwrap();
+    }
+}
+
+impl SseEncode for crate::services::sangfor::VpnConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.server, serializer);
+        <String>::sse_encode(self.username, serializer);
+        <String>::sse_encode(self.password, serializer);
+        <String>::sse_encode(self.totp_secret, serializer);
+        <Option<String>>::sse_encode(self.custom_dns, serializer);
+        <Option<String>>::sse_encode(self.tun_name, serializer);
+        <String>::sse_encode(self.tun_address, serializer);
+        <String>::sse_encode(self.tun_netmask, serializer);
+        <u16>::sse_encode(self.mtu, serializer);
+        <Option<String>>::sse_encode(self.split_routes, serializer);
+    }
+}
+
+impl SseEncode for crate::services::sangfor::VpnState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::services::sangfor::VpnState::Disconnected => 0,
+                crate::services::sangfor::VpnState::Connecting => 1,
+                crate::services::sangfor::VpnState::LoginStart => 2,
+                crate::services::sangfor::VpnState::LoginPassword => 3,
+                crate::services::sangfor::VpnState::WaitingSms => 4,
+                crate::services::sangfor::VpnState::WaitingTotp => 5,
+                crate::services::sangfor::VpnState::GettingToken => 6,
+                crate::services::sangfor::VpnState::GettingResources => 7,
+                crate::services::sangfor::VpnState::GettingIp => 8,
+                crate::services::sangfor::VpnState::OpeningChannels => 9,
+                crate::services::sangfor::VpnState::Connected => 10,
+                crate::services::sangfor::VpnState::Error => 11,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::services::sangfor::VpnTrafficStats {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u64>::sse_encode(self.bytes_sent, serializer);
+        <u64>::sse_encode(self.bytes_received, serializer);
+        <u64>::sse_encode(self.packets_sent, serializer);
+        <u64>::sse_encode(self.packets_received, serializer);
     }
 }
 

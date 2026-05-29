@@ -38,20 +38,20 @@ class TranslationsZhCn with BaseTranslations<AppLocale, Translations> implements
 
 	// Translations
 	@override String get app_name => '朋克洛德';
-	@override late final _TranslationsCommonZhCn common = _TranslationsCommonZhCn._(_root);
-	@override late final _TranslationsPageZhCn page = _TranslationsPageZhCn._(_root);
-	@override late final _TranslationsNoticeZhCn notice = _TranslationsNoticeZhCn._(_root);
-	@override late final _TranslationsTitleZhCn title = _TranslationsTitleZhCn._(_root);
-	@override late final _TranslationsActionZhCn action = _TranslationsActionZhCn._(_root);
-	@override late final _TranslationsLabelZhCn label = _TranslationsLabelZhCn._(_root);
-	@override late final _TranslationsFeatZhCn feat = _TranslationsFeatZhCn._(_root);
-	@override late final _TranslationsSettingZhCn setting = _TranslationsSettingZhCn._(_root);
-	@override late final _TranslationsSubmoduleZhCn submodule = _TranslationsSubmoduleZhCn._(_root);
+	@override late final _Translations$common$zh_CN common = _Translations$common$zh_CN._(_root);
+	@override late final _Translations$page$zh_CN page = _Translations$page$zh_CN._(_root);
+	@override late final _Translations$notice$zh_CN notice = _Translations$notice$zh_CN._(_root);
+	@override late final _Translations$title$zh_CN title = _Translations$title$zh_CN._(_root);
+	@override late final _Translations$action$zh_CN action = _Translations$action$zh_CN._(_root);
+	@override late final _Translations$label$zh_CN label = _Translations$label$zh_CN._(_root);
+	@override late final _Translations$feat$zh_CN feat = _Translations$feat$zh_CN._(_root);
+	@override late final _Translations$setting$zh_CN setting = _Translations$setting$zh_CN._(_root);
+	@override late final _Translations$submodule$zh_CN submodule = _Translations$submodule$zh_CN._(_root);
 }
 
 // Path: common
-class _TranslationsCommonZhCn implements TranslationsCommonEn {
-	_TranslationsCommonZhCn._(this._root);
+class _Translations$common$zh_CN implements Translations$common$en {
+	_Translations$common$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -71,8 +71,8 @@ class _TranslationsCommonZhCn implements TranslationsCommonEn {
 }
 
 // Path: page
-class _TranslationsPageZhCn implements TranslationsPageEn {
-	_TranslationsPageZhCn._(this._root);
+class _Translations$page$zh_CN implements Translations$page$en {
+	_Translations$page$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -84,8 +84,8 @@ class _TranslationsPageZhCn implements TranslationsPageEn {
 }
 
 // Path: notice
-class _TranslationsNoticeZhCn implements TranslationsNoticeEn {
-	_TranslationsNoticeZhCn._(this._root);
+class _Translations$notice$zh_CN implements Translations$notice$en {
+	_Translations$notice$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -138,8 +138,8 @@ class _TranslationsNoticeZhCn implements TranslationsNoticeEn {
 }
 
 // Path: title
-class _TranslationsTitleZhCn implements TranslationsTitleEn {
-	_TranslationsTitleZhCn._(this._root);
+class _Translations$title$zh_CN implements Translations$title$en {
+	_Translations$title$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -197,8 +197,8 @@ class _TranslationsTitleZhCn implements TranslationsTitleEn {
 }
 
 // Path: action
-class _TranslationsActionZhCn implements TranslationsActionEn {
-	_TranslationsActionZhCn._(this._root);
+class _Translations$action$zh_CN implements Translations$action$en {
+	_Translations$action$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -236,8 +236,8 @@ class _TranslationsActionZhCn implements TranslationsActionEn {
 }
 
 // Path: label
-class _TranslationsLabelZhCn implements TranslationsLabelEn {
-	_TranslationsLabelZhCn._(this._root);
+class _Translations$label$zh_CN implements Translations$label$en {
+	_Translations$label$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -261,8 +261,8 @@ class _TranslationsLabelZhCn implements TranslationsLabelEn {
 }
 
 // Path: feat
-class _TranslationsFeatZhCn implements TranslationsFeatEn {
-	_TranslationsFeatZhCn._(this._root);
+class _Translations$feat$zh_CN implements Translations$feat$en {
+	_Translations$feat$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -273,8 +273,8 @@ class _TranslationsFeatZhCn implements TranslationsFeatEn {
 }
 
 // Path: setting
-class _TranslationsSettingZhCn implements TranslationsSettingEn {
-	_TranslationsSettingZhCn._(this._root);
+class _Translations$setting$zh_CN implements Translations$setting$en {
+	_Translations$setting$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -321,20 +321,21 @@ class _TranslationsSettingZhCn implements TranslationsSettingEn {
 }
 
 // Path: submodule
-class _TranslationsSubmoduleZhCn implements TranslationsSubmoduleEn {
-	_TranslationsSubmoduleZhCn._(this._root);
+class _Translations$submodule$zh_CN implements Translations$submodule$en {
+	_Translations$submodule$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
 	// Translations
-	@override late final _TranslationsSubmoduleCquptCheckinZhCn cqupt_checkin = _TranslationsSubmoduleCquptCheckinZhCn._(_root);
-	@override late final _TranslationsSubmoduleCquptSportZhCn cqupt_sport = _TranslationsSubmoduleCquptSportZhCn._(_root);
-	@override late final _TranslationsSubmoduleChaoxingZhCn chaoxing = _TranslationsSubmoduleChaoxingZhCn._(_root);
+	@override late final _Translations$submodule$cqupt_checkin$zh_CN cqupt_checkin = _Translations$submodule$cqupt_checkin$zh_CN._(_root);
+	@override late final _Translations$submodule$cqupt_sport$zh_CN cqupt_sport = _Translations$submodule$cqupt_sport$zh_CN._(_root);
+	@override late final _Translations$submodule$chaoxing$zh_CN chaoxing = _Translations$submodule$chaoxing$zh_CN._(_root);
+	@override late final _Translations$submodule$sangfor_vpn$zh_CN sangfor_vpn = _Translations$submodule$sangfor_vpn$zh_CN._(_root);
 }
 
 // Path: submodule.cqupt_checkin
-class _TranslationsSubmoduleCquptCheckinZhCn implements TranslationsSubmoduleCquptCheckinEn {
-	_TranslationsSubmoduleCquptCheckinZhCn._(this._root);
+class _Translations$submodule$cqupt_checkin$zh_CN implements Translations$submodule$cqupt_checkin$en {
+	_Translations$submodule$cqupt_checkin$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -362,8 +363,8 @@ class _TranslationsSubmoduleCquptCheckinZhCn implements TranslationsSubmoduleCqu
 }
 
 // Path: submodule.cqupt_sport
-class _TranslationsSubmoduleCquptSportZhCn implements TranslationsSubmoduleCquptSportEn {
-	_TranslationsSubmoduleCquptSportZhCn._(this._root);
+class _Translations$submodule$cqupt_sport$zh_CN implements Translations$submodule$cqupt_sport$en {
+	_Translations$submodule$cqupt_sport$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -433,8 +434,8 @@ class _TranslationsSubmoduleCquptSportZhCn implements TranslationsSubmoduleCqupt
 }
 
 // Path: submodule.chaoxing
-class _TranslationsSubmoduleChaoxingZhCn implements TranslationsSubmoduleChaoxingEn {
-	_TranslationsSubmoduleChaoxingZhCn._(this._root);
+class _Translations$submodule$chaoxing$zh_CN implements Translations$submodule$chaoxing$en {
+	_Translations$submodule$chaoxing$zh_CN._(this._root);
 
 	final TranslationsZhCn _root; // ignore: unused_field
 
@@ -449,6 +450,61 @@ class _TranslationsSubmoduleChaoxingZhCn implements TranslationsSubmoduleChaoxin
 	@override String get course_activities => '课程活动';
 	@override String get teacher => '教师';
 	@override String get messages_placeholder => '消息功能即将上线';
+}
+
+// Path: submodule.sangfor_vpn
+class _Translations$submodule$sangfor_vpn$zh_CN implements Translations$submodule$sangfor_vpn$en {
+	_Translations$submodule$sangfor_vpn$zh_CN._(this._root);
+
+	final TranslationsZhCn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'SSL VPN';
+	@override String get desc => '通过 Sangfor EasyConnect 连接校园VPN';
+	@override String get connect => '连接';
+	@override String get disconnect => '断开连接';
+	@override String get fill_server_username => '请填写服务器地址和用户名';
+	@override String get vpn_setup_failed => 'VPN 初始化失败';
+	@override String get vpn_fd_timeout => 'VPN 文件描述符超时';
+	@override String get configuration => '配置';
+	@override String get server => '服务器';
+	@override String get server_hint => 'rvpn.example.com:443';
+	@override String get username => '用户名';
+	@override String get password => '密码';
+	@override String get advanced_settings => '高级设置';
+	@override String get totp_secret => 'TOTP 密钥';
+	@override String get totp_secret_hint => '可选的2FA种子';
+	@override String get custom_dns => '自定义 DNS';
+	@override String get custom_dns_hint => '例如 223.5.5.5（可选）';
+	@override String get totp_verification => 'TOTP 验证';
+	@override String get sms_verification => 'SMS 验证';
+	@override String get enter_code => '输入验证码';
+	@override String get submit => '提交';
+	@override String get status_connected => '已连接';
+	@override String get status_tunnel_active => 'VPN 隧道已激活';
+	@override String get status_disconnected => '未连接';
+	@override String get status_not_connected => '未连接到 VPN';
+	@override String get status_connecting => '连接中...';
+	@override String get status_establishing => '正在建立连接';
+	@override String get status_authenticating => '认证中...';
+	@override String get status_login_session => '正在请求登录会话';
+	@override String get status_verifying => '验证凭据...';
+	@override String get status_submitting => '正在提交登录信息';
+	@override String get status_sms_required => '需要 SMS 验证';
+	@override String get status_sms_hint => '请输入短信验证码';
+	@override String get status_totp_required => '需要 TOTP 验证';
+	@override String get status_totp_hint => '请输入 TOTP 验证码';
+	@override String get status_getting_token => '获取令牌...';
+	@override String get status_exchanging => '正在交换凭据获取令牌';
+	@override String get status_fetching => '获取资源...';
+	@override String get status_retrieving => '正在获取网络资源';
+	@override String get status_assigning_ip => '分配 IP...';
+	@override String get status_requesting_ip => '正在请求虚拟 IP 地址';
+	@override String get status_opening => '开放通道...';
+	@override String get status_channels => '正在建立数据通道';
+	@override String get status_failed => '连接失败';
+	@override String get status_error_occurred => '发生错误';
+	@override String get status_check_logcat => '查看 logcat 获取详情（tag: rust_lib_punklorde）';
 }
 
 /// The flat map containing all translations for locale <zh-CN>.
@@ -510,6 +566,8 @@ extension on TranslationsZhCn {
 			'notice.never_updated' => '从未更新',
 			'notice.failed_get_data' => '获取数据失败',
 			'notice.schedule_empty' => '今天已经没课了~',
+			'notice.schedule_title_hint' => '请输入日程标题',
+			'notice.schedule_location_hint' => '可选，点击右侧按钮在地图上选点',
 			'notice.phone_num_empty_hint' => '手机号不能为空',
 			'notice.ver_code_empty_hint' => '验证码不能为空',
 			'notice.pwd_empty_hint' => '密码不能为空',
@@ -533,10 +591,22 @@ extension on TranslationsZhCn {
 			'title.select_platform' => '选择平台',
 			'title.scan_result' => '扫码结果',
 			'title.add_guest' => '添加访客账户',
+			'title.add_custom_event' => '添加自定义日程',
+			'title.edit_custom_event' => '编辑自定义日程',
+			'title.pick_location' => '选择地点',
 			'title.select_checkin_user' => '谁要签到？',
 			'title.select_checkin_user_hine' => '将为这些用户进行签到',
 			'title.checkin_result' => '签到结果',
 			'title.week_title' => ({required Object week}) => '第 ${week} 周',
+			'title.schedule_title' => '日程标题',
+			'title.schedule_description' => '描述',
+			'title.schedule_weeks' => '周次',
+			'title.schedule_day' => '星期',
+			'title.schedule_slot' => '时间节次',
+			'title.schedule_color' => '颜色',
+			'title.basic_info' => '基本信息',
+			'title.time_schedule' => '时间安排',
+			'title.slot_span' => '跨节数',
 			'title.teacher' => '教师',
 			'title.location' => '地点',
 			'title.time' => '时间',
@@ -583,6 +653,8 @@ extension on TranslationsZhCn {
 			'action.guest_add_by_code' => '扫码添加',
 			'action.guest_add_by_file' => '从分享文件添加',
 			'action.manual_select_point' => '手动选择签到点',
+			'action.pick_on_map' => '在地图上选择',
+			'action.confirm_location' => '确认位置',
 			'action.custom_device_info' => '自定义设备信息',
 			'action.reset_device_info' => '重置设备信息',
 			'label.primary' => '主账号',
@@ -735,6 +807,52 @@ extension on TranslationsZhCn {
 			'submodule.chaoxing.course_activities' => '课程活动',
 			'submodule.chaoxing.teacher' => '教师',
 			'submodule.chaoxing.messages_placeholder' => '消息功能即将上线',
+			'submodule.sangfor_vpn.title' => 'SSL VPN',
+			'submodule.sangfor_vpn.desc' => '通过 Sangfor EasyConnect 连接校园VPN',
+			'submodule.sangfor_vpn.connect' => '连接',
+			'submodule.sangfor_vpn.disconnect' => '断开连接',
+			'submodule.sangfor_vpn.fill_server_username' => '请填写服务器地址和用户名',
+			'submodule.sangfor_vpn.vpn_setup_failed' => 'VPN 初始化失败',
+			'submodule.sangfor_vpn.vpn_fd_timeout' => 'VPN 文件描述符超时',
+			'submodule.sangfor_vpn.configuration' => '配置',
+			'submodule.sangfor_vpn.server' => '服务器',
+			'submodule.sangfor_vpn.server_hint' => 'rvpn.example.com:443',
+			'submodule.sangfor_vpn.username' => '用户名',
+			'submodule.sangfor_vpn.password' => '密码',
+			'submodule.sangfor_vpn.advanced_settings' => '高级设置',
+			'submodule.sangfor_vpn.totp_secret' => 'TOTP 密钥',
+			'submodule.sangfor_vpn.totp_secret_hint' => '可选的2FA种子',
+			'submodule.sangfor_vpn.custom_dns' => '自定义 DNS',
+			'submodule.sangfor_vpn.custom_dns_hint' => '例如 223.5.5.5（可选）',
+			'submodule.sangfor_vpn.totp_verification' => 'TOTP 验证',
+			'submodule.sangfor_vpn.sms_verification' => 'SMS 验证',
+			'submodule.sangfor_vpn.enter_code' => '输入验证码',
+			'submodule.sangfor_vpn.submit' => '提交',
+			'submodule.sangfor_vpn.status_connected' => '已连接',
+			'submodule.sangfor_vpn.status_tunnel_active' => 'VPN 隧道已激活',
+			'submodule.sangfor_vpn.status_disconnected' => '未连接',
+			'submodule.sangfor_vpn.status_not_connected' => '未连接到 VPN',
+			'submodule.sangfor_vpn.status_connecting' => '连接中...',
+			'submodule.sangfor_vpn.status_establishing' => '正在建立连接',
+			'submodule.sangfor_vpn.status_authenticating' => '认证中...',
+			'submodule.sangfor_vpn.status_login_session' => '正在请求登录会话',
+			'submodule.sangfor_vpn.status_verifying' => '验证凭据...',
+			'submodule.sangfor_vpn.status_submitting' => '正在提交登录信息',
+			'submodule.sangfor_vpn.status_sms_required' => '需要 SMS 验证',
+			'submodule.sangfor_vpn.status_sms_hint' => '请输入短信验证码',
+			'submodule.sangfor_vpn.status_totp_required' => '需要 TOTP 验证',
+			'submodule.sangfor_vpn.status_totp_hint' => '请输入 TOTP 验证码',
+			'submodule.sangfor_vpn.status_getting_token' => '获取令牌...',
+			'submodule.sangfor_vpn.status_exchanging' => '正在交换凭据获取令牌',
+			'submodule.sangfor_vpn.status_fetching' => '获取资源...',
+			'submodule.sangfor_vpn.status_retrieving' => '正在获取网络资源',
+			'submodule.sangfor_vpn.status_assigning_ip' => '分配 IP...',
+			'submodule.sangfor_vpn.status_requesting_ip' => '正在请求虚拟 IP 地址',
+			'submodule.sangfor_vpn.status_opening' => '开放通道...',
+			'submodule.sangfor_vpn.status_channels' => '正在建立数据通道',
+			'submodule.sangfor_vpn.status_failed' => '连接失败',
+			'submodule.sangfor_vpn.status_error_occurred' => '发生错误',
+			'submodule.sangfor_vpn.status_check_logcat' => '查看 logcat 获取详情（tag: rust_lib_punklorde）',
 			_ => null,
 		};
 	}

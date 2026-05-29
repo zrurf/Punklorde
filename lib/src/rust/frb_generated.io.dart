@@ -4,12 +4,14 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/motion_sim.dart';
+import 'api/sangfor.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 import 'services/motion_sim/model.dart';
+import 'services/sangfor.dart';
 
 abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustLibApiImplPlatform({
@@ -28,6 +30,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<VpnState> dco_decode_StreamSink_vpn_state_Sse(dynamic raw);
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -44,6 +49,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   BarometerData dco_decode_box_autoadd_barometer_data(dynamic raw);
+
+  @protected
+  bool dco_decode_box_autoadd_bool(dynamic raw);
 
   @protected
   Checkpoint dco_decode_box_autoadd_checkpoint(dynamic raw);
@@ -89,6 +97,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Trajectory dco_decode_box_autoadd_trajectory(dynamic raw);
+
+  @protected
+  VpnConfig dco_decode_box_autoadd_vpn_config(dynamic raw);
+
+  @protected
+  VpnState dco_decode_box_autoadd_vpn_state(dynamic raw);
+
+  @protected
+  VpnTrafficStats dco_decode_box_autoadd_vpn_traffic_stats(dynamic raw);
 
   @protected
   Checkpoint dco_decode_checkpoint(dynamic raw);
@@ -148,6 +165,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BarometerData? dco_decode_opt_box_autoadd_barometer_data(dynamic raw);
 
   @protected
+  bool? dco_decode_opt_box_autoadd_bool(dynamic raw);
+
+  @protected
   CompassData? dco_decode_opt_box_autoadd_compass_data(dynamic raw);
 
   @protected
@@ -179,6 +199,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SimulatorStats? dco_decode_opt_box_autoadd_simulator_stats(dynamic raw);
+
+  @protected
+  VpnConfig? dco_decode_opt_box_autoadd_vpn_config(dynamic raw);
+
+  @protected
+  VpnState? dco_decode_opt_box_autoadd_vpn_state(dynamic raw);
+
+  @protected
+  VpnTrafficStats? dco_decode_opt_box_autoadd_vpn_traffic_stats(dynamic raw);
 
   @protected
   PedometerData dco_decode_pedometer_data(dynamic raw);
@@ -214,6 +243,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrajectoryMode dco_decode_trajectory_mode(dynamic raw);
 
   @protected
+  int dco_decode_u_16(dynamic raw);
+
+  @protected
   int dco_decode_u_32(dynamic raw);
 
   @protected
@@ -229,10 +261,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BigInt dco_decode_usize(dynamic raw);
 
   @protected
+  VpnConfig dco_decode_vpn_config(dynamic raw);
+
+  @protected
+  VpnState dco_decode_vpn_state(dynamic raw);
+
+  @protected
+  VpnTrafficStats dco_decode_vpn_traffic_stats(dynamic raw);
+
+  @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
   RustStreamSink<SimulatorUpdate> sse_decode_StreamSink_simulator_update_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<VpnState> sse_decode_StreamSink_vpn_state_Sse(
     SseDeserializer deserializer,
   );
 
@@ -257,6 +303,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BarometerData sse_decode_box_autoadd_barometer_data(
     SseDeserializer deserializer,
   );
+
+  @protected
+  bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
 
   @protected
   Checkpoint sse_decode_box_autoadd_checkpoint(SseDeserializer deserializer);
@@ -314,6 +363,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Trajectory sse_decode_box_autoadd_trajectory(SseDeserializer deserializer);
+
+  @protected
+  VpnConfig sse_decode_box_autoadd_vpn_config(SseDeserializer deserializer);
+
+  @protected
+  VpnState sse_decode_box_autoadd_vpn_state(SseDeserializer deserializer);
+
+  @protected
+  VpnTrafficStats sse_decode_box_autoadd_vpn_traffic_stats(
+    SseDeserializer deserializer,
+  );
 
   @protected
   Checkpoint sse_decode_checkpoint(SseDeserializer deserializer);
@@ -377,6 +437,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  bool? sse_decode_opt_box_autoadd_bool(SseDeserializer deserializer);
+
+  @protected
   CompassData? sse_decode_opt_box_autoadd_compass_data(
     SseDeserializer deserializer,
   );
@@ -424,6 +487,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  VpnConfig? sse_decode_opt_box_autoadd_vpn_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  VpnState? sse_decode_opt_box_autoadd_vpn_state(SseDeserializer deserializer);
+
+  @protected
+  VpnTrafficStats? sse_decode_opt_box_autoadd_vpn_traffic_stats(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PedometerData sse_decode_pedometer_data(SseDeserializer deserializer);
 
   @protected
@@ -457,6 +533,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   TrajectoryMode sse_decode_trajectory_mode(SseDeserializer deserializer);
 
   @protected
+  int sse_decode_u_16(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
@@ -472,6 +551,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
+  VpnConfig sse_decode_vpn_config(SseDeserializer deserializer);
+
+  @protected
+  VpnState sse_decode_vpn_state(SseDeserializer deserializer);
+
+  @protected
+  VpnTrafficStats sse_decode_vpn_traffic_stats(SseDeserializer deserializer);
+
+  @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
     SseSerializer serializer,
@@ -480,6 +568,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_StreamSink_simulator_update_Sse(
     RustStreamSink<SimulatorUpdate> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_vpn_state_Sse(
+    RustStreamSink<VpnState> self,
     SseSerializer serializer,
   );
 
@@ -509,6 +603,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     BarometerData self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_box_autoadd_bool(bool self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_checkpoint(
@@ -589,6 +686,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_vpn_config(
+    VpnConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_vpn_state(
+    VpnState self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_vpn_traffic_stats(
+    VpnTrafficStats self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_checkpoint(Checkpoint self, SseSerializer serializer);
 
   @protected
@@ -661,6 +776,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer);
+
+  @protected
   void sse_encode_opt_box_autoadd_compass_data(
     CompassData? self,
     SseSerializer serializer,
@@ -724,6 +842,24 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_vpn_config(
+    VpnConfig? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_vpn_state(
+    VpnState? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_vpn_traffic_stats(
+    VpnTrafficStats? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_pedometer_data(PedometerData self, SseSerializer serializer);
 
   @protected
@@ -775,6 +911,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_u_16(int self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
@@ -788,6 +927,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_usize(BigInt self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_vpn_config(VpnConfig self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_vpn_state(VpnState self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_vpn_traffic_stats(
+    VpnTrafficStats self,
+    SseSerializer serializer,
+  );
 }
 
 // Section: wire_class
