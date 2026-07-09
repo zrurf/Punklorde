@@ -5,7 +5,6 @@ import 'package:punklorde/common/model/location.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/api/endpoint.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/model.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/utils/brute_force.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/utils/math.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/utils/ua.dart';
 import 'package:punklorde/utils/uuid.dart';
@@ -55,8 +54,8 @@ class ApiClient {
     }
   }
 
-  /// 雷达签到原始接口
-  Future<double?> rawCheckinRadar(
+  /// 雷达签到
+  Future<bool> checkinRadar(
     AuthCredential credential,
     String id,
     Coordinate coord,
@@ -78,31 +77,10 @@ class ApiClient {
           validateStatus: (status) => status != null && status < 500,
         ),
       );
-      return r.data["distance"];
+      return _checkResult(r);
     } catch (e) {
-      return null;
+      return false;
     }
-  }
-
-  /// 探测雷达签到坐标
-  Future<List<Coordinate>> detectCheckinCoord(
-    AuthCredential credential,
-    String id,
-    Coordinate auxiliaryA, // 辅助点A
-    Coordinate auxiliaryB, // 辅助点B
-  ) async {
-    final List<Future<double?>> futures = [
-      rawCheckinRadar(credential, id, auxiliaryA, 0.0, 30),
-      rawCheckinRadar(credential, id, auxiliaryB, 0.0, 30),
-    ];
-    final distances = await Future.wait(futures);
-    if (distances.first == null || distances.last == null) return List.empty();
-    return findCircleIntersections(
-      auxiliaryA,
-      distances.first!,
-      auxiliaryB,
-      distances.last!,
-    );
   }
 
   /// PIN签到
@@ -137,18 +115,6 @@ class ApiClient {
     } catch (e) {
       return null;
     }
-  }
-
-  /// 雷达签到
-  Future<bool> checkinRadar(
-    AuthCredential credential,
-    String id,
-    Coordinate coord,
-    double speed,
-    double accuracy,
-  ) async {
-    return ((await rawCheckinRadar(credential, id, coord, speed, accuracy)) !=
-        null);
   }
 
   /// 二维码签到
