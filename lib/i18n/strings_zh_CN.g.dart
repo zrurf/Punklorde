@@ -450,6 +450,7 @@ class _Translations$submodule$chaoxing$zh_CN implements Translations$submodule$c
 	@override String get course_activities => '课程活动';
 	@override String get teacher => '教师';
 	@override String get messages_placeholder => '消息功能即将上线';
+	@override String get mods => 'Mods';
 }
 
 // Path: submodule.sangfor_vpn
@@ -807,6 +808,7 @@ extension on TranslationsZhCn {
 			'submodule.chaoxing.course_activities' => '课程活动',
 			'submodule.chaoxing.teacher' => '教师',
 			'submodule.chaoxing.messages_placeholder' => '消息功能即将上线',
+			'submodule.chaoxing.mods' => 'Mods',
 			'submodule.sangfor_vpn.title' => 'SSL VPN',
 			'submodule.sangfor_vpn.desc' => '通过 Sangfor EasyConnect 连接校园VPN',
 			'submodule.sangfor_vpn.connect' => '连接',

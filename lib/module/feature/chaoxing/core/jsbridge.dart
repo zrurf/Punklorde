@@ -50,7 +50,7 @@ class ChaoxingJSBridge {
           final msg = JSBridgeMessage.fromJson(
             Map<String, dynamic>.from(args[0] as Map),
           );
-          _handleMessage(msg);
+          handleMessage(msg);
         } catch (e) {
           // ignore parse errors
         }
@@ -82,7 +82,7 @@ sessionStorage.setItem("wolf_sc", "$sc");
   }
 
   /// 处理来自 JS 的消息
-  void _handleMessage(JSBridgeMessage msg) {
+  void handleMessage(JSBridgeMessage msg) {
     switch (msg.action) {
       case 'PostNotification':
         final name = msg.data?['name'] as String?;
@@ -108,8 +108,8 @@ sessionStorage.setItem("wolf_sc", "$sc");
   }
 
   /// 向 JS 端触发事件
-  Future<void> triggerEvent(String name, Map<String, dynamic>? userInfo) async {
-    final json = userInfo != null ? jsonEncode(userInfo) : '{}';
+  Future<void> triggerEvent(String name, Map<String, dynamic>? payload) async {
+    final json = payload != null ? jsonEncode(payload) : '{}';
     await _controller.evaluateJavascript(
       source: "if(window.JSBridge) window.JSBridge.trigger('$name', $json);",
     );

@@ -26,6 +26,7 @@ extern "C" {
     pub fn EC_GetDNSServer(id: c_int) -> *mut c_char;
     pub fn EC_GetDnsData(id: c_int) -> *mut c_char;
     pub fn EC_GetDnsRoutes(id: c_int) -> *mut c_char;
+    pub fn EC_GetRoutes(id: c_int) -> *mut c_char;
     pub fn EC_IsConnected(id: c_int) -> c_int;
 
     pub fn EC_ReadRecv(id: c_int, buf: *mut c_void, buf_len: c_int) -> c_int;
@@ -34,7 +35,7 @@ extern "C" {
 }
 
 /// Helper to read a nullable C string from FFI and free it
-unsafe fn read_c_string(ptr: *mut c_char) -> Option<String> {
+pub unsafe fn read_c_string(ptr: *mut c_char) -> Option<String> {
     if ptr.is_null() {
         return None;
     }
@@ -162,6 +163,12 @@ impl GoVpnClient {
 
     pub fn get_dns_routes(&self) -> Option<String> {
         let result = unsafe { EC_GetDnsRoutes(self.id) };
+        let s = unsafe { read_c_string(result) };
+        s.filter(|s| !s.is_empty())
+    }
+
+    pub fn get_routes(&self) -> Option<String> {
+        let result = unsafe { EC_GetRoutes(self.id) };
         let s = unsafe { read_c_string(result) };
         s.filter(|s| !s.is_empty())
     }

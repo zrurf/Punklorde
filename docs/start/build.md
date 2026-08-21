@@ -188,3 +188,25 @@ flutter pub get -C ./rust_builder/cargokit/build_tool
 **解决方法：**
 
 手动修改百度地图相关插件的下载缓存，删除所有gradle脚本里`https://maven.aliyun.com/repository/content/groups/public/`这个maven仓库。推荐使用**Everything**来查找和修改。
+
+### Android编译：Problems writing to Binary store in xxx
+**报错信息：**
+```
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':integration_test:compileDebugJavaWithJavac'.
+> Could not resolve all dependencies for configuration ':integration_test:debugCompileClasspath'.
+   > Problems writing to Binary store in .gradle/tmp/gradle4124254546034528496.bin (exist: true)
+```
+**原因：**
+
+由于gradle缓存损坏导致编译失败。
+
+**解决方法：**
+
+在`./android`目录下执行以下命令：
+
+```bash
+./gradlew clean
+```

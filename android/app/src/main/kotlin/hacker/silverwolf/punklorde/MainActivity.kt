@@ -114,7 +114,7 @@ class MainActivity: FlutterActivity() {
                         "netmask" to (call.argument<String>("netmask") ?: "255.255.255.0"),
                         "dns" to (call.argument<String>("dns") ?: "114.114.114.114,223.5.5.5"),
                         "mtu" to (call.argument<Int>("mtu") ?: 1400),
-                        "routes" to (call.argument<String>("routes") ?: "0.0.0.0/0")
+                        "routes" to (call.argument<String>("routes") ?: "10.255.255.1/32")
                     )
 
                     // Check if VPN is already prepared (user has granted permission)

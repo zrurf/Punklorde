@@ -29,7 +29,10 @@ class FeatSangforVpnView extends StatefulWidget {
 class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   static const _vpnChannelName = 'hacker.silverwolf.punklorde/vpn';
 
-  final SangforVpnController _controller = SangforVpnController();
+  /// Page view uses the app-scoped controller singleton so the tunnel keeps
+  /// running after this page is popped (the connection is only torn down by an
+  /// explicit disconnect, an error, or the app process being killed).
+  SangforVpnController get _controller => sangforVpn;
   StreamSubscription<VpnState>? _stateSub;
   final _twoFaController = TextEditingController();
   bool _showTwoFa = false;
@@ -50,6 +53,37 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
     super.initState();
     _loadConfig();
     _setupVpnChannel();
+    // If a session is already alive (e.g. the user re-entered the page while
+    // the VPN was running), restore the UI to match the real connection state.
+    _restoreSession();
+  }
+
+  /// Re-subscribe for state changes and resume monitoring when a VPN session
+  /// from a previous page visit is still running.
+  void _restoreSession() {
+    final state = _controller.getState();
+    if (state == null || state == VpnState.disconnected) {
+      // No live session: make sure any stale native VPN interface left over
+      // from a previous session is torn down as well.
+      if (Platform.isAndroid) {
+        _vpnChannel?.invokeMethod('stopVpn');
+      }
+      return;
+    }
+    _subscribeToStates();
+    _onStateChange(state);
+  }
+
+  Future<void> _subscribeToStates() async {
+    await _stateSub?.cancel();
+    final stream = await _controller.subscribe();
+    _stateSub = stream.listen(
+      _onStateChange,
+      onError: (e) {
+        _showError(e.toString());
+        _cleanupAfterError();
+      },
+    );
   }
 
   void _setupVpnChannel() {
@@ -118,6 +152,13 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   }
 
   Future<void> _connect() async {
+    // If a session is already running (e.g. re-entered the page while
+    // connected), do not start a second one — just resync the UI.
+    if (_controller.isRunning()) {
+      _onStateChange(_controller.getState() ?? VpnState.connected);
+      return;
+    }
+
     _saveConfig();
 
     if (vpnConfig.value.server.isEmpty || vpnConfig.value.username.isEmpty) {
@@ -137,14 +178,7 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
       final rustConfig = _buildRustConfig();
       _controller.create(rustConfig);
 
-      final stream = await _controller.subscribe();
-      _stateSub = stream.listen(
-        _onStateChange,
-        onError: (e) {
-          _showError(e.toString());
-          _cleanupAfterError();
-        },
-      );
+      await _subscribeToStates();
 
       // Phase 1: Authenticate and get server-assigned IP
       try {
@@ -168,8 +202,8 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
       // and never sends DNS queries through the TUN interface.
       final dns = (updatedConfig?.customDns?.isNotEmpty == true)
           ? '${updatedConfig!.customDns!},10.255.255.1'
-          : '10.255.255.1,223.5.5.5';
-      await _setupVpnService(rustConfig, dns);
+          : '10.255.255.1';
+      await _setupVpnService(updatedConfig ?? rustConfig, dns);
 
       // Phase 3: Open data channels and start relay
       _controller.openChannelsAndRelay();
@@ -187,13 +221,17 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   Future<void> _setupVpnService(VpnConfig rustConfig, String dns) async {
     if (!Platform.isAndroid) return;
 
+    final routes = (rustConfig.splitRoutes?.isNotEmpty == true)
+        ? '${rustConfig.splitRoutes!},10.255.255.1/32,8.8.8.8/32,8.8.4.4/32,1.1.1.1/32,223.5.5.5/32'
+        : '10.255.255.1/32,8.8.8.8/32,8.8.4.4/32,1.1.1.1/32,223.5.5.5/32';
+
     _vpnFdCompleter = Completer<int>();
     await _vpnChannel?.invokeMethod('startVpn', {
       'address': rustConfig.tunAddress,
       'netmask': rustConfig.tunNetmask,
       'dns': dns,
       'mtu': rustConfig.mtu,
-      'routes': '10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,202.202.32.0/20',
+      'routes': routes,
     });
     try {
       await _vpnFdCompleter!.future.timeout(
@@ -302,7 +340,7 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
       final rustConfig = _controller.getConfig() ?? _buildRustConfig();
       final dns = (rustConfig.customDns?.isNotEmpty == true)
           ? rustConfig.customDns!
-          : rustConfig.tunAddress;
+          : '10.255.255.1';
       await _setupVpnService(rustConfig, dns);
 
       // Open data channels and start relay
@@ -366,7 +404,9 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   void dispose() {
     _stopTrafficPolling();
     _stateSub?.cancel();
-    _controller.dispose();
+    // NOTE: do NOT dispose the VPN controller here. Leaving this page must
+    // keep the tunnel alive; it is only torn down by an explicit disconnect,
+    // an unrecoverable error, or the app process being killed.
     _serverController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();

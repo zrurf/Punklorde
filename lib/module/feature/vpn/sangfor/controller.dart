@@ -2,6 +2,13 @@ import 'dart:async';
 import 'package:punklorde/src/rust/api/sangfor.dart';
 import 'package:punklorde/src/rust/services/sangfor.dart';
 
+/// Global VPN controller singleton.
+///
+/// Owned at app scope so the tunnel keeps running after the VPN page is
+/// popped. The connection is only torn down by an explicit user disconnect,
+/// an unrecoverable error, or the app process being killed.
+final SangforVpnController sangforVpn = SangforVpnController();
+
 /// Sangfor VPN Controller
 /// Bridges Flutter -> Rust API calls for VPN management
 class SangforVpnController {
@@ -15,6 +22,11 @@ class SangforVpnController {
 
   /// Create a new VPN service
   void create(VpnConfig config) {
+    // Release any previous session first so repeated connects do not leak
+    // Rust-side services in the global registry.
+    if (_handleId != null) {
+      disposeVpn(handleId: _handleId!);
+    }
     _handleId = createVpn(config: config);
   }
 
@@ -22,6 +34,7 @@ class SangforVpnController {
   Future<Stream<VpnState>> subscribe() async {
     if (_handleId == null) throw StateError('VPN not initialized');
     final stream = await subscribeVpnState(handleId: _handleId!);
+    await _subscription?.cancel();
     _subscription = stream.listen(
       (state) => _stateController.add(state),
       onError: (error) => _stateController.addError(error),

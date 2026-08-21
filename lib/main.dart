@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:punklorde/app/main.dart';
 import 'package:punklorde/core/account/pkld_file_handler.dart';
 import 'package:punklorde/core/service/widget_service.dart';

@@ -386,6 +386,7 @@ fn main() {
             EC_GetDNSServer\n\
             EC_GetDnsData\n\
             EC_GetDnsRoutes\n\
+            EC_GetRoutes\n\
             EC_IsConnected\n";
         let def_path = out_dir.join(format!("{}.def", lib_name));
         std::fs::write(&def_path, def_content).expect("failed to write .def file");

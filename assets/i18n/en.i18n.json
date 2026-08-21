@@ -312,7 +312,8 @@
       "no_activities": "No activities available",
       "course_activities": "Course Activities",
       "teacher": "Teacher",
-      "messages_placeholder": "Messages feature coming soon"
+      "messages_placeholder": "Messages feature coming soon",
+      "mods": "Mods"
     },
     "sangfor_vpn": {
       "title": "SSL VPN",

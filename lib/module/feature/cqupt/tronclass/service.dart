@@ -17,6 +17,11 @@ class CquptTronCheckinService {
     return await _apiClient.getCheckinEvents(credentials) ?? [];
   }
 
+  /// 获取数字签到码
+  Future<String?> getCheckinNumber(AuthCredential credential, String id) async {
+    return await _apiClient.queryCheckinNumber(credential, id);
+  }
+
   /// 二维码签到
   Future<void> checkinQr(
     BuildContext context,

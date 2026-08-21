@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/auth.dart';
@@ -166,14 +165,20 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildSettingsGroup(BuildContext context) {
+    final colors = context.theme.colors;
     return FTileGroup(
       children: [
         FTile(
-          title: Text(t.setting.theme),
+          title: Text(t.submodule.chaoxing.mods),
+          prefix: Icon(LucideIcons.box, color: colors.primary),
           suffix: const Icon(LucideIcons.chevronRight),
-          onPress: () {
-            cycleThemeMode();
-          },
+          onPress: () {},
+        ),
+        FTile(
+          title: Text(t.common.setting),
+          prefix: Icon(LucideIcons.cog, color: colors.primary),
+          suffix: const Icon(LucideIcons.chevronRight),
+          onPress: () {},
         ),
       ],
     );

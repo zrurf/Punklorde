@@ -6,6 +6,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:punklorde/common/model/cookie.dart';
 import 'package:punklorde/module/feature/chaoxing/core/content_blocker.dart';
 import 'package:punklorde/module/feature/chaoxing/core/jsbridge.dart';
+import 'package:punklorde/module/feature/chaoxing/utils/jsbridge.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/utils/ua.dart';
 
@@ -33,7 +34,11 @@ class ChaoxingWebViewConfig {
   onPageFinished;
 
   /// 页面开始加载
-  final void Function(InAppWebViewController controller, String? url)?
+  final void Function(
+    InAppWebViewController controller,
+    ChaoxingJSBridge jsBridge,
+    String? url,
+  )?
   onPageStarted;
 
   /// 控制台消息
@@ -121,6 +126,20 @@ class _ChaoxingWebViewState extends State<ChaoxingWebView> {
         await _jsBridge!.init();
         await _injectCookies(controller, widget.config.url);
       },
+      onJsPrompt: (controller, prompt) async {
+        final msg = prompt.message;
+        if (msg == null) {
+          return null;
+        }
+        final bridgeData = JsBridgeUtil.parsePrompt(msg);
+        if (bridgeData != null) {
+          _jsBridge?.handleMessage(
+            JSBridgeMessage(action: bridgeData.action, data: bridgeData.data),
+          );
+          return JsPromptResponse(handledByClient: true);
+        }
+        return null;
+      },
       onLoadStop: (controller, url) async {
         if (!_initialLoadDone) {
           _initialLoadDone = true;
@@ -132,8 +151,8 @@ class _ChaoxingWebViewState extends State<ChaoxingWebView> {
           return;
         }
         if (_jsBridge != null && !_bridgeReady) {
-          await _jsBridge!.reinject();
-          await _jsBridge!.setClientInfo(clientCid, clientSc);
+          await _jsBridge?.reinject();
+          await _jsBridge?.setClientInfo(clientCid, clientSc);
         }
 
         // 注入自定义 CSS / JS
@@ -144,15 +163,20 @@ class _ChaoxingWebViewState extends State<ChaoxingWebView> {
           await controller.evaluateJavascript(source: widget.config.injectJS!);
         }
 
+        _jsBridge?.triggerEvent("CLIENT_WEB_LIFECYCLE", {"status": 1});
         widget.config.onPageFinished?.call(controller, url?.toString());
       },
       onLoadStart: (controller, url) async {
         _bridgeReady = false;
         if (_jsBridge != null && !_bridgeReady) {
-          await _jsBridge!.reinject();
-          await _jsBridge!.setClientInfo(clientCid, clientSc);
+          await _jsBridge?.reinject();
+          await _jsBridge?.setClientInfo(clientCid, clientSc);
         }
-        widget.config.onPageStarted?.call(controller, url?.toString());
+        widget.config.onPageStarted?.call(
+          controller,
+          _jsBridge!,
+          url?.toString(),
+        );
       },
       shouldInterceptRequest: widget.config.onShouldInterceptRequest != null
           ? (controller, request) {

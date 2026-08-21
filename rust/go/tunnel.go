@@ -21,6 +21,7 @@ static void go_loge(const char* msg) { (void)msg; }
 import "C"
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
@@ -64,11 +65,19 @@ type VpnClient struct {
 	recvConn     *utls.UConn
 	sendLock     sync.Mutex
 	recvLock     sync.Mutex
-	tlsSessionID []byte
+	reconnectMu  sync.Mutex
+	sendErrCount int
+	recvErrCount int
+
+	// lifecycle: cancel() stops background keepalive goroutines
+	stopCtx       context.Context
+	stopCancel    context.CancelFunc
+	keepAliveOnce sync.Once
 
 	resources string // raw XML
 	dnsServer string
 	dnsData   map[string]string // domain -> IP from <Dns data="...">
+	routes    string            // comma-separated CIDRs from resource IP ranges
 	connected bool
 	mu        sync.Mutex
 }
@@ -111,12 +120,16 @@ func EC_New(server, username, password, totpSecret *C.char) C.int {
 	rawServer := C.GoString(server)
 	normalized := normalizeServer(rawServer)
 
+	stopCtx, stopCancel := context.WithCancel(context.Background())
+
 	c := &VpnClient{
 		id:         id,
 		server:     normalized,
 		username:   C.GoString(username),
 		password:   C.GoString(password),
 		totpSecret: C.GoString(totpSecret),
+		stopCtx:    stopCtx,
+		stopCancel: stopCancel,
 		httpClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -259,6 +272,20 @@ func EC_OpenDataChannels(id C.int) *C.char {
 	return nil
 }
 
+func isFatalReadError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	return errors.Is(err, io.EOF) ||
+		errors.Is(err, io.ErrClosedPipe) ||
+		errors.Is(err, net.ErrClosed) ||
+		strings.Contains(errStr, "connection abort") ||
+		strings.Contains(errStr, "connection reset") ||
+		strings.Contains(errStr, "broken pipe") ||
+		strings.Contains(errStr, "use of closed network connection")
+}
+
 //export EC_ReadRecv
 func EC_ReadRecv(id C.int, buf unsafe.Pointer, bufLen C.int) C.int {
 	c := getClient(int(id))
@@ -280,6 +307,33 @@ func EC_ReadRecv(id C.int, buf unsafe.Pointer, bufLen C.int) C.int {
 	n, err := c.recvConn.Read(data)
 	c.recvLock.Unlock()
 
+	for err != nil && c.recvErrCount < 5 {
+		if rc <= 5 || rc%50 == 0 {
+			C.go_loge(C.CString("EC_ReadRecv #" + strconv.FormatUint(rc, 10) + " error (retry " + strconv.Itoa(c.recvErrCount+1) + "/5): " + err.Error()))
+		}
+		if reconnErr := c.reconnectDataChannels(); reconnErr != nil {
+			C.go_loge(C.CString("EC_ReadRecv #" + strconv.FormatUint(rc, 10) + " reconnectDataChannels failed: " + reconnErr.Error()))
+			c.recvErrCount++
+			if c.recvErrCount >= 5 {
+				return -1
+			}
+			continue
+		}
+		c.recvErrCount = 0
+		c.recvLock.Lock()
+		n, err = c.recvConn.Read(data)
+		c.recvLock.Unlock()
+		if err == nil {
+			C.go_logi(C.CString("EC_ReadRecv #" + strconv.FormatUint(rc, 10) + " reconnected and received " + strconv.Itoa(n) + " bytes"))
+			break
+		}
+		c.recvErrCount++
+	}
+	if c.recvErrCount >= 5 {
+		C.go_loge(C.CString("EC_ReadRecv: all retries exhausted"))
+		return -1
+	}
+
 	if err != nil {
 		if rc <= 5 || rc%50 == 0 {
 			C.go_loge(C.CString("EC_ReadRecv #" + strconv.FormatUint(rc, 10) + " error: " + err.Error() + " n=" + strconv.Itoa(n)))
@@ -290,6 +344,11 @@ func EC_ReadRecv(id C.int, buf unsafe.Pointer, bufLen C.int) C.int {
 				hexPart := hex.EncodeToString(data[:min(n, 80)])
 				C.go_logi(C.CString("EC_ReadRecv #" + strconv.FormatUint(rc, 10) + " received " + strconv.Itoa(n) + " bytes (with error) hex=" + hexPart))
 			}
+			return C.int(n)
+		}
+		if isFatalReadError(err) {
+			C.go_loge(C.CString("EC_ReadRecv: fatal read error, connection is dead"))
+			return -1
 		}
 		return C.int(n)
 	}
@@ -314,19 +373,43 @@ func EC_WriteSend(id C.int, buf unsafe.Pointer, bufLen C.int) C.int {
 		return -1
 	}
 	data := C.GoBytes(buf, bufLen)
-	c.sendLock.Lock()
-	n, err := c.sendConn.Write(data)
-	c.sendLock.Unlock()
 
 	writeMu.Lock()
 	writeCount++
 	wc := writeCount
 	writeMu.Unlock()
 
-	if err != nil {
-		if wc <= 3 || wc%10 == 0 {
-			C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " error: " + err.Error()))
+	c.sendLock.Lock()
+	n, err := c.sendConn.Write(data)
+	c.sendLock.Unlock()
+
+	for err != nil && c.sendErrCount < 5 {
+		C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " error (retry " + strconv.Itoa(c.sendErrCount+1) + "/5): " + err.Error()))
+		if reconnErr := c.reconnectDataChannels(); reconnErr != nil {
+			C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " reconnectDataChannels failed: " + reconnErr.Error()))
+			c.sendErrCount++
+			if c.sendErrCount >= 5 {
+				return -1
+			}
+			continue
 		}
+		c.sendErrCount = 0
+		c.sendLock.Lock()
+		n, err = c.sendConn.Write(data)
+		c.sendLock.Unlock()
+		if err == nil {
+			C.go_logi(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " reconnected and wrote " + strconv.Itoa(n) + " bytes"))
+			break
+		}
+		c.sendErrCount++
+	}
+	if c.sendErrCount >= 5 {
+		C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " all retries exhausted"))
+		return -1
+	}
+
+	if err != nil {
+		C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " error: " + err.Error()))
 		if n > 0 {
 			C.go_loge(C.CString("EC_WriteSend #" + strconv.FormatUint(wc, 10) + " partial write " + strconv.Itoa(n) + " bytes with error"))
 		}
@@ -413,6 +496,15 @@ func EC_GetDnsRoutes(id C.int) *C.char {
 	return C.CString(strings.Join(ips, ","))
 }
 
+//export EC_GetRoutes
+func EC_GetRoutes(id C.int) *C.char {
+	c := getClient(int(id))
+	if c == nil || c.routes == "" {
+		return C.CString("")
+	}
+	return C.CString(c.routes)
+}
+
 // ===================== Helpers =====================
 
 func getClient(id int) *VpnClient {
@@ -428,12 +520,104 @@ func errStr(msg string) *C.char {
 // ===================== Client Methods =====================
 
 func (c *VpnClient) close() {
+	if c.stopCancel != nil {
+		c.stopCancel()
+	}
 	if c.sendConn != nil {
 		c.sendConn.Close()
 	}
 	if c.recvConn != nil {
 		c.recvConn.Close()
 	}
+}
+
+// errNotFound is returned by requestUpdateSession when the server does not
+// implement /por/update_session.csp (HTTP 404), in which case the periodic
+// session keepalive should be stopped.
+var errNotFound = errors.New("not found")
+
+// sessionKeepAliveLoop periodically calls /por/update_session.csp to keep the
+// server-side session alive (mirrors the official EasyConnect client and the
+// reference zju-connect). Without it, sangfor servers with strict idle
+// policies close the session, which the tunnel layer surfaces as a broken
+// pipe / dropped connection.
+//
+// The loop stops when the client is closed (EC_Free) or when the server
+// reports it does not support update_session.
+func (c *VpnClient) sessionKeepAliveLoop() {
+	ticker := time.NewTicker(60 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-c.stopCtx.Done():
+			return
+		case <-ticker.C:
+			ctx, cancel := context.WithTimeout(c.stopCtx, 10*time.Second)
+			err := c.requestUpdateSession(ctx)
+			cancel()
+			if err == nil {
+				continue
+			}
+			if errors.Is(err, errNotFound) {
+				C.go_loge(C.CString("session keepalive: server does not support update_session, stopping"))
+				return
+			}
+			C.go_loge(C.CString("session keepalive: update_session failed: " + err.Error()))
+		}
+	}
+}
+
+// requestUpdateSession pings /por/update_session.csp to keep the server-side
+// session alive.
+func (c *VpnClient) requestUpdateSession(ctx context.Context) error {
+	u := url.URL{
+		Scheme: "https",
+		Host:   c.server,
+		Path:   "/por/update_session.csp",
+	}
+	q := url.Values{}
+	q.Set("twfid", c.twfID)
+	q.Set("apiversion", "1")
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Cookie", "TWFID="+c.twfID)
+	req.Header.Set("User-Agent", "EasyConnect_Linux_Ubuntu")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return errNotFound
+		}
+		return errors.New("update_session: unexpected status " + strconv.Itoa(resp.StatusCode))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	// Successful body looks like:
+	//   <Auth><Message>success</Message><ErrorCode>1</ErrorCode><TwfID>...</TwfID></Auth>
+	var reply struct {
+		Message   string `xml:"Message"`
+		ErrorCode string `xml:"ErrorCode"`
+	}
+	if err := xml.Unmarshal(body, &reply); err != nil {
+		return errors.New("update_session: parse reply: " + err.Error())
+	}
+	if reply.Message != "success" || reply.ErrorCode != "1" {
+		return errors.New("update_session: unexpected reply message='" + reply.Message + "' error_code='" + reply.ErrorCode + "'")
+	}
+	return nil
 }
 
 type fakeHeartBeatExtension struct {
@@ -454,7 +638,13 @@ func (e *fakeHeartBeatExtension) Read(b []byte) (n int, err error) {
 	return e.Len(), io.EOF
 }
 
-// tlsConn creates a special TLS connection for data channels
+// tlsConn creates a special TLS connection for data channels.
+// Sangfor routes everything on the shared 443 port by the SessionId in
+// the TLS ClientHello: the fixed "L3IP\0..." SessionId marks this as an
+// L3 tunnel connection (VPN) as opposed to an HTTP/ECAgent connection.
+// Using any other SessionId (e.g. the one echoed by the server in the
+// getIP handshake) makes the server mishandle the connection, so it must
+// stay constant — this matches the reference zju-connect implementation.
 func (c *VpnClient) tlsConn() (*utls.UConn, error) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", c.server)
 	if err != nil {
@@ -781,7 +971,12 @@ func (c *VpnClient) getResources() (string, error) {
 	io.Copy(&buf, resp.Body)
 	c.resources = buf.String()
 	c.parseDNS()
-	C.go_logi(C.CString("getResources: parsed DNS=" + c.dnsServer))
+	c.parseRoutes()
+	routeCount := 0
+	if c.routes != "" {
+		routeCount = len(strings.Split(c.routes, ","))
+	}
+	C.go_logi(C.CString("getResources: parsed DNS=" + c.dnsServer + " routeCount=" + strconv.Itoa(routeCount)))
 	return c.resources, nil
 }
 
@@ -898,6 +1093,122 @@ func (c *VpnClient) parseDNS() {
 	}
 }
 
+// parseRoutes extracts L3VPN IP ranges from resources XML and converts to CIDRs.
+func (c *VpnClient) parseRoutes() {
+	type RcXml struct {
+		Host string `xml:"host,attr"`
+		Type string `xml:"type,attr"`
+	}
+	type RcsXml struct {
+		Rc []RcXml `xml:"Rc"`
+	}
+	type ResXml struct {
+		Rcs RcsXml `xml:"Rcs"`
+	}
+
+	var res ResXml
+	if err := xml.Unmarshal([]byte(c.resources), &res); err != nil {
+		C.go_loge(C.CString("parseRoutes: xml.Unmarshal err = " + err.Error()))
+		return
+	}
+
+	var allCIDRs []string
+	seen := make(map[string]bool)
+
+	for _, rc := range res.Rcs.Rc {
+		if rc.Type != "2" {
+			continue
+		}
+		hosts := strings.Split(rc.Host, ";")
+		for _, host := range hosts {
+			host = strings.TrimSpace(host)
+			if host == "" || strings.HasPrefix(host, "http://") || strings.HasPrefix(host, "https://") {
+				continue
+			}
+
+			if strings.Contains(host, "~") {
+				parts := strings.SplitN(host, "~", 2)
+				if len(parts) == 2 {
+					start := net.ParseIP(strings.TrimSpace(parts[0]))
+					end := net.ParseIP(strings.TrimSpace(parts[1]))
+					if start != nil && end != nil && start.To4() != nil && end.To4() != nil {
+						for _, cidr := range rangeToCIDRs(start.To4(), end.To4()) {
+							if !seen[cidr] {
+								seen[cidr] = true
+								allCIDRs = append(allCIDRs, cidr)
+							}
+						}
+					}
+				}
+			} else if ip := net.ParseIP(host); ip != nil && ip.To4() != nil {
+				cidr := ip.String() + "/32"
+				if !seen[cidr] {
+					seen[cidr] = true
+					allCIDRs = append(allCIDRs, cidr)
+				}
+			}
+		}
+	}
+
+	// Always include TUN subnet so 10.255.255.1 DNS works
+	tunCIDR := "10.0.0.0/8"
+	if !seen[tunCIDR] {
+		seen[tunCIDR] = true
+		allCIDRs = append(allCIDRs, tunCIDR)
+	}
+
+	c.routes = strings.Join(allCIDRs, ",")
+	C.go_logi(C.CString("parseRoutes: " + strconv.Itoa(len(allCIDRs)) + " CIDRs parsed"))
+}
+
+func ipToUint32(ip net.IP) uint32 {
+	ip = ip.To4()
+	return uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
+}
+
+func uint32ToIP(n uint32) net.IP {
+	return net.IPv4(byte(n>>24), byte(n>>16), byte(n>>8), byte(n))
+}
+
+func rangeToCIDRs(start, end net.IP) []string {
+	s := ipToUint32(start)
+	e := ipToUint32(end)
+	if s > e {
+		return nil
+	}
+	var cidrs []string
+	for s <= e {
+		sz := e - s + 1
+
+		// max host bits from alignment (trailing zeros of s)
+		hostAlign := uint32(0)
+		tmp := s
+		for tmp&1 == 0 && hostAlign < 32 {
+			hostAlign++
+			tmp >>= 1
+		}
+
+		// max host bits from remaining range size
+		hostSize := uint32(0)
+		for (uint64(1)<<hostSize) <= uint64(sz) && hostSize < 32 {
+			hostSize++
+		}
+		if hostSize > 0 {
+			hostSize--
+		}
+
+		hostBits := hostAlign
+		if hostSize < hostBits {
+			hostBits = hostSize
+		}
+
+		prefixLen := 32 - int(hostBits)
+		cidrs = append(cidrs, uint32ToIP(s).String()+"/"+strconv.Itoa(prefixLen))
+		s += 1 << hostBits
+	}
+	return cidrs
+}
+
 // ========== IP ==========
 
 func (c *VpnClient) getIP() error {
@@ -938,11 +1249,12 @@ func (c *VpnClient) getIP() error {
 	c.ip = reply[4:8]
 	c.ipRev = []byte{c.ip[3], c.ip[2], c.ip[1], c.ip[0]}
 
-	c.tlsSessionID = conn.HandshakeState.ServerHello.SessionId
-	C.go_logi(C.CString("getIP: tls sessionID hex=" + hex.EncodeToString(c.tlsSessionID)))
-
-	// Keep conn alive (critical: closing breaks subsequent handshakes)
-	// Also log any unexpected data arriving on this connection
+	// Keep conn open (critical: closing breaks subsequent handshakes).
+	// The reference zju-connect keeps the getIP/query connection alive and
+	// NEVER re-issues the getIP request: a second getIP with the same token
+	// is treated by the server as a new session login and tears down the
+	// already-established data channels (the "connect then drop after a few
+	// seconds" symptom). We mirror that behavior here exactly.
 	go func() {
 		buf := make([]byte, 1500)
 		keepCount := 0
@@ -966,6 +1278,14 @@ func (c *VpnClient) getIP() error {
 			}
 		}
 	}()
+
+	// Periodic session keepalive (mirrors the reference zju-connect and the
+	// official EasyConnect client). Strict sangfor servers close sessions that
+	// stay idle, which shows up as the data channels being dropped a while
+	// after connect — this keeps the server-side session alive.
+	c.keepAliveOnce.Do(func() {
+		go c.sessionKeepAliveLoop()
+	})
 	return nil
 }
 
@@ -1128,6 +1448,144 @@ func (c *VpnClient) openDataChannels() error {
 
 	c.connected = true
 	C.go_logi(C.CString("openDataChannels: all channels established concurrently, connected=true"))
+	return nil
+}
+
+func (c *VpnClient) createSendConn() (*utls.UConn, error) {
+	if c.token == [48]byte{} {
+		return nil, errors.New("token is nil")
+	}
+	conn, err := c.tlsConn()
+	if err != nil {
+		return nil, err
+	}
+
+	msg := []byte{0x05, 0x00, 0x00, 0x00}
+	msg = append(msg, c.token[:]...)
+	msg = append(msg, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+	msg = append(msg, c.ipRev...)
+
+	_, err = conn.Write(msg)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	reply := make([]byte, 1500)
+	n, err := conn.Read(reply)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	if reply[0] != 0x02 {
+		hexLen := n
+		if hexLen > 64 {
+			hexLen = 64
+		}
+		conn.Close()
+		return nil, errors.New("send handshake bad status " + strconv.Itoa(int(reply[0])) +
+			" len=" + strconv.Itoa(n) + " hex=" + hex.EncodeToString(reply[:hexLen]))
+	}
+	return conn, nil
+}
+
+func (c *VpnClient) createRecvConn() (*utls.UConn, error) {
+	if c.token == [48]byte{} {
+		return nil, errors.New("token is nil")
+	}
+	conn, err := c.tlsConn()
+	if err != nil {
+		return nil, err
+	}
+
+	msg := []byte{0x06, 0x00, 0x00, 0x00}
+	msg = append(msg, c.token[:]...)
+	msg = append(msg, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+	msg = append(msg, c.ipRev...)
+
+	_, err = conn.Write(msg)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	reply := make([]byte, 1500)
+	n, err := conn.Read(reply)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	if reply[0] != 0x01 {
+		hexLen := n
+		if hexLen > 64 {
+			hexLen = 64
+		}
+		conn.Close()
+		return nil, errors.New("recv handshake bad status " + strconv.Itoa(int(reply[0])) +
+			" len=" + strconv.Itoa(n) + " hex=" + hex.EncodeToString(reply[:hexLen]))
+	}
+	return conn, nil
+}
+
+// reconnectDataChannels closes both old data channels and creates new ones
+// concurrently. This is called when either channel detects a fatal error.
+func (c *VpnClient) reconnectDataChannels() error {
+	c.reconnectMu.Lock()
+	defer c.reconnectMu.Unlock()
+
+	c.sendLock.Lock()
+	if c.sendConn != nil {
+		c.sendConn.Close()
+		c.sendConn = nil
+	}
+	c.sendLock.Unlock()
+
+	c.recvLock.Lock()
+	if c.recvConn != nil {
+		c.recvConn.Close()
+		c.recvConn = nil
+	}
+	c.recvLock.Unlock()
+
+	type chanResult struct {
+		conn *utls.UConn
+		err  error
+	}
+	sendCh := make(chan chanResult, 1)
+	recvCh := make(chan chanResult, 1)
+
+	go func() {
+		conn, err := c.createSendConn()
+		sendCh <- chanResult{conn, err}
+	}()
+	go func() {
+		conn, err := c.createRecvConn()
+		recvCh <- chanResult{conn, err}
+	}()
+
+	sr := <-sendCh
+	rr := <-recvCh
+
+	if sr.err != nil {
+		if rr.conn != nil {
+			rr.conn.Close()
+		}
+		return sr.err
+	}
+	if rr.err != nil {
+		sr.conn.Close()
+		return rr.err
+	}
+
+	c.sendLock.Lock()
+	c.sendConn = sr.conn
+	c.sendLock.Unlock()
+
+	c.recvLock.Lock()
+	c.recvConn = rr.conn
+	c.recvLock.Unlock()
+
+	C.go_logi(C.CString("reconnectDataChannels: both channels re-established"))
 	return nil
 }
 

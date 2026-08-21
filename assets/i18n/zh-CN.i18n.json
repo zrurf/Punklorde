@@ -312,7 +312,8 @@
       "no_activities": "暂无活动",
       "course_activities": "课程活动",
       "teacher": "教师",
-      "messages_placeholder": "消息功能即将上线"
+      "messages_placeholder": "消息功能即将上线",
+      "mods": "Mods"
     },
     "sangfor_vpn": {
       "title": "SSL VPN",

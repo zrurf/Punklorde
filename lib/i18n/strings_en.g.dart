@@ -1038,6 +1038,9 @@ class Translations$submodule$chaoxing$en {
 
 	/// en: 'Messages feature coming soon'
 	String get messages_placeholder => 'Messages feature coming soon';
+
+	/// en: 'Mods'
+	String get mods => 'Mods';
 }
 
 // Path: submodule.sangfor_vpn
@@ -1487,6 +1490,7 @@ extension on Translations {
 			'submodule.chaoxing.course_activities' => 'Course Activities',
 			'submodule.chaoxing.teacher' => 'Teacher',
 			'submodule.chaoxing.messages_placeholder' => 'Messages feature coming soon',
+			'submodule.chaoxing.mods' => 'Mods',
 			'submodule.sangfor_vpn.title' => 'SSL VPN',
 			'submodule.sangfor_vpn.desc' => 'Connect to campus VPN via Sangfor EasyConnect',
 			'submodule.sangfor_vpn.connect' => 'Connect',

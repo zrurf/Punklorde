@@ -6,4 +6,6 @@ String apiCheckinQr(String id) =>
 String apiCheckinPin(String id) =>
     "$baseUrl/api/rollcall/$id/answer_number_rollcall"; // 数字签到接口
 String apiCheckinRadar(String id) =>
-    "$baseUrl/api/rollcall/$id/answer"; // 雷达签到接口
+    "$baseUrl/api/rollcall/$id/answer?api_version=1.76"; // 雷达签到接口
+String apiQueryRollcall(String id) =>
+    "$baseUrl/api/rollcall/$id/student_rollcalls"; // 查询签到接口（可查数字签到码）

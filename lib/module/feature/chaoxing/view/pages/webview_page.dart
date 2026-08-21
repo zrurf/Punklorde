@@ -24,6 +24,12 @@ class _ChaoxingWebViewPageState extends State<ChaoxingWebViewPage> {
   InAppWebViewController? _controller;
   ChaoxingJSHandler? _jsHandler;
 
+  @override
+  void dispose() {
+    _jsHandler?.dispose();
+    super.dispose();
+  }
+
   Future<void> _onBackPressed() async {
     if (_controller != null && await _controller!.canGoBack()) {
       _controller!.goBack();
@@ -70,10 +76,11 @@ class _ChaoxingWebViewPageState extends State<ChaoxingWebViewPage> {
                     url: widget.url,
                     credential: credential,
                     userAgent: credential.ext?["ua"],
-                    onPageStarted: (controller, url) {
+                    onPageStarted: (controller, jsBridge, url) {
                       _controller = controller;
                       _jsHandler = ChaoxingJSHandler(
                         controller,
+                        jsBridge,
                         onOpenUrl: (newUrl) async {
                           _controller?.loadUrl(
                             urlRequest: URLRequest(url: WebUri(newUrl)),

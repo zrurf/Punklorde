@@ -23,6 +23,12 @@ class HomeworkPageState extends State<HomeworkPage> {
   InAppWebViewController? _webviewController;
   ChaoxingJSHandler? _jsHandler;
 
+  @override
+  void dispose() {
+    _jsHandler?.dispose();
+    super.dispose();
+  }
+
   /// 父组件可通过 GlobalKey 调用，用于标题栏回退
   Future<bool> goBack() async {
     if (_webviewController == null) return false;
@@ -63,10 +69,11 @@ class HomeworkPageState extends State<HomeworkPage> {
         url: _homeworkUrl,
         credential: credential,
         userAgent: credential.ext?["ua"],
-        onPageStarted: (controller, url) {
+        onPageStarted: (controller, jsBridge, url) {
           _webviewController = controller;
           _jsHandler = ChaoxingJSHandler(
             controller,
+            jsBridge,
             onOpenUrl: (newUrl) async {
               _webviewController?.loadUrl(
                 urlRequest: URLRequest(url: WebUri(newUrl)),

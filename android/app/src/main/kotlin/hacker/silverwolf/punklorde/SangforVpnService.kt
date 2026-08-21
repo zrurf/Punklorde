@@ -41,7 +41,7 @@ class SangforVpnService : VpnService() {
         var vpnNetmask: String = "255.255.255.0"
         var vpnDnsServers: String = "114.114.114.114,223.5.5.5"
         var vpnMtu: Int = 1400
-        var vpnRoutes: String = "" // comma-separated CIDR, e.g. "0.0.0.0/0"
+        var vpnRoutes: String = "" // comma-separated CIDR
         var vpnAppPackage: String = "" // empty = all traffic through VPN
 
         // The established fd, to be picked up by Rust
@@ -159,12 +159,10 @@ class SangforVpnService : VpnService() {
                 builder.addAllowedApplication(vpnAppPackage)
             }
 
-            // Disable VPN for this app itself to prevent routing loops
-            try {
-                builder.addDisallowedApplication(packageName)
-            } catch (_: Exception) {
-                // Ignored
-            }
+            // Disable VPN for this app itself to prevent routing loops.
+            // Ensures the Go tunnel's own connections bypass the TUN.
+            builder.addDisallowedApplication(packageName)
+            Log.e(TAG, "addDisallowedApplication($packageName) OK")
 
             // MTU
             builder.setMtu(vpnMtu)
@@ -174,6 +172,10 @@ class SangforVpnService : VpnService() {
             // traffic (incl. Android connectivity probes) through the TUN,
             // where it would be dropped, causing the system to mark the
             // network as disconnected and send zero IPv4 traffic.
+
+            // Allow non-VPN-routed traffic (e.g. DNS forwarding socket)
+            // to use the underlying network instead of being dropped.
+            builder.allowBypass()
 
             // Establish the VPN interface
             Log.d(TAG, "establishVpn: calling establish()...")

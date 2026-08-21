@@ -54,6 +54,18 @@ class ApiClient {
     }
   }
 
+  /// 获取签到码
+  Future<String?> queryCheckinNumber(
+    AuthCredential credential,
+    String id,
+  ) async {
+    final r = await _dio.get(
+      apiQueryRollcall(id),
+      options: Options(headers: _getHeader(credential.token)),
+    );
+    return r.data["number_code"];
+  }
+
   /// 雷达签到
   Future<bool> checkinRadar(
     AuthCredential credential,

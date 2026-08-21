@@ -14,7 +14,7 @@ use std::panic::{self, AssertUnwindSafe};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result};
 use flutter_rust_bridge::frb;
@@ -111,6 +111,8 @@ pub struct SangforVpnService {
     dns_server: Arc<Mutex<Option<String>>>,
     /// DNS route IPs (mapped IPs from <Dns data>) to add to VPN routes
     dns_routes: Arc<Mutex<Option<String>>>,
+    /// CIDR routes parsed from L3VPN resource IP ranges
+    vpn_routes: Arc<Mutex<Option<String>>>,
 }
 
 /// Atomic traffic counters for lock-free access from relay threads
@@ -155,6 +157,7 @@ impl SangforVpnService {
             assigned_ip: Arc::new(Mutex::new(None)),
             dns_server: Arc::new(Mutex::new(None)),
             dns_routes: Arc::new(Mutex::new(None)),
+            vpn_routes: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -380,18 +383,28 @@ impl SangforVpnService {
         let tun = {
             let fd = *tun_fd.lock();
             let fd = fd.ok_or_else(|| anyhow::anyhow!("Android: tun fd not set. Call set_tun_fd() before connect()."))?;
-            unsafe { tun_rs::SyncDevice::from_fd(fd) }
-                .context("failed to create TUN from fd")?
+            let device = unsafe { tun_rs::SyncDevice::from_fd(fd) }
+                .context("failed to create TUN from fd")?;
+            let raw_fd = device.as_raw_fd();
+            unsafe {
+                let flags = libc::fcntl(raw_fd, libc::F_GETFL, 0);
+                if flags != -1 {
+                    libc::fcntl(raw_fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
+                }
+            }
+            device
         };
 
         info!("TUN device created");
+
+        let tun_arc = Arc::new(Mutex::new(tun));
 
         // Step 9: Start data relay
         set_state(VpnState::Connected);
         info!("VPN connected successfully");
 
-        Self::run_tun_relay(
-            tun,
+        let _ = Self::run_tun_relay(
+            tun_arc,
             client.clone(),
             running.clone(),
             traffic,
@@ -399,7 +412,8 @@ impl SangforVpnService {
             config.tun_address.clone(),
             "10.255.255.1".to_string(),
             Arc::new(std::collections::HashMap::new()),
-        )?;
+            None,
+        );
 
         Ok(())
     }
@@ -465,20 +479,31 @@ impl SangforVpnService {
         let tun = {
             let fd = *self.tun_fd.lock();
             let fd = fd.ok_or("Android: tun fd not set. Call set_tun_fd() before connect().")?;
-            unsafe { tun_rs::SyncDevice::from_fd(fd) }
-                .map_err(|e| format!("TUN create from fd failed: {}", e))?
+            let device = unsafe { tun_rs::SyncDevice::from_fd(fd) }
+                .map_err(|e| format!("TUN create from fd failed: {}", e))?;
+            let raw_fd = device.as_raw_fd();
+            unsafe {
+                let flags = libc::fcntl(raw_fd, libc::F_GETFL, 0);
+                if flags != -1 {
+                    libc::fcntl(raw_fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
+                }
+            }
+            device
         };
 
         self.set_state(VpnState::Connected);
+
+        let tun_arc = Arc::new(Mutex::new(tun));
 
         let client = self.client.clone();
         let running = self.running.clone();
         let traffic = self.traffic.clone();
         let config = self.config.lock().clone();
         let assigned = server_ip.clone();
+        let dns_routes_val = self.dns_routes.lock().clone();
 
         std::thread::spawn(move || {
-            let _ = Self::run_tun_relay(tun, client, running, traffic, assigned, config.tun_address, "10.255.255.1".to_string(), Arc::new(std::collections::HashMap::new()));
+            let _ = Self::run_tun_relay(tun_arc, client, running, traffic, assigned, config.tun_address, "10.255.255.1".to_string(), Arc::new(std::collections::HashMap::new()), dns_routes_val);
         });
 
         Ok(())
@@ -516,6 +541,10 @@ impl SangforVpnService {
         self.dns_routes.lock().clone()
     }
 
+    pub fn get_routes_for_config(&self) -> Option<String> {
+        self.vpn_routes.lock().clone()
+    }
+
     /// Phase 1: Authenticate and retrieve the server-assigned IP.
     ///
     /// This runs the auth flow up through getIP and returns the IP string.
@@ -534,6 +563,7 @@ impl SangforVpnService {
         let stream_sink = self.stream_sink.clone();
         let assigned_ip = self.assigned_ip.clone();
         let dns_server = self.dns_server.clone();
+        let vpn_routes = self.vpn_routes.clone();
 
         self.running.store(true, Ordering::Relaxed);
 
@@ -610,20 +640,29 @@ impl SangforVpnService {
             let dns_str = parsed_dns.clone().unwrap_or_default();
             if !dns_str.is_empty() {
                 android_log(&format!("VPN: campus DNS = {}", dns_str));
-                // Override custom_dns with campus DNS
                 let mut cfg = self.config.lock();
                 cfg.custom_dns = Some(dns_str);
             } else {
-                android_log("VPN: no campus DNS found in resources");
+                android_log("VPN: no campus DNS found in resources (dnsserver empty)");
             }
             *dns_server.lock() = parsed_dns;
-        let parsed_routes = c.get_dns_routes();
-        if parsed_routes.as_ref().map_or(false, |r| !r.is_empty()) {
-            android_log(&format!("VPN: dns routes = {}", parsed_routes.as_ref().unwrap()));
+            let parsed_routes = c.get_dns_routes();
+            if parsed_routes.as_ref().map_or(false, |r| !r.is_empty()) {
+                android_log(&format!("VPN: dns routes = {}", parsed_routes.as_ref().unwrap()));
+            }
+            *self.dns_routes.lock() = parsed_routes;
+            let parsed_vpn_routes = c.get_routes();
+            if let Some(ref routes) = parsed_vpn_routes {
+                if !routes.is_empty() {
+                    let count = routes.split(',').count();
+                    android_log(&format!("VPN: vpn routes count = {}", count));
+                    let mut cfg = self.config.lock();
+                    cfg.split_routes = Some(routes.clone());
+                }
+            }
+            *vpn_routes.lock() = parsed_vpn_routes;
         }
-        *self.dns_routes.lock() = parsed_routes;
-        }
-
+        
         // Step 6: Get IP
         set_state(VpnState::GettingIp);
         with_client!(c, c.get_ip().map_err(|e| format!("get_ip: {}", e)))?;
@@ -708,6 +747,16 @@ impl SangforVpnService {
                 android_log(&format!("VPN (2FA): dns routes = {}", parsed_routes.as_ref().unwrap()));
             }
             *self.dns_routes.lock() = parsed_routes;
+            let parsed_vpn_routes = c.get_routes();
+            if let Some(ref routes) = parsed_vpn_routes {
+                if !routes.is_empty() {
+                    let count = routes.split(',').count();
+                    android_log(&format!("VPN (2FA): vpn routes count = {}", count));
+                    let mut cfg = self.config.lock();
+                    cfg.split_routes = Some(routes.clone());
+                }
+            }
+            *self.vpn_routes.lock() = parsed_vpn_routes;
         }
 
         // Get IP
@@ -773,11 +822,22 @@ impl SangforVpnService {
         let tun = {
             let fd = *tun_fd.lock();
             let fd = fd.ok_or("Android: tun fd not set")?;
-            unsafe { tun_rs::SyncDevice::from_fd(fd) }
-                .map_err(|e| format!("TUN create from fd failed: {}", e))?
+            let device = unsafe { tun_rs::SyncDevice::from_fd(fd) }
+                .map_err(|e| format!("TUN create from fd failed: {}", e))?;
+            let raw_fd = device.as_raw_fd();
+            unsafe {
+                let flags = libc::fcntl(raw_fd, libc::F_GETFL, 0);
+                if flags != -1 {
+                    libc::fcntl(raw_fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
+                    android_log(&format!("TUN relay: set non-blocking mode on fd {}", raw_fd));
+                }
+            }
+            device
         };
 
         info!("TUN device created for relay");
+
+        let tun_arc = Arc::new(Mutex::new(tun));
 
         // Mark connected and start relay
         set_state(VpnState::Connected);
@@ -786,6 +846,7 @@ impl SangforVpnService {
         let assigned_for_relay = self.assigned_ip.lock().clone()
             .unwrap_or_else(|| config.tun_address.clone());
         let tun_for_relay = config.tun_address.clone();
+        let dns_routes_for_relay = self.dns_routes.lock().clone();
 
         // Read DNS data mapping (domain->IP) for TUN-local DNS resolver
         let dns_data: Arc<std::collections::HashMap<String, String>> = {
@@ -809,8 +870,76 @@ impl SangforVpnService {
             }
         };
 
+        let state_relay = state.clone();
+        let stream_sink_relay = stream_sink.clone();
         std::thread::spawn(move || {
-            let _ = Self::run_tun_relay(tun, client, running, traffic, assigned_for_relay, tun_for_relay, "10.255.255.1".to_string(), dns_data);
+            let mut retry_count: u32 = 0;
+            const MAX_RETRIES: u32 = 3;
+
+            loop {
+                let _ = Self::run_tun_relay(
+                    tun_arc.clone(), client.clone(), running.clone(), traffic.clone(),
+                    assigned_for_relay.clone(), tun_for_relay.clone(),
+                    "10.255.255.1".to_string(), dns_data.clone(), dns_routes_for_relay.clone()
+                );
+
+                let user_disconnected = {
+                    let locked = state_relay.lock();
+                    matches!(*locked, VpnState::Disconnected)
+                };
+
+                if user_disconnected {
+                    break;
+                }
+
+                if retry_count >= MAX_RETRIES {
+                    let mut locked = state_relay.lock();
+                    if matches!(*locked, VpnState::Connected) {
+                        android_log("VPN: tunnel relay stopped after all reconnection attempts");
+                        *locked = VpnState::Disconnected;
+                        if let Some(ref sink) = *stream_sink_relay.lock() {
+                            let _ = sink.add(VpnState::Disconnected);
+                        }
+                    }
+                    break;
+                }
+
+                retry_count += 1;
+                android_log(&format!("VPN: connection lost, reconnecting ({}/{})...", retry_count, MAX_RETRIES));
+
+                let reconnect_ok = {
+                    let mut guard = client.lock();
+                    if let Some(ref mut c) = *guard {
+                        match c.open_data_channels() {
+                            Ok(_) => {
+                                android_log("VPN: data channels re-opened for reconnection");
+                                true
+                            }
+                            Err(e) => {
+                                android_log(&format!("VPN: failed to re-open data channels: {}", e));
+                                false
+                            }
+                        }
+                    } else {
+                        android_log("VPN: reconnection failed - client not initialized");
+                        false
+                    }
+                };
+
+                if !reconnect_ok {
+                    let mut locked = state_relay.lock();
+                    if matches!(*locked, VpnState::Connected) {
+                        android_log("VPN: reconnection aborted - cannot open data channels");
+                        *locked = VpnState::Disconnected;
+                        if let Some(ref sink) = *stream_sink_relay.lock() {
+                            let _ = sink.add(VpnState::Disconnected);
+                        }
+                    }
+                    break;
+                }
+
+                running.store(true, Ordering::Relaxed);
+            }
         });
 
         Ok(())
@@ -854,7 +983,7 @@ impl SangforVpnService {
     }
 
     fn run_tun_relay(
-        tun: tun_rs::SyncDevice,
+        tun_arc: Arc<Mutex<tun_rs::SyncDevice>>,
         client_arc: Arc<Mutex<Option<GoVpnClient>>>,
         running: Arc<AtomicBool>,
         traffic: Arc<TrafficCounters>,
@@ -862,28 +991,14 @@ impl SangforVpnService {
         tun_ip: String,
         dns_ip: String,
         dns_data: Arc<std::collections::HashMap<String, String>>,
+        _dns_routes: Option<String>,
     ) -> Result<()> {
-        // Set TUN fd to non-blocking mode so recv() returns immediately
-        #[cfg(target_os = "android")]
-        {
-            let raw_fd = tun.as_raw_fd();
-            unsafe {
-                let flags = libc::fcntl(raw_fd, libc::F_GETFL, 0);
-                if flags != -1 {
-                    libc::fcntl(raw_fd, libc::F_SETFL, flags | libc::O_NONBLOCK);
-                    android_log(&format!("TUN relay: set non-blocking mode on fd {}", raw_fd));
-                }
-            }
-        }
-
-        let tun_arc = Arc::new(Mutex::new(tun));
         let tun_send = tun_arc.clone();
         let tun_recv = tun_arc.clone();
 
         // Parse the assigned IP and TUN IP once for NAT rewriting
         let assigned_ip_bytes = parse_ipv4_to_bytes(&assigned_ip);
         let tun_ip_bytes = parse_ipv4_to_bytes(&tun_ip);
-        let dns_ip_bytes = parse_ipv4_to_bytes(&dns_ip);
         let do_nat = assigned_ip_bytes.is_some()
             && tun_ip_bytes.is_some()
             && assigned_ip_bytes != tun_ip_bytes;
@@ -927,6 +1042,10 @@ impl SangforVpnService {
             let mut idle: u64 = 0;
             let mut consecutive_empty: u64 = 0;
             let mut logged_real_traffic = false;
+            let mut consecutive_write_failures: u32 = 0;
+            let mut last_write_time = Instant::now();
+            let mut keepalive_seq: u16 = 0;
+            let mut keepalive_count: u64 = 0;
             while running_send.load(Ordering::Relaxed) {
                 let n = {
                     let t = tun_send.lock();
@@ -947,10 +1066,10 @@ impl SangforVpnService {
                 };
                 if n > 0 {
                     // ===== TUN-local DNS resolver =====
-                    // Intercept DNS queries (UDP port 53) destined for our virtual DNS IP
-                    // and respond with mapped IPs from the VPN resource data.
-                    let dns_ip_check = dns_ip_bytes.unwrap_or([10, 255, 255, 1]);
-                    if is_dns_query_to_self(&buf, n, dns_ip_check) {
+                    // Intercept ALL UDP port 53 DNS queries going through TUN.
+                    // With 0.0.0.0/0 route, Android/browsers may send DNS to
+                    // various servers (8.8.8.8, system DoT fallback, etc.).
+                    if is_dns_query(&buf, n) {
                         let ihl = ((buf[0] & 0x0F) * 4) as usize;
                         let dns_query = &buf[ihl + 8..n];
                         if let Some(domain) = parse_dns_qname(&buf, ihl) {
@@ -969,27 +1088,51 @@ impl SangforVpnService {
                                             ));
                                         }
                                     }
+                                } else {
+                                    // AAAA or other type for mapped domain: NODATA
+                                    if let Some(resp) = build_dns_nodata_response(dns_query) {
+                                        let _ = write_dns_response_to_tun(
+                                            &tun_recv_ref, &buf[..n], &resp, traffic_send.clone()
+                                        );
+                                    }
+                                    dns_handled += 1;
                                 }
                                 continue;
                             }
-                            // Unknown domain: respond with SERVFAIL so Android falls back
-                            // to public DNS via normal network immediately
-                            if let Some(empty_resp) = build_dns_empty_response(dns_query) {
-                                let _ = write_dns_response_to_tun(
-                                    &tun_recv_ref, &buf[..n], &empty_resp, traffic_send.clone()
+
+                            // Unknown domain: forward to upstream DNS (223.5.5.5)
+                            // via a real UDP socket on the non-VPN network.
+                            let dns_query_bytes = &buf[ihl + 8..n];
+                            if let Some(upstream_resp) = forward_dns_to_upstream(dns_query_bytes) {
+                                let ok = write_dns_response_to_tun(
+                                    &tun_recv_ref, &buf[..n], &upstream_resp, traffic_send.clone()
                                 );
+                                dns_handled += 1;
+                                if dns_handled <= 10 || dns_handled % 50 == 0 {
+                                    android_log(&format!(
+                                        "DNS: forwarded '{}' via upstream (handled={}) {}",
+                                        domain, dns_handled,
+                                        if ok { "OK" } else { "FAIL" }
+                                    ));
+                                }
+                            } else {
+                                if let Some(empty_resp) = build_dns_empty_response(dns_query) {
+                                    let _ = write_dns_response_to_tun(
+                                        &tun_recv_ref, &buf[..n], &empty_resp, traffic_send.clone()
+                                    );
+                                }
+                                dns_handled += 1;
+                                if dns_handled < 3 {
+                                    android_log(&format!(
+                                        "DNS: upstream forward failed for '{}' (returning SERVFAIL)",
+                                        domain
+                                    ));
+                                }
                             }
-                            if dns_handled < 3 {
-                                android_log(&format!(
-                                    "DNS: unknown domain '{}' (returning SERVFAIL)",
-                                    domain
-                                ));
-                            }
-                            dns_handled += 1;
+                            continue;
+                        } else {
                             continue;
                         }
-                        // Always continue — don't send DNS queries to VPN server
-                        continue;
                     }
                     // ===== End DNS resolver =====
 
@@ -1066,22 +1209,72 @@ impl SangforVpnService {
                                 pkt_count, ret, hex_str
                             ));
                         }
-                        if ret < 0 {
-                            if pkt_count <= 5 || pkt_count % 20 == 0 {
-                                android_log(&format!(
-                                    "TUN->send ERROR: EC_WriteSend failed ret={} pkt#{}",
-                                    ret, pkt_count
-                                ));
-                            }
-                        }
                         if ret >= 0 {
+                            consecutive_write_failures = 0;
+                            last_write_time = Instant::now();
                             traffic_send.bytes_sent.fetch_add(ret as u64, Ordering::Relaxed);
                             traffic_send.packets_sent.fetch_add(1, Ordering::Relaxed);
+                        } else {
+                            consecutive_write_failures += 1;
+                            if pkt_count <= 5 || pkt_count % 20 == 0 {
+                                android_log(&format!(
+                                    "TUN->send ERROR: EC_WriteSend failed ret={} pkt#{} fail#{}",
+                                    ret, pkt_count, consecutive_write_failures
+                                ));
+                            }
+                            if consecutive_write_failures >= 5 {
+                                android_log("VPN: tunnel connection lost (5 consecutive write failures), stopping relay");
+                                running_send.store(false, Ordering::Relaxed);
+                                break;
+                            }
                         }
                     }
                 } else {
                     idle += 1;
                     consecutive_empty += 1;
+
+                    if last_write_time.elapsed() >= KEEPALIVE_INTERVAL {
+                        if let Some(tun_ip) = tun_send_ip {
+                            keepalive_seq = keepalive_seq.wrapping_add(1);
+                            let gw_ip: [u8; 4] = [10, 255, 255, 1];
+                            let mut pkt = build_keepalive_dns(tun_ip, gw_ip, keepalive_seq);
+                            if let Some(assigned) = assigned_send {
+                                if tun_ip != assigned {
+                                    nat_rewrite_source_ipv4(&mut pkt, tun_ip, assigned);
+                                }
+                            }
+                            let pkt_len = pkt.len();
+                            let id = client_send.lock().as_ref().map(|c| c.id).unwrap_or(-1);
+                            if id >= 0 {
+                                let ret = unsafe {
+                                    ffi::EC_WriteSend(id, pkt.as_ptr() as *const c_void, pkt_len as c_int)
+                                };
+                                if ret >= 0 {
+                                    last_write_time = Instant::now();
+                                    keepalive_count += 1;
+                                    consecutive_write_failures = 0;
+                                    if keepalive_count <= 3 || keepalive_count % 20 == 0 {
+                                        android_log(&format!(
+                                            "VPN: keepalive #{} sent (DNS query to 10.255.255.1, id={})",
+                                            keepalive_count, keepalive_seq
+                                        ));
+                                    }
+                                } else {
+                                    consecutive_write_failures += 1;
+                                    android_log(&format!(
+                                        "VPN: keepalive #{} FAILED ret={} (id={}) fail#{}",
+                                        keepalive_count + 1, ret, keepalive_seq, consecutive_write_failures
+                                    ));
+                                    if consecutive_write_failures >= 5 {
+                                        android_log("VPN: tunnel connection lost (5 consecutive write failures), stopping relay");
+                                        running_send.store(false, Ordering::Relaxed);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if idle % 500 == 0 {
                         android_log(&format!(
                             "TUN->send IDLE: {} empty reads, {} pkt sent, {} dns, {} dropped",
@@ -1153,6 +1346,10 @@ impl SangforVpnService {
                     let _ = t.send(&buf[..n as usize]);
                     traffic_recv.bytes_received.fetch_add(n as u64, Ordering::Relaxed);
                     traffic_recv.packets_received.fetch_add(1, Ordering::Relaxed);
+                } else if n < 0 {
+                    android_log("recv->TUN: fatal read error, stopping relay");
+                    running_recv.store(false, Ordering::Relaxed);
+                    break;
                 } else {
                     err_count += 1;
                     if err_count <= 5 || err_count % 100 == 0 {
@@ -1161,7 +1358,13 @@ impl SangforVpnService {
                             n, err_count
                         ));
                     }
-                    thread::sleep(Duration::from_millis(10));
+                    let delay_ms = match err_count {
+                        0..=5 => 10,
+                        6..=50 => 100,
+                        51..=500 => 500,
+                        _ => 1000,
+                    };
+                    thread::sleep(Duration::from_millis(delay_ms));
                 }
             }
         });
@@ -1207,7 +1410,14 @@ fn android_log(msg: &str) {
     {
         let tag = std::ffi::CString::new("rust_lib_punklorde").unwrap_or_default();
         let fmt = std::ffi::CString::new("%s").unwrap_or_default();
-        let c_msg = std::ffi::CString::new(msg).unwrap_or_default();
+        let safe_msg: std::borrow::Cow<str> = if msg.contains('\0') {
+            std::borrow::Cow::Owned(msg.replace('\0', "\\0"))
+        } else {
+            std::borrow::Cow::Borrowed(msg)
+        };
+        let c_msg = std::ffi::CString::new(safe_msg.as_bytes()).unwrap_or_else(|_| {
+            std::ffi::CString::new("(log: invalid chars)").unwrap_or_default()
+        });
         unsafe {
             android_log_sys::__android_log_print(
                 6,
@@ -1411,9 +1621,144 @@ fn nat_rewrite_source_ipv4(packet: &mut [u8], from: [u8; 4], to: [u8; 4]) {
     transport[csum_offset + 1] = (final_checksum & 0xFF) as u8;
 }
 
+/// Interval for the tunnel keepalive. The reference zju-connect sends a DNS
+/// query through the tunnel roughly every minute to keep the session alive;
+/// we use 30s so strict servers never mark the tunnel idle, without the
+/// packet storm caused by the previous 1s interval.
+const KEEPALIVE_INTERVAL: Duration = Duration::from_secs(30);
+
+fn build_keepalive_dns(src_ip: [u8; 4], dst_ip: [u8; 4], dns_id: u16) -> Vec<u8> {
+    let dns_query: [u8; 31] = [
+        (dns_id >> 8) as u8, (dns_id & 0xFF) as u8,
+        0x01, 0x00,
+        0x00, 0x01,
+        0x00, 0x00,
+        0x00, 0x00,
+        0x00, 0x00,
+        0x03, b'w', b'w', b'w',
+        0x05, b'b', b'a', b'i', b'd', b'u',
+        0x03, b'c', b'o', b'm',
+        0x00,
+        0x00, 0x01,
+        0x00, 0x01,
+    ];
+
+    let udp_len: u16 = 8 + dns_query.len() as u16;
+    let total_len: u16 = 20 + udp_len;
+    let mut pkt = vec![0u8; total_len as usize];
+
+    pkt[0] = 0x45;
+    pkt[1] = 0x00;
+    pkt[2] = (total_len >> 8) as u8;
+    pkt[3] = total_len as u8;
+    pkt[4] = 0x00;
+    pkt[5] = 0x00;
+    pkt[6] = 0x40;
+    pkt[7] = 0x00;
+    pkt[8] = 64;
+    pkt[9] = 17;
+    pkt[12..16].copy_from_slice(&src_ip);
+    pkt[16..20].copy_from_slice(&dst_ip);
+
+    let mut ip_sum: u32 = 0;
+    for i in (0..20).step_by(2) {
+        ip_sum += u16::from_be_bytes([pkt[i], pkt[i + 1]]) as u32;
+    }
+    while ip_sum > 0xFFFF {
+        ip_sum = (ip_sum & 0xFFFF) + (ip_sum >> 16);
+    }
+    let ip_cksum = !(ip_sum as u16);
+    pkt[10] = (ip_cksum >> 8) as u8;
+    pkt[11] = (ip_cksum & 0xFF) as u8;
+
+    // UDP header: use a valid ephemeral source port (the previous
+    // implementation used 0, which is invalid and may be rejected or
+    // treated as malformed by the server's DNS gateway)
+    let src_port: u16 = 53000 + (dns_id.wrapping_add(1) % 10000);
+    pkt[20] = (src_port >> 8) as u8;
+    pkt[21] = (src_port & 0xFF) as u8;
+    pkt[22] = 0x00;
+    pkt[23] = 0x35;
+    pkt[24] = (udp_len >> 8) as u8;
+    pkt[25] = udp_len as u8;
+    pkt[26] = 0x00;
+    pkt[27] = 0x00;
+
+    pkt[28..].copy_from_slice(&dns_query);
+
+    let mut udp_sum: u32 = 0;
+    udp_sum += u16::from_be_bytes([pkt[12], pkt[13]]) as u32;
+    udp_sum += u16::from_be_bytes([pkt[14], pkt[15]]) as u32;
+    udp_sum += u16::from_be_bytes([pkt[16], pkt[17]]) as u32;
+    udp_sum += u16::from_be_bytes([pkt[18], pkt[19]]) as u32;
+    udp_sum += 0x0011;
+    udp_sum += udp_len as u32;
+    udp_sum += u16::from_be_bytes([pkt[20], pkt[21]]) as u32;
+    udp_sum += u16::from_be_bytes([pkt[22], pkt[23]]) as u32;
+    udp_sum += udp_len as u32;
+    udp_sum += 0x0000;
+    for i in (28..pkt.len()).step_by(2) {
+        if i + 1 < pkt.len() {
+            udp_sum += u16::from_be_bytes([pkt[i], pkt[i + 1]]) as u32;
+        } else {
+            udp_sum += (pkt[i] as u32) << 8;
+        }
+    }
+    while udp_sum > 0xFFFF {
+        udp_sum = (udp_sum & 0xFFFF) + (udp_sum >> 16);
+    }
+    let udp_cksum = !(udp_sum as u16);
+    if udp_cksum != 0 {
+        pkt[26] = (udp_cksum >> 8) as u8;
+        pkt[27] = (udp_cksum & 0xFF) as u8;
+    }
+
+    pkt
+}
+
+fn write_packet_to_tun(
+    tun: &Mutex<tun_rs::SyncDevice>,
+    packet: &[u8],
+    traffic: Arc<TrafficCounters>,
+) -> bool {
+    match tun.lock().send(packet) {
+        Ok(n) => {
+            traffic.bytes_received.fetch_add(n as u64, Ordering::Relaxed);
+            traffic.packets_received.fetch_add(1, Ordering::Relaxed);
+            true
+        }
+        Err(e) => {
+            if e.kind() != std::io::ErrorKind::WouldBlock {
+                android_log(&format!("write_packet_to_tun error: {}", e));
+            }
+            false
+        }
+    }
+}
+
 // ========== DNS Resolution Helpers ==========
 
 /// Check if an IPv4 packet is a DNS query (UDP port 53) destined for self (TUN IP)
+fn is_dns_query(packet: &[u8], n: usize) -> bool {
+    if n < 28 {
+        return false;
+    }
+    if (packet[0] >> 4) != 4 {
+        return false;
+    }
+    if packet[9] != 17 {
+        return false;
+    }
+    let ihl = ((packet[0] & 0x0F) * 4) as usize;
+    if n < ihl + 8 {
+        return false;
+    }
+    let dport = u16::from_be_bytes([packet[ihl + 2], packet[ihl + 3]]);
+    dport == 53
+}
+
+/// Check if a packet is a DNS query to a specific IP (unused, kept for reference)
+#[allow(dead_code)]
 fn is_dns_query_to_self(packet: &[u8], n: usize, tun_ip: [u8; 4]) -> bool {
     if n < 28 {
         return false;
@@ -1437,9 +1782,12 @@ fn is_dns_query_to_self(packet: &[u8], n: usize, tun_ip: [u8; 4]) -> bool {
 
 /// Parse domain name from DNS query (QNAME: label format)
 fn parse_dns_qname(packet: &[u8], ihl: usize) -> Option<String> {
-    let udp_start = ihl + 8;
-    let dns_payload = &packet[udp_start..];
-    let mut pos: usize = 0;
+    let dns_start = ihl + 8;
+    let dns_payload = &packet[dns_start..];
+    if dns_payload.len() < 17 {
+        return None;
+    }
+    let mut pos: usize = 12;
     let mut parts: Vec<String> = Vec::new();
 
     while pos < dns_payload.len() {
@@ -1448,7 +1796,6 @@ fn parse_dns_qname(packet: &[u8], ihl: usize) -> Option<String> {
             break;
         }
         if (len & 0xC0) == 0xC0 {
-            // Compressed name pointer — skip
             pos += 2;
             continue;
         }
@@ -1464,7 +1811,7 @@ fn parse_dns_qname(packet: &[u8], ihl: usize) -> Option<String> {
     if parts.is_empty() {
         None
     } else {
-        Some(parts.join("."))
+        Some(parts.join(".").to_lowercase())
     }
 }
 
@@ -1600,6 +1947,67 @@ fn build_dns_empty_response(query: &[u8]) -> Option<Vec<u8>> {
     resp[12..12 + question_len].copy_from_slice(&query[q_start..q_start + question_len]);
 
     Some(resp)
+}
+
+/// Build a DNS NOERROR response with no answers (NODATA).
+/// Used for AAAA queries to domains that only have A records.
+fn build_dns_nodata_response(query: &[u8]) -> Option<Vec<u8>> {
+    if query.len() < 12 {
+        return None;
+    }
+    let mut pos = 12usize;
+    while pos < query.len() {
+        let len = query[pos] as usize;
+        if len == 0 {
+            pos += 1;
+            break;
+        }
+        if (len & 0xC0) == 0xC0 {
+            pos += 2;
+            break;
+        }
+        pos += 1 + len;
+    }
+    if pos + 4 > query.len() {
+        return None;
+    }
+    let question_len = pos + 4 - 12;
+    let resp_len = 12 + question_len;
+    let mut resp = vec![0u8; resp_len];
+
+    resp[0] = query[0];
+    resp[1] = query[1];
+    resp[2] = 0x81;
+    resp[3] = 0x80;
+    resp[4] = query[4];
+    resp[5] = query[5];
+    resp[6] = 0x00;
+    resp[7] = 0x00;
+    resp[8] = 0x00;
+    resp[9] = 0x00;
+    resp[10] = 0x00;
+    resp[11] = 0x00;
+
+    let q_start = 12;
+    resp[12..12 + question_len].copy_from_slice(&query[q_start..q_start + question_len]);
+
+    Some(resp)
+}
+
+/// Forward a raw DNS query to an upstream resolver and return the response.
+/// Uses a short-lived UDP socket; since 223.5.5.5 is not covered by VPN
+/// routes, the traffic goes through the underlying (non-VPN) network.
+fn forward_dns_to_upstream(query: &[u8]) -> Option<Vec<u8>> {
+    let upstream = "223.5.5.5:53";
+    let socket = std::net::UdpSocket::bind("0.0.0.0:0").ok()?;
+    socket.set_read_timeout(Some(std::time::Duration::from_secs(1))).ok()?;
+    socket.send_to(query, upstream).ok()?;
+
+    let mut buf = [0u8; 512];
+    match socket.recv(&mut buf) {
+        Ok(n) => Some(buf[..n].to_vec()),
+        Err(_) => None,
+    }
 }
 
 /// Write a pre-built DNS response payload back to TUN, wrapping in IP+UDP headers.

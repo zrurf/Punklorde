@@ -66,6 +66,12 @@ class _CourseActivePageState extends State<CourseActivePage> {
     _loadActiveList();
   }
 
+  @override
+  void dispose() {
+    _jsHandler?.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadActiveList() async {
     _loading.value = true;
     try {
@@ -130,7 +136,7 @@ class _CourseActivePageState extends State<CourseActivePage> {
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           final canExit = await _handleBack();
-          if (canExit && mounted) context.pop();
+          if (canExit && context.mounted) context.pop();
         }
       },
       child: Scaffold(
@@ -414,13 +420,14 @@ class _CourseActivePageState extends State<CourseActivePage> {
         url: initUrl,
         credential: cred,
         userAgent: cred.ext?["ua"],
-        onPageStarted: (controller, url) {
+        onPageStarted: (controller, jsBridge, url) {
           _webViewController = controller;
           _jsHandler = ChaoxingJSHandler(
             controller,
+            jsBridge,
             onOpenUrl: (newUrl) async {
               // 打开独立 WebView 页面，而非在当前 WebView 内导航
-              if (mounted) {
+              if (context.mounted) {
                 context.push('/feat/chaoxing/webview', extra: newUrl);
               }
             },
