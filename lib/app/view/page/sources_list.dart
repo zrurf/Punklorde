@@ -31,86 +31,89 @@ class SourcesListPage extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Watch((context) {
-                final sources = resourceManager.sourcesSignal.value;
+              child: SignalBuilder(
+                builder: (context) {
+                  final sources = resourceManager.sourcesSignal.value;
 
-                if (sources.isEmpty) {
-                  return _buildEmptyState(context);
-                }
+                  if (sources.isEmpty) {
+                    return _buildEmptyState(context);
+                  }
 
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: ListView.separated(
-                    itemCount: sources.length,
-                    separatorBuilder: (_, _) => const FDivider(),
-                    itemBuilder: (context, index) {
-                      final source = sources[index];
-                      return InkWell(
-                        onTap: () => _showSourceEditDialog(context, source),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  spacing: 4,
-                                  children: [
-                                    Text(
-                                      source.id,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: ListView.separated(
+                      itemCount: sources.length,
+                      separatorBuilder: (_, _) => const FDivider(),
+                      itemBuilder: (context, index) {
+                        final source = sources[index];
+                        return InkWell(
+                          onTap: () => _showSourceEditDialog(context, source),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        source.id,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      source.baseUrl,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: colors.mutedForeground,
-                                        fontSize: 13,
+                                      Text(
+                                        source.baseUrl,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: colors.mutedForeground,
+                                          fontSize: 13,
+                                        ),
                                       ),
-                                    ),
-                                    Row(
-                                      spacing: 4,
-                                      children: [
-                                        FBadge(
-                                          variant: .secondary,
-                                          child: Text(
-                                            'P${source.priority}',
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                      Row(
+                                        spacing: 4,
+                                        children: [
+                                          FBadge(
+                                            variant: .secondary,
+                                            child: Text(
+                                              'P${source.priority}',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        if (!source.enabled)
-                                          FBadge(
-                                            variant: .destructive,
-                                            child: Text(t.label.expired),
-                                          ),
-                                      ],
-                                    ),
-                                  ],
+                                          if (!source.enabled)
+                                            FBadge(
+                                              variant: .destructive,
+                                              child: Text(t.label.expired),
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                LucideIcons.chevronRight,
-                                size: 18,
-                                color: colors.mutedForeground,
-                              ),
-                            ],
+                                const SizedBox(width: 8),
+                                Icon(
+                                  LucideIcons.chevronRight,
+                                  size: 18,
+                                  color: colors.mutedForeground,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -206,8 +209,8 @@ class SourcesListPage extends StatelessWidget {
                       t.setting.source_enabled,
                       style: TextStyle(color: colors.foreground),
                     ),
-                    Watch(
-                      (context) => Switch(
+                    SignalBuilder(
+                      builder: (context) => Switch(
                         value: enabledSignal.value,
                         onChanged: (v) => enabledSignal.value = v,
                       ),

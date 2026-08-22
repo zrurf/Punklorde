@@ -16,7 +16,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:signals/signals_flutter.dart';
 
-class InfoPanel extends StatefulWidget {
+class InfoPanel extends SignalStatefulWidget {
   final AuthCredential credential;
 
   const InfoPanel({super.key, required this.credential});
@@ -81,9 +81,8 @@ class _InfoPanelState extends State<InfoPanel> {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final platform = currentSchoolSignal
-        .watch(context)
-        ?.platforms[widget.credential.type];
+    final platform =
+        currentSchoolSignal.value?.platforms[widget.credential.type];
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
@@ -163,53 +162,58 @@ class _InfoPanelState extends State<InfoPanel> {
                           onPress: () {
                             showFDialog(
                               context: context,
-                              builder: (context, style, animation) => punklordeDialog(
-                                style: style,
-                                animation: animation,
-                                title: Text(t.action.login_info),
-                                body: Column(
-                                  spacing: 4,
-                                  mainAxisSize: .min,
-                                  children: [
-                                    _buildInfoField(
-                                      context,
-                                      title: t.title.user,
-                                      value: widget.credential.name,
-                                      icon: LucideIcons.user,
-                                      onLongPress: () {
-                                        copyToClipboard(widget.credential.name);
-                                      },
+                              builder: (context, style, animation) =>
+                                  punklordeDialog(
+                                    style: style,
+                                    animation: animation,
+                                    title: Text(t.action.login_info),
+                                    body: Column(
+                                      spacing: 4,
+                                      mainAxisSize: .min,
+                                      children: [
+                                        _buildInfoField(
+                                          context,
+                                          title: t.title.user,
+                                          value: widget.credential.name,
+                                          icon: LucideIcons.user,
+                                          onLongPress: () {
+                                            copyToClipboard(
+                                              widget.credential.name,
+                                            );
+                                          },
+                                        ),
+                                        _buildInfoField(
+                                          context,
+                                          title: t.title.id,
+                                          value: widget.credential.id,
+                                          icon: LucideIcons.key,
+                                          onLongPress: () {
+                                            copyToClipboard(
+                                              widget.credential.id,
+                                            );
+                                          },
+                                        ),
+                                        _buildInfoField(
+                                          context,
+                                          title: t.title.exprire_at,
+                                          value: DateFormat(
+                                            'yyyy-MM-dd HH:mm:ss',
+                                          ).format(widget.credential.expireAt),
+                                          icon: LucideIcons.history,
+                                          onLongPress: () {},
+                                        ),
+                                      ],
                                     ),
-                                    _buildInfoField(
-                                      context,
-                                      title: t.title.id,
-                                      value: widget.credential.id,
-                                      icon: LucideIcons.key,
-                                      onLongPress: () {
-                                        copyToClipboard(widget.credential.id);
-                                      },
-                                    ),
-                                    _buildInfoField(
-                                      context,
-                                      title: t.title.exprire_at,
-                                      value: DateFormat(
-                                        'yyyy-MM-dd HH:mm:ss',
-                                      ).format(widget.credential.expireAt),
-                                      icon: LucideIcons.history,
-                                      onLongPress: () {},
-                                    ),
-                                  ],
-                                ),
-                                actions: [
-                                  FButton(
-                                    size: .xs,
-                                    onPress: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text(t.notice.confirm),
+                                    actions: [
+                                      FButton(
+                                        size: .xs,
+                                        onPress: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(t.notice.confirm),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
                             );
                           },
                         ),
@@ -228,89 +232,104 @@ class _InfoPanelState extends State<InfoPanel> {
                                   showFDialog(
                                     context: context,
                                     builder: (context, style, animation) {
-                                      final colors = context.theme.colors;
-                                      final qrCode = _qrCode.watch(context);
-                                      return punklordeDialog(
-                                        style: style,
-                                        animation: animation,
-                                        title: Text(t.action.share_code),
-                                        body: (qrCode == null)
-                                            ? ((_qrBuildError.watch(context))
-                                                  ? Column(
-                                                      spacing: 4,
-                                                      mainAxisSize: .min,
-                                                      children: [
-                                                        Icon(
-                                                          LucideIcons
-                                                              .circleAlert,
-                                                          color: colors.error,
-                                                        ),
-                                                        Text(
-                                                          t
-                                                              .notice
-                                                              .share_qr_render_error,
-                                                          style: TextStyle(
-                                                            color: colors.error,
+                                      // 弹窗内容订阅信号变化，仅重建弹窗子树
+                                      return SignalBuilder(
+                                        builder: (context) {
+                                          final colors = context.theme.colors;
+                                          final qrCode = _qrCode.value;
+                                          return punklordeDialog(
+                                            style: style,
+                                            animation: animation,
+                                            title: Text(t.action.share_code),
+                                            body: (qrCode == null)
+                                                ? ((_qrBuildError.value)
+                                                      ? Column(
+                                                          spacing: 4,
+                                                          mainAxisSize: .min,
+                                                          children: [
+                                                            Icon(
+                                                              LucideIcons
+                                                                  .circleAlert,
+                                                              color:
+                                                                  colors.error,
+                                                            ),
+                                                            Text(
+                                                              t
+                                                                  .notice
+                                                                  .share_qr_render_error,
+                                                              style: TextStyle(
+                                                                color: colors
+                                                                    .error,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : FCircularProgress(
+                                                          size: .xl,
+                                                          style: .delta(
+                                                            iconStyle: .delta(
+                                                              color: colors
+                                                                  .primary,
+                                                            ),
                                                           ),
+                                                        ))
+                                                : QrImageView.withQr(
+                                                    qr: qrCode,
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    errorStateBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                        ) => Column(
+                                                          spacing: 4,
+                                                          mainAxisSize: .min,
+                                                          children: [
+                                                            Icon(
+                                                              LucideIcons
+                                                                  .circleAlert,
+                                                              color:
+                                                                  colors.error,
+                                                            ),
+                                                            Text(
+                                                              t
+                                                                  .notice
+                                                                  .share_qr_render_error,
+                                                              style: TextStyle(
+                                                                color: colors
+                                                                    .error,
+                                                              ),
+                                                            ),
+                                                          ],
                                                         ),
-                                                      ],
-                                                    )
-                                                  : FCircularProgress(
-                                                      size: .xl,
-                                                      style: .delta(
-                                                        iconStyle: .delta(
-                                                          color: colors.primary,
-                                                        ),
-                                                      ),
-                                                    ))
-                                            : QrImageView.withQr(
-                                                qr: qrCode,
-                                                backgroundColor: Colors.white,
-                                                errorStateBuilder:
-                                                    (context, error) => Column(
-                                                      spacing: 4,
-                                                      mainAxisSize: .min,
-                                                      children: [
-                                                        Icon(
-                                                          LucideIcons
-                                                              .circleAlert,
-                                                          color: colors.error,
-                                                        ),
-                                                        Text(
-                                                          t
-                                                              .notice
-                                                              .share_qr_render_error,
-                                                          style: TextStyle(
-                                                            color: colors.error,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                  ),
+                                            actions: [
+                                              FButton(
+                                                variant: .secondary,
+                                                size: .xs,
+                                                onPress:
+                                                    (_shareData.value != null)
+                                                    ? () {
+                                                        _shareAsFile();
+                                                      }
+                                                    : null,
+                                                prefix: const Icon(
+                                                  LucideIcons.fileUp,
+                                                ),
+                                                child: Text(
+                                                  t.action.file_sharing,
+                                                ),
                                               ),
-                                        actions: [
-                                          FButton(
-                                            variant: .secondary,
-                                            size: .xs,
-                                            onPress:
-                                                (_shareData.watch(context) !=
-                                                    null)
-                                                ? () {
-                                                    _shareAsFile();
-                                                  }
-                                                : null,
-                                            prefix: const Icon(
-                                              LucideIcons.fileUp,
-                                            ),
-                                            child: Text(t.action.file_sharing),
-                                          ),
-                                          FButton(
-                                            size: .xs,
-                                            onPress: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text(t.notice.confirm),
-                                          ),
-                                        ],
+                                              FButton(
+                                                size: .xs,
+                                                onPress: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: Text(t.notice.confirm),
+                                              ),
+                                            ],
+                                          );
+                                        },
                                       );
                                     },
                                   );

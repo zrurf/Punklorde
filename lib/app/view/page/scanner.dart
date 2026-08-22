@@ -52,8 +52,8 @@ class UniversalScannerPage extends StatelessWidget {
             child: Container(
               height: 120,
               padding: const .only(bottom: 30),
-              child: Watch(
-                (context) => Row(
+              child: SignalBuilder(
+                builder: (context) => Row(
                   mainAxisAlignment: .spaceEvenly,
                   children: [
                     (!controller.isPaused)

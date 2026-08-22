@@ -117,7 +117,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
 
     return PopScope(
       key: widgetKey,
-      canPop: !_isRunning.watch(context),
+      canPop: !_isRunning.value,
       onPopInvokedWithResult: (didPop, result) async {
         if (_isRunning.value) {
           showFToast(
@@ -149,7 +149,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
             ),
             // 顶部功能栏
             Visibility(
-              visible: !_isRunning.watch(context),
+              visible: !_isRunning.value,
               child: Positioned(
                 left: 12,
                 right: 12,
@@ -246,7 +246,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
             ),
             // 跑步状态栏
             Visibility(
-              visible: _isRunning.watch(context),
+              visible: _isRunning.value,
               child: Positioned(
                 left: 12,
                 right: 12,
@@ -275,63 +275,65 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                     ),
                     child: Column(
                       children: [
-                        // 顶部数据区域
+                        // 顶部数据区域（每秒变化的运动数据，SignalBuilder 局部重建）
                         Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // 运动时间
-                              _buildStatColumn(
-                                context,
-                                mainValue: formatDuration(
-                                  _duration.watch(context),
+                          child: SignalBuilder(
+                            builder: (context) => Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // 运动时间
+                                _buildStatColumn(
+                                  context,
+                                  mainValue: formatDuration(_duration.value),
+                                  mainLabel:
+                                      t.submodule.cqupt_sport.elapsed_time,
+                                  subValue:
+                                      '${t.submodule.cqupt_sport.remain_time} ${formatDuration(_remainTime.value)}',
+                                  alignment: CrossAxisAlignment.center,
                                 ),
-                                mainLabel: t.submodule.cqupt_sport.elapsed_time,
-                                subValue:
-                                    '${t.submodule.cqupt_sport.remain_time} ${formatDuration(_remainTime.watch(context))}',
-                                alignment: CrossAxisAlignment.center,
-                              ),
 
-                              Container(
-                                height: 40,
-                                width: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
+                                Container(
+                                  height: 40,
+                                  width: 1,
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                ),
 
-                              // 运动距离
-                              _buildStatColumn(
-                                context,
-                                mainValue:
-                                    "${_distance.watch(context).round()}m",
-                                mainLabel: t.submodule.cqupt_sport.distance,
-                                subValue:
-                                    '${t.submodule.cqupt_sport.target_distance} ${featUserConfig.watch(context).targetDistance.round()}m',
-                                alignment: CrossAxisAlignment.center,
-                              ),
+                                // 运动距离
+                                _buildStatColumn(
+                                  context,
+                                  mainValue: "${_distance.value.round()}m",
+                                  mainLabel: t.submodule.cqupt_sport.distance,
+                                  subValue:
+                                      '${t.submodule.cqupt_sport.target_distance} ${featUserConfig.value.targetDistance.round()}m',
+                                  alignment: CrossAxisAlignment.center,
+                                ),
 
-                              Container(
-                                height: 40,
-                                width: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
+                                Container(
+                                  height: 40,
+                                  width: 1,
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                ),
 
-                              // 速度/配速
-                              _buildStatColumn(
-                                context,
-                                mainValue: formatPace(_speed.watch(context)),
-                                mainLabel: t.submodule.cqupt_sport.pace,
-                                subValue:
-                                    '${t.submodule.cqupt_sport.speed} ${_speed.watch(context).toStringAsFixed(2)}m/s',
-                                alignment: CrossAxisAlignment.center,
-                              ),
-                            ],
+                                // 速度/配速
+                                _buildStatColumn(
+                                  context,
+                                  mainValue: formatPace(_speed.value),
+                                  mainLabel: t.submodule.cqupt_sport.pace,
+                                  subValue:
+                                      '${t.submodule.cqupt_sport.speed} ${_speed.value.toStringAsFixed(2)}m/s',
+                                  alignment: CrossAxisAlignment.center,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 8),
 
                         // 底部进度条
-                        _buildProgressBar(context),
+                        SignalBuilder(
+                          builder: (context) => _buildProgressBar(context),
+                        ),
                       ],
                     ),
                   ),
@@ -461,7 +463,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                               showFSheet(
                                 context: context,
                                 builder: (sheetContext) => UserPanel(
-                                  currentUser: featCredential.watch(context),
+                                  currentUser: featCredential.value,
                                   onSelect: (AuthCredential? credential) {
                                     if (_isRunning.value) {
                                       showFToast(
@@ -540,8 +542,8 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
 
   // 构建底部进度条
   Widget _buildProgressBar(BuildContext context) {
-    final distance = _distance.watch(context);
-    final target = featUserConfig.watch(context).targetDistance;
+    final distance = _distance.value;
+    final target = featUserConfig.value.targetDistance;
     // 计算进度百分比，最大不超过1.0
     double progress = (target > 0) ? (distance / target) : 0.0;
     if (progress > 1.0) progress = 1.0;
@@ -646,7 +648,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   // 中间的主操作按钮 (开始/结束)
   Widget _buildMainButton(BuildContext context) {
     final colors = context.theme.colors;
-    final isRunning = _isRunning.watch(context);
+    final isRunning = _isRunning.value;
 
     return GestureDetector(
       onTap: () {

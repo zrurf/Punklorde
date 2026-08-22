@@ -162,7 +162,7 @@ class _CheckinResultPageState extends State<CheckinResultPage> {
                           : FButton(
                               variant: .primary,
                               size: .sm,
-                              onPress: (_retryList.watch(context).isNotEmpty)
+                              onPress: (_retryList.value.isNotEmpty)
                                   ? () async {
                                       await widget.onRetry(
                                         _retryList.value.toList(),

@@ -207,13 +207,15 @@ class _ScannerWidgetState extends State<ScannerWidget>
       },
       child: Stack(
         children: [
-          Watch((context) {
-            final image = _frozenImage.watch(context);
-            if (image != null && _isPaused.value) {
-              return Positioned.fill(child: Image.memory(image, fit: .cover));
-            }
-            return const SizedBox.shrink();
-          }),
+          SignalBuilder(
+            builder: (context) {
+              final image = _frozenImage.value;
+              if (image != null && _isPaused.value) {
+                return Positioned.fill(child: Image.memory(image, fit: .cover));
+              }
+              return const SizedBox.shrink();
+            },
+          ),
 
           RepaintBoundary(
             key: _repaintBoundaryKey,
@@ -232,17 +234,21 @@ class _ScannerWidgetState extends State<ScannerWidget>
             ),
           ),
 
-          Watch((context) {
-            final isPaused = _isPaused.watch(context);
-            if (isPaused) return const SizedBox.shrink();
-            return _buildScanAnimation();
-          }),
+          SignalBuilder(
+            builder: (context) {
+              final isPaused = _isPaused.value;
+              if (isPaused) return const SizedBox.shrink();
+              return _buildScanAnimation();
+            },
+          ),
 
-          Watch((context) {
-            final showOverlay = _showMultiSelectOverlay.watch(context);
-            if (!showOverlay) return const SizedBox.shrink();
-            return _buildMultiSelectButtons();
-          }),
+          SignalBuilder(
+            builder: (context) {
+              final showOverlay = _showMultiSelectOverlay.value;
+              if (!showOverlay) return const SizedBox.shrink();
+              return _buildMultiSelectButtons();
+            },
+          ),
 
           Positioned(
             top: 0,
@@ -304,24 +310,28 @@ class _ScannerWidgetState extends State<ScannerWidget>
         child: Row(
           mainAxisAlignment: .spaceEvenly,
           children: [
-            Watch((context) {
-              final isPaused = _isPaused.watch(context);
-              if (isPaused) return const SizedBox(width: 60);
-              return _buildCircleButton(
-                icon: LucideIcons.image,
-                onTap: _pickImage,
-              );
-            }),
-            Watch((context) {
-              final torchOn = _torchEnabled.watch(context);
-              final isPaused = _isPaused.watch(context);
-              if (isPaused) return const SizedBox(width: 60);
-              return _buildCircleButton(
-                icon: LucideIcons.flashlight,
-                onTap: _toggleTorch,
-                isActive: torchOn,
-              );
-            }),
+            SignalBuilder(
+              builder: (context) {
+                final isPaused = _isPaused.value;
+                if (isPaused) return const SizedBox(width: 60);
+                return _buildCircleButton(
+                  icon: LucideIcons.image,
+                  onTap: _pickImage,
+                );
+              },
+            ),
+            SignalBuilder(
+              builder: (context) {
+                final torchOn = _torchEnabled.value;
+                final isPaused = _isPaused.value;
+                if (isPaused) return const SizedBox(width: 60);
+                return _buildCircleButton(
+                  icon: LucideIcons.flashlight,
+                  onTap: _toggleTorch,
+                  isActive: torchOn,
+                );
+              },
+            ),
           ],
         ),
       ),

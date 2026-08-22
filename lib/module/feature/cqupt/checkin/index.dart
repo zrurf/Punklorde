@@ -115,16 +115,13 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                   await fetchEvent(context);
                 },
                 color: colors.primary,
-                child: (_initialized.watch(context))
+                child: (_initialized.value)
                     ? ListView.builder(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        itemCount: max(
-                          checkinEventSignal.watch(context).length,
-                          1,
-                        ),
+                        itemCount: max(checkinEventSignal.value.length, 1),
                         itemBuilder: (context, index) {
                           if (checkinEventSignal.value.isEmpty) {
                             return Center(
@@ -153,105 +150,123 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                               ),
                             );
                           }
-                          final event = checkinEventSignal.watch(
-                            context,
-                          )[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: FTile(
-                              title: Column(
-                                crossAxisAlignment: .start,
-                                spacing: 4,
-                                children: [
-                                  Row(
+                          // itemBuilder 惰性执行，用 SignalBuilder 订阅信号变化
+                          return SignalBuilder(
+                            builder: (context) {
+                              final event = checkinEventSignal.value[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
+                                child: FTile(
+                                  title: Column(
+                                    crossAxisAlignment: .start,
                                     spacing: 4,
                                     children: [
-                                      Icon(
-                                        LucideIcons.layers2,
-                                        size: 16,
-                                        color: colors.primary,
+                                      Row(
+                                        spacing: 4,
+                                        children: [
+                                          Icon(
+                                            LucideIcons.layers2,
+                                            size: 16,
+                                            color: colors.primary,
+                                          ),
+                                          Text(
+                                            event.platform.name,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: colors.mutedForeground,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      Text(
+                                        event.name,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: .bold,
+                                        ),
+                                        softWrap: true,
                                       ),
                                       Text(
-                                        event.platform.name,
+                                        event.desc ?? '',
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: colors.mutedForeground,
                                         ),
+                                        softWrap: true,
                                       ),
                                     ],
                                   ),
-
-                                  Text(
-                                    event.name,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: .bold,
+                                  subtitle: Padding(
+                                    padding: .only(top: 8),
+                                    child: FBadge(
+                                      child: Text(switch (event.type) {
+                                        CheckinType.scan =>
+                                          t
+                                              .submodule
+                                              .cqupt_checkin
+                                              .qrcode_checkin,
+                                        CheckinType.position =>
+                                          t.submodule.cqupt_checkin.pos_checkin,
+                                        CheckinType.pin =>
+                                          t.submodule.cqupt_checkin.pin_checkin,
+                                        CheckinType.gesture =>
+                                          t
+                                              .submodule
+                                              .cqupt_checkin
+                                              .gesture_checkin,
+                                        CheckinType.other =>
+                                          t
+                                              .submodule
+                                              .cqupt_checkin
+                                              .unsupported_checkin,
+                                      }, style: const TextStyle(fontSize: 11)),
                                     ),
-                                    softWrap: true,
                                   ),
-                                  Text(
-                                    event.desc ?? '',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: colors.mutedForeground,
-                                    ),
-                                    softWrap: true,
-                                  ),
-                                ],
-                              ),
-                              subtitle: Padding(
-                                padding: .only(top: 8),
-                                child: FBadge(
-                                  child: Text(switch (event.type) {
-                                    CheckinType.scan =>
-                                      t.submodule.cqupt_checkin.qrcode_checkin,
-                                    CheckinType.position =>
-                                      t.submodule.cqupt_checkin.pos_checkin,
+                                  details: (event.done)
+                                      ? FBadge(
+                                          variant: .primary,
+                                          child: Text(
+                                            t
+                                                .submodule
+                                                .cqupt_checkin
+                                                .already_checkin,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                                  prefix: Icon(switch (event.type) {
+                                    CheckinType.scan => LucideIcons.qrCode,
+                                    CheckinType.position => LucideIcons.mapPin,
                                     CheckinType.pin =>
-                                      t.submodule.cqupt_checkin.pin_checkin,
+                                      LucideIcons.textCursorInput,
                                     CheckinType.gesture =>
-                                      t.submodule.cqupt_checkin.gesture_checkin,
+                                      LucideIcons.lineSquiggle,
                                     CheckinType.other =>
-                                      t
-                                          .submodule
-                                          .cqupt_checkin
-                                          .unsupported_checkin,
-                                  }, style: const TextStyle(fontSize: 11)),
+                                      LucideIcons.circleDashed,
+                                  }, size: 32),
+                                  onPress: () async {
+                                    await event.onCall(
+                                      checkinAuthSignal.value
+                                          .map((v) {
+                                            final cred =
+                                                authCredentials.value[v];
+                                            return (cred?.type ==
+                                                    event.platform.id)
+                                                ? cred
+                                                : null;
+                                          })
+                                          .nonNulls
+                                          .toSet(),
+                                    );
+                                  },
                                 ),
-                              ),
-                              details: (event.done)
-                                  ? FBadge(
-                                      variant: .primary,
-                                      child: Text(
-                                        t
-                                            .submodule
-                                            .cqupt_checkin
-                                            .already_checkin,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    )
-                                  : null,
-                              prefix: Icon(switch (event.type) {
-                                CheckinType.scan => LucideIcons.qrCode,
-                                CheckinType.position => LucideIcons.mapPin,
-                                CheckinType.pin => LucideIcons.textCursorInput,
-                                CheckinType.gesture => LucideIcons.lineSquiggle,
-                                CheckinType.other => LucideIcons.circleDashed,
-                              }, size: 32),
-                              onPress: () async {
-                                await event.onCall(
-                                  checkinAuthSignal.value
-                                      .map((v) {
-                                        final cred = authCredentials.value[v];
-                                        return (cred?.type == event.platform.id)
-                                            ? cred
-                                            : null;
-                                      })
-                                      .nonNulls
-                                      .toSet(),
-                                );
-                              },
-                            ),
+                              );
+                            },
                           );
                         },
                       )

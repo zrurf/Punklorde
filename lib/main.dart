@@ -31,7 +31,11 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   pkldFileHandler.init();
-  resetSystemChromeStyle();
+  applySystemUiStyle(
+    isDark:
+        WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+        Brightness.dark,
+  );
 
   // 初始化设备状态
   await initDeviceStatus();

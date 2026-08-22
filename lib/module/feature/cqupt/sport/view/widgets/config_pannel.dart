@@ -6,7 +6,7 @@ import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/feature/cqupt/sport/resource/resource.dart';
 import 'package:signals/signals_flutter.dart';
 
-class ConfigPanel extends StatefulWidget {
+class ConfigPanel extends SignalStatefulWidget {
   final void Function() onSelectMotionProfile;
   const ConfigPanel({super.key, required this.onSelectMotionProfile});
 
@@ -50,9 +50,8 @@ class _CanfigPanelState extends State<ConfigPanel> {
                   FSelect.searchBuilder(
                     label: Text(t.submodule.cqupt_sport.motion_profile),
                     control: FSelectControl<ResourceIndexEntry>.managed(
-                      initial: featMotionProfileIndex.watch(
-                        context,
-                      )?[featMotionProfile.watch(context)?.id],
+                      initial: featMotionProfileIndex
+                          .value?[featMotionProfile.value?.id],
                       onChange: (value) {
                         if (value != null) {
                           loadMotionProfile(value.id).then((v) {
@@ -65,8 +64,7 @@ class _CanfigPanelState extends State<ConfigPanel> {
                     ),
                     format: (ResourceIndexEntry v) => v.name,
                     filter: (query) {
-                      var lists =
-                          featMotionProfileIndex.watch(context)?.values ?? [];
+                      var lists = featMotionProfileIndex.value?.values ?? [];
                       if (query.isEmpty) return lists;
                       return lists.where(
                         (v) => v.name.contains(query) || v.id.contains(query),

@@ -23,7 +23,7 @@ final _filteredPlats = computed(() {
   return result;
 });
 
-class PrimaryAccountPageView extends StatefulWidget {
+class PrimaryAccountPageView extends SignalStatefulWidget {
   const PrimaryAccountPageView({super.key});
 
   @override
@@ -35,13 +35,13 @@ class _PrimaryAccountPageViewState extends State<PrimaryAccountPageView> {
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
 
-    final entries = _filteredPlats.watch(context)?.map((v) {
-      final guid = authIndexPrimary.watch(context)[v.id];
+    final entries = _filteredPlats.value?.map((v) {
+      final guid = authIndexPrimary.value[v.id];
       late final AuthCredential? credential;
       if (guid == null) {
         credential = null;
       } else {
-        credential = authCredentials.watch(context)[guid];
+        credential = authCredentials.value[guid];
       }
       return FTile(
         title: Text(v.name),

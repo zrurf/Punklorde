@@ -24,19 +24,19 @@ class _GuestAccountPageViewState extends State<GuestAccountPageView> {
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
 
-    final entries = (authIndexGuest.watch(context).isEmpty)
+    final entries = (authIndexGuest.value.isEmpty)
         ? null
         : currentSchoolSignal.value?.platforms.values
               .map((v) {
-                final plat = authIndexGuest.watch(context)[v.id];
+                final plat = authIndexGuest.value[v.id];
                 if (plat == null || plat.isEmpty) {
                   return null;
                 }
                 final users = plat.values
                     .map((v1) {
-                      final credential = authCredentials.watch(context)[v1];
+                      final credential = authCredentials.value[v1];
                       if (credential == null) return null;
-                      final searchStr = _searchQuery.watch(context);
+                      final searchStr = _searchQuery.value;
                       final filter =
                           (searchStr.isEmpty ||
                               credential.name.toLowerCase().contains(

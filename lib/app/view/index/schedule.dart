@@ -17,7 +17,7 @@ import 'package:punklorde/utils/etc/time.dart';
 import 'package:signals/signals_flutter.dart';
 
 /// 课表主控件
-class ScheduleView extends StatefulWidget {
+class ScheduleView extends SignalStatefulWidget {
   const ScheduleView({super.key});
   @override
   State<ScheduleView> createState() => _ScheduleViewState();
@@ -92,13 +92,13 @@ class _ScheduleViewState extends State<ScheduleView> {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final semester = currentSemesterSignal.watch(context);
-    final scheduleSrv = currentSchoolSignal.watch(context)?.scheduleServices;
+    final semester = currentSemesterSignal.value;
+    final scheduleSrv = currentSchoolSignal.value?.scheduleServices;
 
-    final displayWeek = _displayWeekSignal.watch(context);
-    final now = _currentTimeSignal.watch(context);
+    final displayWeek = _displayWeekSignal.value;
+    final now = _currentTimeSignal.value;
     final currentRealWeek = semester?.getWeekIndex(now) ?? 0;
-    final lastUpdate = lastScheduleUpdateTimeSignal.watch(context);
+    final lastUpdate = lastScheduleUpdateTimeSignal.value;
 
     return SafeArea(
       child: Column(
@@ -234,7 +234,7 @@ class _ScheduleViewState extends State<ScheduleView> {
           weekNumber: weekNumber,
           semester: semester,
           slots: scheduleSrv.slots,
-          currentTime: _currentTimeSignal.value,
+          currentTimeSignal: _currentTimeSignal,
           slotHeight: _slotHeight,
           timeAxisWidth: _timeAxisWidth,
         );
@@ -254,11 +254,11 @@ class _ScheduleViewState extends State<ScheduleView> {
 
 /// 单周课表视图组件
 /// 使用 Stack 布局实现跨时间槽课程显示
-class _WeekTable extends StatelessWidget {
+class _WeekTable extends SignalWidget {
   final int weekNumber;
   final Semester semester;
   final List<TimeSlot> slots;
-  final DateTime currentTime;
+  final ReadonlySignal<DateTime> currentTimeSignal;
   final double slotHeight;
   final double timeAxisWidth;
 
@@ -267,7 +267,7 @@ class _WeekTable extends StatelessWidget {
     required this.weekNumber,
     required this.semester,
     required this.slots,
-    required this.currentTime,
+    required this.currentTimeSignal,
     required this.slotHeight,
     required this.timeAxisWidth,
   });
@@ -280,26 +280,28 @@ class _WeekTable extends StatelessWidget {
       Duration(days: (weekNumber - 1) * 7),
     );
 
-    // 监听信号
-    final eventIndex = calendarEventIndexSignal.watch(context);
-    final baseEvents = scheduleBaseEventsSignal.watch(context);
-    final customEvents = scheduleCustomEventsSignal.watch(context);
-
-    final isCurrentWeek = semester.getWeekIndex(currentTime) == weekNumber;
-    final todayWeekday = currentTime.weekday;
+    // 监听信号（课表数据，低频变化）
+    final eventIndex = calendarEventIndexSignal.value;
+    final baseEvents = scheduleBaseEventsSignal.value;
+    final customEvents = scheduleCustomEventsSignal.value;
 
     // 计算总高度
     final totalHeight = slots.length * slotHeight;
 
     return Column(
       children: [
-        // 顶部星期栏
-        _buildHeader(
-          dateFmt,
-          weekStartDate,
-          colors,
-          isCurrentWeek,
-          todayWeekday,
+        // 顶部星期栏：仅时间相关小部件局部重建
+        SignalBuilder(
+          builder: (context) {
+            final now = currentTimeSignal.value;
+            return _buildHeader(
+              dateFmt,
+              weekStartDate,
+              colors,
+              semester.getWeekIndex(now) == weekNumber,
+              now.weekday,
+            );
+          },
         ),
         // 课表网格与内容
         Expanded(
@@ -308,10 +310,19 @@ class _WeekTable extends StatelessWidget {
               height: totalHeight,
               child: Stack(
                 children: [
-                  // 1. 底层：网格背景与左侧时间轴
-                  _buildGridBackground(colors, isCurrentWeek, todayWeekday),
+                  // 1. 底层：网格背景与左侧时间轴（仅今日高亮随时间变化）
+                  SignalBuilder(
+                    builder: (context) {
+                      final now = currentTimeSignal.value;
+                      return _buildGridBackground(
+                        colors,
+                        semester.getWeekIndex(now) == weekNumber,
+                        now.weekday,
+                      );
+                    },
+                  ),
 
-                  // 2. 中层：课程卡片 (支持跨槽)
+                  // 2. 中层：课程卡片 (支持跨槽，不随时间重建)
                   _buildEventLayer(
                     context,
                     eventIndex,
@@ -321,7 +332,15 @@ class _WeekTable extends StatelessWidget {
                   ),
 
                   // 3. 顶层：当前时间线
-                  if (isCurrentWeek) _buildTimeLine(context, todayWeekday),
+                  SignalBuilder(
+                    builder: (context) {
+                      final now = currentTimeSignal.value;
+                      if (semester.getWeekIndex(now) != weekNumber) {
+                        return const SizedBox.shrink();
+                      }
+                      return _buildTimeLine(context, now);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -624,9 +643,9 @@ class _WeekTable extends StatelessWidget {
   }
 
   /// 构建时间线
-  Widget _buildTimeLine(BuildContext context, int todayWeekday) {
+  Widget _buildTimeLine(BuildContext context, DateTime now) {
     final colors = context.theme.colors;
-    final now = currentTime;
+    final todayWeekday = now.weekday;
     final currentMinutes = now.hour * 60 + now.minute;
 
     TimeSlot? lastSlot;

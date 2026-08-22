@@ -72,7 +72,6 @@ class HomeworkPageState extends State<HomeworkPage> {
         onPageStarted: (controller, jsBridge, url) {
           _webviewController = controller;
           _jsHandler = ChaoxingJSHandler(
-            controller,
             jsBridge,
             onOpenUrl: (newUrl) async {
               _webviewController?.loadUrl(

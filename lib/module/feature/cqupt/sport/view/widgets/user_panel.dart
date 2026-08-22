@@ -25,7 +25,7 @@ final Computed<List<AuthCredential>> _filteredUsers = computed(() {
   }).toList();
 });
 
-class UserPanel extends StatefulWidget {
+class UserPanel extends SignalStatefulWidget {
   final AuthCredential? currentUser;
   final void Function(AuthCredential? credential) onSelect;
 
@@ -45,8 +45,7 @@ class _UserPanelState extends State<UserPanel> {
     final colors = context.theme.colors;
 
     final entries = Computed(
-      () => _filteredUsers
-          .watch(context)
+      () => _filteredUsers.value
           .map((v) {
             return FSelectTile.suffix(
               title: Row(
@@ -123,17 +122,19 @@ class _UserPanelState extends State<UserPanel> {
                     hint: t.notice.search_user,
                   ),
                   const SizedBox(height: 8),
-                  Watch((context) {
-                    return FSelectTileGroup<AuthCredential>(
-                      control: .managedRadio(
-                        initial: widget.currentUser,
-                        onChange: (v) {
-                          widget.onSelect(v.first);
-                        },
-                      ),
-                      children: entries.value,
-                    );
-                  }),
+                  SignalBuilder(
+                    builder: (context) {
+                      return FSelectTileGroup<AuthCredential>(
+                        control: .managedRadio(
+                          initial: widget.currentUser,
+                          onChange: (v) {
+                            widget.onSelect(v.first);
+                          },
+                        ),
+                        children: entries.value,
+                      );
+                    },
+                  ),
 
                   Visibility(
                     visible: entries.value.isEmpty,

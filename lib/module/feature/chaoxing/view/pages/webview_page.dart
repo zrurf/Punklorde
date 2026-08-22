@@ -79,7 +79,6 @@ class _ChaoxingWebViewPageState extends State<ChaoxingWebViewPage> {
                     onPageStarted: (controller, jsBridge, url) {
                       _controller = controller;
                       _jsHandler = ChaoxingJSHandler(
-                        controller,
                         jsBridge,
                         onOpenUrl: (newUrl) async {
                           _controller?.loadUrl(

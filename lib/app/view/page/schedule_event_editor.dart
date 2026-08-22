@@ -26,7 +26,7 @@ void showCustomEventEditor(BuildContext context, {ScheduleEvent? event}) {
 }
 
 /// 自定义日程编辑底部面板
-class _CustomEventEditorSheet extends StatefulWidget {
+class _CustomEventEditorSheet extends SignalStatefulWidget {
   final ScheduleEvent? event;
   final Semester semester;
   final List<TimeSlot> slots;
@@ -233,85 +233,87 @@ class _CustomEventEditorSheetState extends State<_CustomEventEditorSheet> {
                     _buildSectionLabel(t.title.time_schedule),
 
                     // 星期 / 节次 / 跨节数 —— 多轮 Picker
-                    Watch((_) {
-                      final dayIndex = _selectedDay.value - 1;
-                      final slotIndex = widget.slots
-                          .indexWhere(
-                            (s) => s.index == _selectedSlotIndex.value,
-                          )
-                          .clamp(0, widget.slots.length - 1);
-                      final mx = _maxSpan;
-                      final spanIndex = _slotSpan.value.clamp(1, mx) - 1;
+                    SignalBuilder(
+                      builder: (_) {
+                        final dayIndex = _selectedDay.value - 1;
+                        final slotIndex = widget.slots
+                            .indexWhere(
+                              (s) => s.index == _selectedSlotIndex.value,
+                            )
+                            .clamp(0, widget.slots.length - 1);
+                        final mx = _maxSpan;
+                        final spanIndex = _slotSpan.value.clamp(1, mx) - 1;
 
-                      return SizedBox(
-                        height: 150,
-                        child: FPicker(
-                          key: ValueKey('time_picker_$mx'),
-                          control: FPickerControl.managed(
-                            initial: [dayIndex, slotIndex, spanIndex],
-                            onChange: (v) {
-                              _selectedDay.value = v[0] + 1;
-                              final newSlotIndex = widget.slots[v[1]].index;
-                              _selectedSlotIndex.value = newSlotIndex;
-                              final newSpan = v[2] + 1;
-                              if (newSpan > _maxSpan) {
-                                _slotSpan.value = _maxSpan;
-                              } else {
-                                _slotSpan.value = newSpan;
-                              }
-                            },
+                        return SizedBox(
+                          height: 150,
+                          child: FPicker(
+                            key: ValueKey('time_picker_$mx'),
+                            control: FPickerControl.managed(
+                              initial: [dayIndex, slotIndex, spanIndex],
+                              onChange: (v) {
+                                _selectedDay.value = v[0] + 1;
+                                final newSlotIndex = widget.slots[v[1]].index;
+                                _selectedSlotIndex.value = newSlotIndex;
+                                final newSpan = v[2] + 1;
+                                if (newSpan > _maxSpan) {
+                                  _slotSpan.value = _maxSpan;
+                                } else {
+                                  _slotSpan.value = newSpan;
+                                }
+                              },
+                            ),
+                            children: [
+                              FPickerWheel(
+                                flex: 1,
+                                children: [
+                                  for (int i = 0; i < 7; i++)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2,
+                                      ),
+                                      child: Text(
+                                        _dayLabels[i],
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              FPickerWheel(
+                                flex: 2,
+                                children: [
+                                  for (final slot in widget.slots)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2,
+                                      ),
+                                      child: Text(
+                                        slot.name,
+                                        overflow: .fade,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              FPickerWheel(
+                                flex: 1,
+                                children: [
+                                  for (int i = 1; i <= mx; i++)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 2,
+                                      ),
+                                      child: Text(
+                                        '$i节',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
-                          children: [
-                            FPickerWheel(
-                              flex: 1,
-                              children: [
-                                for (int i = 0; i < 7; i++)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                    ),
-                                    child: Text(
-                                      _dayLabels[i],
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            FPickerWheel(
-                              flex: 2,
-                              children: [
-                                for (final slot in widget.slots)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                    ),
-                                    child: Text(
-                                      slot.name,
-                                      overflow: .fade,
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            FPickerWheel(
-                              flex: 1,
-                              children: [
-                                for (int i = 1; i <= mx; i++)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                    ),
-                                    child: Text(
-                                      '$i节',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
 
                     const FDivider(),
 
@@ -344,7 +346,7 @@ class _CustomEventEditorSheetState extends State<_CustomEventEditorSheet> {
                         ),
                         const Spacer(),
                         Text(
-                          '${_selectedWeeks.watch(context).length}/${widget.semester.week}',
+                          '${_selectedWeeks.value.length}/${widget.semester.week}',
                           style: TextStyle(
                             fontSize: 12,
                             color: colors.mutedForeground,
@@ -353,84 +355,90 @@ class _CustomEventEditorSheetState extends State<_CustomEventEditorSheet> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Watch((_) {
-                      return Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: [
-                          for (int w = 1; w <= widget.semester.week; w++)
-                            _buildWeekChip(w, colors),
-                        ],
-                      );
-                    }),
+                    SignalBuilder(
+                      builder: (_) {
+                        return Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: [
+                            for (int w = 1; w <= widget.semester.week; w++)
+                              _buildWeekChip(w, colors),
+                          ],
+                        );
+                      },
+                    ),
 
                     const FDivider(),
 
                     // 颜色选择
                     _buildSectionLabel(t.title.schedule_color),
-                    Watch((_) {
-                      return Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: [
-                          for (final opt in _colorOptions)
-                            GestureDetector(
-                              onTap: () => _selectedColor.value = opt.color,
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: Color(opt.color),
-                                  shape: BoxShape.circle,
-                                  border: _selectedColor.value == opt.color
-                                      ? Border.all(
-                                          color: colors.foreground,
-                                          width: 2.5,
-                                        )
-                                      : Border.all(
-                                          color: colors.border,
-                                          width: 0.5,
-                                        ),
+                    SignalBuilder(
+                      builder: (_) {
+                        return Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final opt in _colorOptions)
+                              GestureDetector(
+                                onTap: () => _selectedColor.value = opt.color,
+                                child: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: Color(opt.color),
+                                    shape: BoxShape.circle,
+                                    border: _selectedColor.value == opt.color
+                                        ? Border.all(
+                                            color: colors.foreground,
+                                            width: 2.5,
+                                          )
+                                        : Border.all(
+                                            color: colors.border,
+                                            width: 0.5,
+                                          ),
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
-                      );
-                    }),
+                          ],
+                        );
+                      },
+                    ),
 
                     // 自定义 Hex —— 始终显示当前颜色的 Hex，可直接修改
                     _buildLabel('Hex 颜色'),
-                    Watch((_) {
-                      return Row(
-                        spacing: 8,
-                        children: [
-                          Expanded(
-                            child: FTextField(
-                              control: .managed(controller: _hexController),
-                              hint: '#AARRGGBB',
+                    SignalBuilder(
+                      builder: (_) {
+                        return Row(
+                          spacing: 8,
+                          children: [
+                            Expanded(
+                              child: FTextField(
+                                control: .managed(controller: _hexController),
+                                hint: '#AARRGGBB',
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: Color(_selectedColor.value),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: colors.border),
+                            Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                color: Color(_selectedColor.value),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: colors.border),
+                              ),
                             ),
-                          ),
-                          FButton(
-                            variant: .secondary,
-                            size: .xs,
-                            onPress: _applyHexColor,
-                            child: const Text(
-                              '应用',
-                              style: TextStyle(fontSize: 12),
+                            FButton(
+                              variant: .secondary,
+                              size: .xs,
+                              onPress: _applyHexColor,
+                              child: const Text(
+                                '应用',
+                                style: TextStyle(fontSize: 12),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    }),
+                          ],
+                        );
+                      },
+                    ),
 
                     const FDivider(),
 

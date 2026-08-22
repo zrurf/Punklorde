@@ -17,7 +17,7 @@ import 'package:punklorde/src/rust/services/sangfor.dart'
     hide VpnTrafficStats; // Use local VpnTrafficStats from data.dart
 import 'package:signals/signals_flutter.dart';
 
-class FeatSangforVpnView extends StatefulWidget {
+class FeatSangforVpnView extends SignalStatefulWidget {
   final String? defaultServer;
 
   const FeatSangforVpnView({super.key, this.defaultServer});
@@ -155,10 +155,7 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
     // VPN 隧道依赖 Android 的 VpnService/TUN 能力，iOS 平台暂不支持
     if (!Platform.isAndroid) {
       _showError(t.submodule.sangfor_vpn.status_failed);
-      addVpnLog(
-        VpnLogLevel.error,
-        'Sangfor VPN is only supported on Android.',
-      );
+      addVpnLog(VpnLogLevel.error, 'Sangfor VPN is only supported on Android.');
       return;
     }
 
@@ -429,9 +426,9 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final isRunning = vpnIsRunning.watch(context);
-    final status = vpnStatus.watch(context);
-    final showConsole = vpnShowConsole.watch(context);
+    final isRunning = vpnIsRunning.value;
+    final status = vpnStatus.value;
+    final showConsole = vpnShowConsole.value;
 
     return PopScope(
       canPop: !isRunning,

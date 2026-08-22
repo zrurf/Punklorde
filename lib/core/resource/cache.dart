@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
@@ -6,6 +8,10 @@ import 'package:punklorde/core/resource/model.dart';
 
 class CacheService {
   late final Directory _cacheDir;
+  File? _accessedFile;
+
+  // key -> 最近使用时间（由应用自行记录，避免依赖文件系统 atime）
+  Map<String, DateTime> _accessedAt = {};
 
   Future<void> init() async {
     final appDir = await getApplicationSupportDirectory();
@@ -13,6 +19,41 @@ class CacheService {
     if (!await _cacheDir.exists()) {
       await _cacheDir.create(recursive: true);
     }
+    _accessedFile = File(p.join(_cacheDir.path, '.last_accessed.json'));
+    await _loadAccessedAt();
+  }
+
+  Future<void> _loadAccessedAt() async {
+    final file = _accessedFile;
+    if (file == null || !await file.exists()) return;
+    try {
+      final json = jsonDecode(await file.readAsString());
+      if (json is! Map) return;
+      _accessedAt = {
+        for (final e in json.entries)
+          if (e.value is String && DateTime.tryParse(e.value as String) != null)
+            e.key: DateTime.parse(e.value as String),
+      };
+    } catch (_) {
+      _accessedAt = {};
+    }
+  }
+
+  Future<void> _persistAccessedAt() async {
+    final file = _accessedFile;
+    if (file == null) return;
+    final data = {
+      for (final e in _accessedAt.entries) e.key: e.value.toIso8601String(),
+    };
+    try {
+      await file.writeAsString(jsonEncode(data), flush: true);
+    } catch (_) {
+      // 持久化失败不阻塞业务
+    }
+  }
+
+  void _recordAccess(String key) {
+    _accessedAt[key] = DateTime.now();
   }
 
   /// 获取缓存目录路径
@@ -33,13 +74,17 @@ class CacheService {
       if (entity is File) {
         final stat = await entity.stat();
         final relativePath = p.relative(entity.path, from: _cacheDir.path);
+        // 忽略元数据文件
+        if (p.basename(relativePath).startsWith('.')) continue;
         entries.add(
           CacheEntry(
             key: p.split(relativePath).join('/'),
             filePath: entity.path,
             size: stat.size,
             lastModified: stat.modified,
-            lastAccessed: stat.accessed,
+            // 使用应用自行记录的最近使用时间；文件系统 atime 在多数设备上
+            // 并不可靠（常等于创建/修改时间），因此不再回退到 stat.accessed
+            lastAccessed: _accessedAt[p.split(relativePath).join('/')],
           ),
         );
       }
@@ -69,11 +114,13 @@ class CacheService {
     return age < expiryDuration;
   }
 
-  /// 读取缓存
+  /// 读取缓存（会更新该缓存的“最后使用时间”）
   Future<String?> readCache(String key) async {
     final filePath = getCachePath(key);
     final file = File(filePath);
     if (await file.exists()) {
+      _recordAccess(key);
+      unawaited(_persistAccessedAt());
       return filePath;
     }
     return null;
@@ -93,6 +140,8 @@ class CacheService {
           await dir.delete();
         }
       }
+      _accessedAt.remove(key);
+      unawaited(_persistAccessedAt());
       return true;
     }
     return false;
@@ -111,6 +160,7 @@ class CacheService {
     }
     await _cacheDir.delete(recursive: true);
     await _cacheDir.create(recursive: true);
+    _accessedAt = {};
     return count;
   }
 
@@ -120,6 +170,8 @@ class CacheService {
     final file = File(filePath);
     await file.parent.create(recursive: true);
     await file.writeAsBytes(data, flush: true);
+    _recordAccess(key);
+    unawaited(_persistAccessedAt());
     return filePath;
   }
 }

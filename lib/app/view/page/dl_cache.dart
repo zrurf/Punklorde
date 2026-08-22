@@ -89,8 +89,8 @@ class _DlCachePageState extends State<DlCachePage> {
         child: Column(
           children: [
             // --- 头部（仅当 entries 列表为空/非空变化时重建） ---
-            Watch(
-              (context) => FHeader.nested(
+            SignalBuilder(
+              builder: (context) => FHeader.nested(
                 title: Text(t.setting.dl_cache),
                 prefixes: [FHeaderAction.back(onPress: () => context.pop())],
                 suffixes: _entriesSignal.value.isEmpty
@@ -112,81 +112,88 @@ class _DlCachePageState extends State<DlCachePage> {
               ),
             ),
             // --- 摘要栏（仅当总量 / 数量 / loading 变化时重建） ---
-            Watch((context) {
-              if (_loadingSignal.value || _entriesSignal.value.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      LucideIcons.hardDrive,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${t.setting.cache_total}: ${_formatSize(_totalSizeSignal.value)}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colors.mutedForeground,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(
-                      LucideIcons.file,
-                      size: 16,
-                      color: colors.mutedForeground,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${t.setting.cache_count}: ${_entriesSignal.value.length}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: colors.mutedForeground,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-            // --- 内容区（仅当 loading / 空状态 / 列表项数量变化时重建） ---
-            Expanded(
-              child: Watch((context) {
-                final loading = _loadingSignal.value;
-                final entries = _entriesSignal.value;
-
-                if (loading) {
-                  return const Center(child: CircularProgressIndicator());
+            SignalBuilder(
+              builder: (context) {
+                if (_loadingSignal.value || _entriesSignal.value.isEmpty) {
+                  return const SizedBox.shrink();
                 }
-                if (entries.isEmpty) {
-                  return _buildEmptyState();
-                }
-
                 return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ListView.separated(
-                    itemCount: entries.length,
-                    separatorBuilder: (_, _) => const FDivider(),
-                    itemBuilder: (context, index) {
-                      final entry = entries[index];
-                      return _CacheTile(
-                        entry: entry,
-                        isRefreshing: _getIsRefreshing(entry.key),
-                        onRefresh: () => _doRefreshSingle(entry.key),
-                        onDelete: () => _confirmDeleteCache(entry.key),
-                        onTap: () => _showDetailDialog(entry),
-                        formatSize: _formatSize,
-                        formatDate: _formatDate,
-                      );
-                    },
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.hardDrive,
+                        size: 16,
+                        color: colors.mutedForeground,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        '${t.setting.cache_total}: ${_formatSize(_totalSizeSignal.value)}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colors.mutedForeground,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Icon(
+                        LucideIcons.file,
+                        size: 16,
+                        color: colors.mutedForeground,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        '${t.setting.cache_count}: ${_entriesSignal.value.length}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: colors.mutedForeground,
+                        ),
+                      ),
+                    ],
                   ),
                 );
-              }),
+              },
+            ),
+            // --- 内容区（仅当 loading / 空状态 / 列表项数量变化时重建） ---
+            Expanded(
+              child: SignalBuilder(
+                builder: (context) {
+                  final loading = _loadingSignal.value;
+                  final entries = _entriesSignal.value;
+
+                  if (loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (entries.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: ListView.separated(
+                      itemCount: entries.length,
+                      separatorBuilder: (_, _) => const FDivider(),
+                      itemBuilder: (context, index) {
+                        final entry = entries[index];
+                        return _CacheTile(
+                          entry: entry,
+                          isRefreshing: _getIsRefreshing(entry.key),
+                          onRefresh: () => _doRefreshSingle(entry.key),
+                          onDelete: () => _confirmDeleteCache(entry.key),
+                          onTap: () => _showDetailDialog(entry),
+                          formatSize: _formatSize,
+                          formatDate: _formatDate,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -498,95 +505,99 @@ class _CacheTile extends StatelessWidget {
     final t = Translations.of(context);
     final colors = context.theme.colors;
 
-    return Watch((context) {
-      final refreshing = isRefreshing.value;
+    return SignalBuilder(
+      builder: (context) {
+        final refreshing = isRefreshing.value;
 
-      return InkWell(
-        onTap: refreshing ? null : onTap,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 3,
-                children: [
-                  Text(
-                    entry.key,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  Row(
-                    spacing: 8,
-                    children: [
-                      Text(
-                        formatSize(entry.size),
-                        style: TextStyle(
-                          color: colors.mutedForeground,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        '${t.title.last_update}: ${formatDate(entry.lastModified)}',
-                        style: TextStyle(
-                          color: colors.mutedForeground,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (entry.lastAccessed != null)
+        return InkWell(
+          onTap: refreshing ? null : onTap,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 3,
+                  children: [
                     Text(
-                      '${t.setting.cache_last_accessed}: ${formatDate(entry.lastAccessed!)}',
-                      style: TextStyle(
-                        color: colors.mutedForeground,
-                        fontSize: 12,
+                      entry.key,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 2,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          formatSize(entry.size),
+                          style: TextStyle(
+                            color: colors.mutedForeground,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          '${t.title.last_update}: ${formatDate(entry.lastModified)}',
+                          style: TextStyle(
+                            color: colors.mutedForeground,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (entry.lastAccessed != null)
+                      Text(
+                        '${t.setting.cache_last_accessed}: ${formatDate(entry.lastAccessed!)}',
+                        style: TextStyle(
+                          color: colors.mutedForeground,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (refreshing)
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colors.primary,
+                  ],
                 ),
-              )
-            else
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(LucideIcons.refreshCw),
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    iconSize: 18,
-                    padding: EdgeInsets.zero,
-                    onPressed: onRefresh,
-                    tooltip: t.setting.cache_refresh,
-                  ),
-                  IconButton(
-                    icon: Icon(LucideIcons.trash2, color: colors.destructive),
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    iconSize: 18,
-                    padding: EdgeInsets.zero,
-                    onPressed: onDelete,
-                    tooltip: t.action.delete,
-                  ),
-                ],
               ),
-          ],
-        ),
-      );
-    });
+              const SizedBox(width: 8),
+              if (refreshing)
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.primary,
+                  ),
+                )
+              else
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(LucideIcons.refreshCw),
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      onPressed: onRefresh,
+                      tooltip: t.setting.cache_refresh,
+                    ),
+                    IconButton(
+                      icon: Icon(LucideIcons.trash2, color: colors.destructive),
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      iconSize: 18,
+                      padding: EdgeInsets.zero,
+                      onPressed: onDelete,
+                      tooltip: t.action.delete,
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

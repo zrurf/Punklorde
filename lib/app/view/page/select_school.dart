@@ -19,13 +19,13 @@ final _filteredSchools = computed(() {
   }).toList();
 });
 
-class SelectSchoolPageView extends StatelessWidget {
+class SelectSchoolPageView extends SignalWidget {
   const SelectSchoolPageView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final entries = _filteredSchools.watch(context).map((v) {
+    final entries = _filteredSchools.value.map((v) {
       return FTile(
         prefix: Image.asset(v.logo, width: 32, height: 32),
         title: Text(v.name),
@@ -87,8 +87,8 @@ class SelectSchoolPageView extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const .symmetric(horizontal: 16),
-                child: Watch(
-                  (context) => ListView.builder(
+                child: SignalBuilder(
+                  builder: (context) => ListView.builder(
                     itemCount: result.length,
                     itemBuilder: (context, index) {
                       return Padding(

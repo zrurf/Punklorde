@@ -1,15 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:punklorde/module/feature/chaoxing/core/jsbridge.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class ChaoxingJSHandler {
-  final InAppWebViewController _controller;
   final ChaoxingJSBridge _jsBridge;
   final Future<void> Function(String url)? onOpenUrl;
 
-  ChaoxingJSHandler(this._controller, this._jsBridge, {this.onOpenUrl});
+  ChaoxingJSHandler(this._jsBridge, {this.onOpenUrl});
 
   /// 释放资源
   void dispose() {}

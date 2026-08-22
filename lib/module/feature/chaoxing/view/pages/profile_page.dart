@@ -8,15 +8,14 @@ import 'package:punklorde/module/platform/chaoxing/chaoxing.dart';
 import 'package:punklorde/utils/etc/time.dart';
 import 'package:signals/signals_flutter.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends SignalWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final credential = authCredentials.watch(
-      context,
-    )[authIndexPrimary.watch(context)[platChaoxing.id]];
+    final credential = authCredentials.value[
+        authIndexPrimary.value[platChaoxing.id]];
 
     if (credential == null) {
       return Center(

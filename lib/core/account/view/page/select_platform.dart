@@ -31,7 +31,7 @@ class _SelectPlatformPageState extends State<SelectPlatformPage> {
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
 
-    final entries = _filteredPlats.watch(context)?.map((v) {
+    final entries = _filteredPlats.value?.map((v) {
       return FTile(
         title: Text(v.name),
         suffix: Icon(LucideIcons.chevronRight),

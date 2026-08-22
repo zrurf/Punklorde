@@ -43,10 +43,10 @@ class _FeatChaonxingViewState extends State<FeatChaonxingView> {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final index = _tabIndex.watch(context);
+    final index = _tabIndex.value;
     final tab = t.submodule.chaoxing;
     // 仅当不在作业 Tab 或作业 WebView 在首页时显示底部导航栏
-    final showBottomNav = index != 1 || _isAtHomeworkHome.watch(context);
+    final showBottomNav = index != 1 || _isAtHomeworkHome.value;
 
     return PopScope(
       canPop: false,

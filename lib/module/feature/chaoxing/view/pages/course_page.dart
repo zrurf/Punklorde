@@ -7,7 +7,7 @@ import 'package:punklorde/module/feature/chaoxing/data.dart';
 import 'package:punklorde/module/feature/chaoxing/model/common.dart';
 import 'package:signals/signals_flutter.dart';
 
-class CoursePage extends StatefulWidget {
+class CoursePage extends SignalStatefulWidget {
   const CoursePage({super.key});
 
   @override
@@ -31,8 +31,8 @@ class _CoursePageState extends State<CoursePage> {
 
   @override
   Widget build(BuildContext context) {
-    final loading = _loading.watch(context);
-    final classes = clazzList.watch(context);
+    final loading = _loading.value;
+    final classes = clazzList.value;
     final colors = context.theme.colors;
 
     if (loading && classes.isEmpty) {

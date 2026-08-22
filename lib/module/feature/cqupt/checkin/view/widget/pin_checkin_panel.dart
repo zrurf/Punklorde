@@ -6,7 +6,7 @@ import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:signals/signals_flutter.dart';
 
-class PinCheckinPanel extends StatefulWidget {
+class PinCheckinPanel extends SignalStatefulWidget {
   final String title;
   final String desc;
   final int length;
@@ -77,9 +77,7 @@ class _PinCheckinPanelState extends State<PinCheckinPanel> {
                     Center(
                       child: Pinput(
                         length: widget.length,
-                        defaultPinTheme: switch (themeModeSignal.watch(
-                          context,
-                        )) {
+                        defaultPinTheme: switch (themeModeSignal.value) {
                           .system =>
                             (MediaQuery.of(context).platformBrightness ==
                                     Brightness.dark)

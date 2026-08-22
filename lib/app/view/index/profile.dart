@@ -20,7 +20,7 @@ final Computed<IconData> _themeIcon = Computed(() {
   }
 });
 
-class ProfileView extends StatelessWidget {
+class ProfileView extends SignalWidget {
   const ProfileView({super.key});
 
   @override
@@ -57,10 +57,7 @@ class ProfileView extends StatelessWidget {
                 ),
                 FTile(
                   title: Text(t.setting.theme),
-                  suffix: Icon(
-                    _themeIcon.watch(context),
-                    color: colors.primary,
-                  ),
+                  suffix: Icon(_themeIcon.value, color: colors.primary),
                   onPress: () {
                     cycleThemeMode();
                   },

@@ -14,7 +14,7 @@ import 'package:punklorde/module/model/auth.dart';
 import 'package:signals/signals.dart';
 import 'package:signals/signals_flutter.dart' hide signal;
 
-class GuestAddPage extends StatefulWidget {
+class GuestAddPage extends SignalStatefulWidget {
   final dynamic data;
   const GuestAddPage({super.key, required this.data});
 
@@ -75,18 +75,18 @@ class _GuestAddPageState extends State<GuestAddPage> {
                 mainAxisAlignment: .center,
                 children: [
                   Icon(
-                    (error.watch(context) == null)
+                    (error.value == null)
                         ? ((isExist.value)
                               ? LucideIcons.circleCheck
                               : LucideIcons.userRoundPlus)
                         : LucideIcons.circleX,
-                    color: (error.watch(context) == null)
+                    color: (error.value == null)
                         ? colors.primary
                         : colors.error,
                     size: 50,
                   ),
                   Visibility(
-                    visible: isExist.watch(context),
+                    visible: isExist.value,
                     child: Text(
                       t.notice.current_guest_exist,
                       style: TextStyle(
@@ -100,17 +100,15 @@ class _GuestAddPageState extends State<GuestAddPage> {
                   SingleChildScrollView(
                     child: Column(
                       spacing: 8,
-                      children: (credential.watch(context) != null)
+                      children: (credential.value != null)
                           ? [
                               _buildInfoField(
                                 context,
                                 title: t.title.platform,
                                 value:
                                     currentSchoolSignal
-                                        .watch(context)
-                                        ?.platforms[credential
-                                            .watch(context)
-                                            ?.type]
+                                        .value
+                                        ?.platforms[credential.value?.type]
                                         ?.name ??
                                     t.title.unknown_platform,
                                 icon: LucideIcons.layers2,
@@ -118,26 +116,25 @@ class _GuestAddPageState extends State<GuestAddPage> {
                               _buildInfoField(
                                 context,
                                 title: t.title.user,
-                                value: credential.watch(context)?.name ?? "?",
+                                value: credential.value?.name ?? "?",
                                 icon: LucideIcons.userRound,
                               ),
                               _buildInfoField(
                                 context,
                                 title: t.title.id,
-                                value: credential.watch(context)?.id ?? "?",
+                                value: credential.value?.id ?? "?",
                                 icon: LucideIcons.key,
                               ),
                               _buildInfoField(
                                 context,
                                 title: t.title.exprire_at,
                                 value: formatDate(
-                                  credential.watch(context)?.expireAt ??
-                                      DateTime.now(),
+                                  credential.value?.expireAt ?? DateTime.now(),
                                 ),
                                 icon: LucideIcons.history,
                               ),
                             ]
-                          : ((error.watch(context) != null)
+                          : ((error.value != null)
                                 ? [
                                     FCircularProgress(
                                       size: .xl,
@@ -150,7 +147,7 @@ class _GuestAddPageState extends State<GuestAddPage> {
                                   ]
                                 : [
                                     Text(
-                                      error.watch(context) ?? "",
+                                      error.value ?? "",
                                       style: TextStyle(color: colors.error),
                                     ),
                                   ]),
@@ -158,7 +155,7 @@ class _GuestAddPageState extends State<GuestAddPage> {
                   ),
                   FDivider(),
                   FButton(
-                    onPress: (credential.watch(context) != null)
+                    onPress: (credential.value != null)
                         ? () async {
                             final context = widgetKey.currentContext;
                             if (credential.value == null) return;
@@ -206,7 +203,7 @@ class _GuestAddPageState extends State<GuestAddPage> {
                           }
                         : null,
                     prefix: const Icon(LucideIcons.plus),
-                    child: (isExist.watch(context))
+                    child: (isExist.value)
                         ? Text(t.action.re_add_guest)
                         : Text(t.action.add_guest),
                   ),

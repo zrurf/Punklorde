@@ -15,61 +15,63 @@ final SchoolTab tabSchedule = SchoolTab(
   id: 'common_schedule',
   name: '日程',
   widget: (BuildContext context) {
-    final colors = context.theme.colors;
-    final events = todayRemainingEventsSignal.watch(context);
-    final semester = currentSemesterSignal.watch(context);
-    final slots =
-        currentSchoolSignal.watch(context)?.scheduleServices.slots ?? [];
-    bool isActive = false;
-    if (semester != null && events.isNotEmpty) {
-      isActive = isEventActive(
-        event: events.first,
-        time: DateTime.now(),
-        semester: semester,
-        slots: slots,
-      );
-    }
-    return SizedBox.expand(
-      child: Padding(
-        padding: const .symmetric(horizontal: 16, vertical: 4),
-        child: (events.isNotEmpty)
-            ? ListView.builder(
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final ev = events[index];
-                  return Padding(
-                    padding: const .symmetric(vertical: 4),
-                    child: _buildEventCard(
-                      context,
-                      slots,
-                      ev,
-                      index + (isActive ? 0 : 1),
-                    ),
-                  );
-                },
-              )
-            : Padding(
-                padding: const .all(8),
-                child: Column(
-                  spacing: 8,
-                  children: [
-                    Icon(
-                      LucideIcons.rockingChair,
-                      size: 24,
-                      color: colors.primary,
-                    ),
-                    Text(
-                      t.notice.schedule_empty,
-                      style: TextStyle(
-                        color: colors.mutedForeground,
-                        fontSize: 16,
+    return SignalBuilder(builder: (context) {
+      final colors = context.theme.colors;
+      final events = todayRemainingEventsSignal.value;
+      final semester = currentSemesterSignal.value;
+      final slots =
+          currentSchoolSignal.value?.scheduleServices.slots ?? [];
+      bool isActive = false;
+      if (semester != null && events.isNotEmpty) {
+        isActive = isEventActive(
+          event: events.first,
+          time: DateTime.now(),
+          semester: semester,
+          slots: slots,
+        );
+      }
+      return SizedBox.expand(
+        child: Padding(
+          padding: const .symmetric(horizontal: 16, vertical: 4),
+          child: (events.isNotEmpty)
+              ? ListView.builder(
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    final ev = events[index];
+                    return Padding(
+                      padding: const .symmetric(vertical: 4),
+                      child: _buildEventCard(
+                        context,
+                        slots,
+                        ev,
+                        index + (isActive ? 0 : 1),
                       ),
-                    ),
-                  ],
+                    );
+                  },
+                )
+              : Padding(
+                  padding: const .all(8),
+                  child: Column(
+                    spacing: 8,
+                    children: [
+                      Icon(
+                        LucideIcons.rockingChair,
+                        size: 24,
+                        color: colors.primary,
+                      ),
+                      Text(
+                        t.notice.schedule_empty,
+                        style: TextStyle(
+                          color: colors.mutedForeground,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-      ),
-    );
+        ),
+      );
+    });
   },
 );
 

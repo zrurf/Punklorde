@@ -67,7 +67,7 @@ class _StudentListPageState extends State<StudentListPage> {
 }
 
 /// 表格内容——独立组件，signal 变更只重建此区域
-class _TableBody extends StatelessWidget {
+class _TableBody extends SignalWidget {
   final Signal<List<StudentInfo>?> studentList;
   final Signal<bool> isError;
 
@@ -97,8 +97,8 @@ class _TableBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final students = studentList.watch(context);
-    final error = isError.watch(context);
+    final students = studentList.value;
+    final error = isError.value;
 
     // ---- 加载 / 错误态 ----
     if (students == null) {

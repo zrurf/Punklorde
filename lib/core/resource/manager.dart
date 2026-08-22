@@ -18,7 +18,6 @@ class ResourceManager {
 
   // Provider 链
   late final RemoteProvider _remoteProvider;
-  final LocalAssetProvider _localProvider = LocalAssetProvider();
 
   ResourceManager({required Dio dio, required CacheService cacheService})
     : _dio = dio,

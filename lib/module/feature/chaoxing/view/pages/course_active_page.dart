@@ -114,7 +114,7 @@ class _CourseActivePageState extends State<CourseActivePage> {
 
   @override
   Widget build(BuildContext context) {
-    final tab = _tabIndex.watch(context);
+    final tab = _tabIndex.value;
 
     // 切到 WebView tab 时标记已打开
     if (tab == 1 || tab == 2) {
@@ -219,8 +219,8 @@ class _CourseActivePageState extends State<CourseActivePage> {
   // ===== 活动 Tab =====
 
   Widget _buildActivesView() {
-    final actives = _actives.watch(context);
-    final loading = _loading.watch(context);
+    final actives = _actives.value;
+    final loading = _loading.value;
     final colors = context.theme.colors;
 
     if (loading) {
@@ -423,7 +423,6 @@ class _CourseActivePageState extends State<CourseActivePage> {
         onPageStarted: (controller, jsBridge, url) {
           _webViewController = controller;
           _jsHandler = ChaoxingJSHandler(
-            controller,
             jsBridge,
             onOpenUrl: (newUrl) async {
               // 打开独立 WebView 页面，而非在当前 WebView 内导航

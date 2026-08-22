@@ -3,13 +3,13 @@ import 'package:forui/forui.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/data.dart';
 import 'package:signals/signals_flutter.dart';
 
-class VpnConsoleWidget extends StatelessWidget {
+class VpnConsoleWidget extends SignalWidget {
   const VpnConsoleWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final logs = vpnLogs.watch(context);
+    final logs = vpnLogs.value;
 
     if (logs.isEmpty) {
       return const SizedBox.shrink();

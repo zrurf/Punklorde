@@ -11,7 +11,7 @@ import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/feature/cqupt/sport/utils/time.dart';
 import 'package:signals/signals_flutter.dart';
 
-class FeatSportCquptRecordView extends StatefulWidget {
+class FeatSportCquptRecordView extends SignalStatefulWidget {
   const FeatSportCquptRecordView({super.key});
 
   @override
@@ -42,14 +42,14 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
 
   @override
   Widget build(BuildContext context) {
-    final totalPage = _sportRecordSignal.watch(context).length ~/ _pageSize;
+    final totalPage = _sportRecordSignal.value.length ~/ _pageSize;
 
-    final startIndex = _currentPage.watch(context) * _pageSize;
+    final startIndex = _currentPage.value * _pageSize;
     final endIndex = startIndex + _pageSize;
 
-    final currentPageRecords = (_sportRecordSignal.watch(context).isEmpty)
+    final currentPageRecords = (_sportRecordSignal.value.isEmpty)
         ? <RecordResult>[]
-        : _sportRecordSignal.watch(context).sublist(startIndex, endIndex);
+        : _sportRecordSignal.value.sublist(startIndex, endIndex);
 
     return Scaffold(
       body: SafeArea(
@@ -68,7 +68,10 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                   if (index == 0) {
                     return Padding(
                       padding: const .symmetric(vertical: 4),
-                      child: _buildStatsCard(),
+                      // itemBuilder 惰性执行，SignalBuilder 订阅统计数据变化
+                      child: SignalBuilder(
+                        builder: (context) => _buildStatsCard(),
+                      ),
                     );
                   }
                   if (index == currentPageRecords.length + 1) {
@@ -78,11 +81,13 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                         children: [
                           const FDivider(),
                           FittedBox(
-                            child: FPagination(
-                              control: .managed(
-                                initial: _currentPage.watch(context),
-                                pages: max(totalPage, 1),
-                                onChange: (v) => _currentPage.value = v,
+                            child: SignalBuilder(
+                              builder: (context) => FPagination(
+                                control: .managed(
+                                  initial: _currentPage.value,
+                                  pages: max(totalPage, 1),
+                                  onChange: (v) => _currentPage.value = v,
+                                ),
                               ),
                             ),
                           ),
@@ -110,10 +115,10 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
     return FCard(
       child: Padding(
         padding: const .all(16),
-        child: (_statistics.watch(context) == null)
+        child: (_statistics.value == null)
             ? Center(
                 child: Text(
-                  (featPortalCredential.watch(context) == null)
+                  (featPortalCredential.value == null)
                       ? t.submodule.cqupt_sport.portal_user_not_login
                       : t.submodule.cqupt_sport.failed_to_get_stats,
                   style: TextStyle(fontSize: 15, color: colors.destructive),
@@ -126,30 +131,30 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                   // 运动总次数
                   _buildStatColumn(
                     context,
-                    mainValue: _statistics.watch(context)?.totalExamCount ?? 0,
-                    mainDeno: _statistics.watch(context)?.targetTotalCount ?? 0,
+                    mainValue: _statistics.value?.totalExamCount ?? 0,
+                    mainDeno: _statistics.value?.targetTotalCount ?? 0,
                     mainLabel: t.submodule.cqupt_sport.total_count,
-                    subValue: _statistics.watch(context)?.totalAddCount ?? 0,
+                    subValue: _statistics.value?.totalAddCount ?? 0,
                     alignment: CrossAxisAlignment.center,
                   ),
 
                   // 跑步次数
                   _buildStatColumn(
                     context,
-                    mainValue: _statistics.watch(context)?.runExamCount ?? 0,
-                    mainDeno: _statistics.watch(context)?.targetRunCount ?? 0,
+                    mainValue: _statistics.value?.runExamCount ?? 0,
+                    mainDeno: _statistics.value?.targetRunCount ?? 0,
                     mainLabel: t.submodule.cqupt_sport.run_count,
-                    subValue: _statistics.watch(context)?.runAddCount ?? 0,
+                    subValue: _statistics.value?.runAddCount ?? 0,
                     alignment: CrossAxisAlignment.center,
                   ),
 
                   // 其他次数
                   _buildStatColumn(
                     context,
-                    mainValue: _statistics.watch(context)?.otherExamCount ?? 0,
-                    mainDeno: _statistics.watch(context)?.targetOtherCount ?? 0,
+                    mainValue: _statistics.value?.otherExamCount ?? 0,
+                    mainDeno: _statistics.value?.targetOtherCount ?? 0,
                     mainLabel: t.submodule.cqupt_sport.other_count,
-                    subValue: _statistics.watch(context)?.otherAddCount ?? 0,
+                    subValue: _statistics.value?.otherAddCount ?? 0,
                     alignment: CrossAxisAlignment.center,
                   ),
                 ],

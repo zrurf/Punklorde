@@ -372,15 +372,18 @@ class _SmsCodeFormState extends State<_SmsCodeForm> {
                 : null,
           ),
           const SizedBox(height: 16),
-          FButton(
-            onPress: (_verCodeSendCdSignal.watch(context) <= 0)
-                ? () {
-                    _onSendVerCode();
-                  }
-                : null,
-            child: (_verCodeSendCdSignal.watch(context) <= 0)
-                ? Text(t.action.send_sms_code)
-                : Text("${_verCodeSendCdSignal.watch(context).toString()}s"),
+          // 倒计时每秒变化，用 SignalBuilder 局部重建，避免整表重建
+          SignalBuilder(
+            builder: (context) => FButton(
+              onPress: (_verCodeSendCdSignal.value <= 0)
+                  ? () {
+                      _onSendVerCode();
+                    }
+                  : null,
+              child: (_verCodeSendCdSignal.value <= 0)
+                  ? Text(t.action.send_sms_code)
+                  : Text("${_verCodeSendCdSignal.value.toString()}s"),
+            ),
           ),
           const FDivider(),
           FButton(

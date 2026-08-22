@@ -24,7 +24,6 @@ import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/index.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/index.dart';
 import 'package:punklorde/module/school/cqupt/view/page/student_list.dart';
-import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -48,7 +47,6 @@ final appRoute = GoRouter(
     ShellRoute(
       builder: (context, state, child) {
         final colors = context.theme.colors;
-        resetSystemChromeStyle();
         return Scaffold(
           resizeToAvoidBottomInset: true,
           extendBodyBehindAppBar: true,

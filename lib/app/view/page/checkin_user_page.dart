@@ -11,7 +11,7 @@ import 'package:signals/signals_flutter.dart';
 
 final Signal<String> _searchQuery = Signal('');
 
-class CheckinUserPage extends StatefulWidget {
+class CheckinUserPage extends SignalStatefulWidget {
   const CheckinUserPage({super.key});
 
   @override
@@ -25,13 +25,12 @@ class _CheckinUserPageState extends State<CheckinUserPage> {
     final colors = context.theme.colors;
 
     final entries =
-        (authIndexGuest.watch(context).isEmpty &&
-            authIndexPrimary.watch(context).isEmpty)
+        (authIndexGuest.value.isEmpty && authIndexPrimary.value.isEmpty)
         ? null
         : currentSchoolSignal.value?.platforms.values
               .map((v) {
-                final plat = authIndexGuest.watch(context)[v.id];
-                final primary = authIndexPrimary.watch(context)[v.id];
+                final plat = authIndexGuest.value[v.id];
+                final primary = authIndexPrimary.value[v.id];
                 if ((plat == null || plat.isEmpty) && primary == null) {
                   return null;
                 }
@@ -42,9 +41,9 @@ class _CheckinUserPageState extends State<CheckinUserPage> {
 
                 final u = users
                     .map((v1) {
-                      final credential = authCredentials.watch(context)[v1];
+                      final credential = authCredentials.value[v1];
                       if (credential == null) return null;
-                      final searchStr = _searchQuery.watch(context);
+                      final searchStr = _searchQuery.value;
                       final filter =
                           (searchStr.isEmpty ||
                               credential.name.toLowerCase().contains(

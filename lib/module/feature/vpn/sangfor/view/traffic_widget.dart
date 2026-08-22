@@ -4,13 +4,13 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/data.dart';
 import 'package:signals/signals_flutter.dart';
 
-class VpnTrafficWidget extends StatelessWidget {
+class VpnTrafficWidget extends SignalWidget {
   const VpnTrafficWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
-    final stats = vpnTraffic.watch(context);
+    final stats = vpnTraffic.value;
 
     return FCard(
       child: Padding(
