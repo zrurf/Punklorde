@@ -161,12 +161,12 @@ flutter build ios --release
 
 若遇到签名问题，请在 Xcode 中打开 `ios/Runner.xcworkspace`，配置好签名后再执行构建。
 
-### 5.3 持续集成（GitHub Actions）
+### 5.3 持续集成 / 持续交付（GitHub Actions）
 
-仓库自带 `.github/workflows/ci.yml`：
+仓库自带 `.github/workflows/ci.yml`，分为两部分：
 
-- **Analyze & Test**：任意 push / PR 触发，运行 `build_runner`、`slang` 代码生成后执行 `flutter analyze` 与 `flutter test`。
-- **Build Android APK (debug)**：手动触发（`workflow_dispatch`），在干净环境中安装 Flutter / Rust / Go / Android NDK 后构建 debug APK。
+- **CI（Analyze & Test）**：任意 push / PR 触发，运行 `build_runner`、`slang` 代码生成后执行 `flutter analyze` 与 `flutter test`。
+- **CD（Build Android APK）**：仅在打标签（`v*`）或手动触发（`workflow_dispatch`）时执行，在干净环境中安装 Flutter / Rust / Go / Android NDK 后构建 debug APK 并上传构建产物。
 
 CI 需要生成 `lib/env.g.dart`，会自动写入一个临时的 `.env`（可选的 GitHub Secrets：`MMKV_KEY`、`BAIDU_MAP_APIKEY_ANDROID`、`BAIDU_MAP_APIKEY_IOS`）。
 

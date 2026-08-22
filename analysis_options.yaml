@@ -16,6 +16,8 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    # cargokit 内嵌的独立工具包，其依赖仅由自身 pubspec 解析，不作为本工程分析对象
+    - rust_builder/cargokit/build_tool/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
