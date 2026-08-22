@@ -165,7 +165,7 @@ flutter build ios --release
 
 仓库自带 `.github/workflows/ci.yml`，分为两部分：
 
-- **CI（Analyze & Test）**：任意 push / PR 触发，运行 `build_runner`、`slang` 代码生成后执行 `flutter analyze` 与 `flutter test`。
+- **CI（Analyze & Test）**：任意 push / PR 触发，运行 `build_runner`、`slang` 代码生成后执行 `flutter analyze --no-fatal-infos --no-fatal-warnings`（仅 error 视为失败）与 `flutter test`。
 - **CD（Build Android APK）**：仅在打标签（`v*`）或手动触发（`workflow_dispatch`）时执行，在干净环境中安装 Flutter / Rust / Go / Android NDK 后构建 debug APK 并上传构建产物。
 
 CI 需要生成 `lib/env.g.dart`，会自动写入一个临时的 `.env`（可选的 GitHub Secrets：`MMKV_KEY`、`BAIDU_MAP_APIKEY_ANDROID`、`BAIDU_MAP_APIKEY_IOS`）。
