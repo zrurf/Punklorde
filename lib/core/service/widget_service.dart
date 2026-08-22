@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:punklorde/core/status/app.dart';
@@ -8,25 +10,27 @@ import 'package:punklorde/utils/schedule.dart';
 import 'package:signals/signals_flutter.dart';
 
 class ScheduleWidgetService {
-  static const String _androidWidgetName =
-      'hacker.silverwolf.punklorde.ScheduleWidgetReceiver';
-
   static const _channel = MethodChannel(
     'hacker.silverwolf.punklorde/widget_refresh',
   );
 
   static void init() {
+    // 桌面小组件目前仅支持 Android，iOS 上无对应小组件实现
+    if (!Platform.isAndroid) return;
     effect(() {
-      final _ = calendarEventIndexSignal.value;
-      final __ = currentSemesterSignal.value;
-      final ___ = currentSchoolSignal.value;
-      final ____ = scheduleBaseEventsSignal.value;
-      final _____ = scheduleCustomEventsSignal.value;
+      // 读取信号以建立依赖追踪，值变化时刷新小组件
+      calendarEventIndexSignal.value;
+      currentSemesterSignal.value;
+      currentSchoolSignal.value;
+      scheduleBaseEventsSignal.value;
+      scheduleCustomEventsSignal.value;
       Future.microtask(() => updateWidget());
     });
   }
 
   static Future<void> updateWidget() async {
+    // 桌面小组件目前仅支持 Android，iOS 上无对应小组件实现
+    if (!Platform.isAndroid) return;
     try {
       final semester = currentSemesterSignal.value;
       final scheduleService = currentSchoolSignal.value?.scheduleServices;

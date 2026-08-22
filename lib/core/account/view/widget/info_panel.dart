@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -162,7 +163,7 @@ class _InfoPanelState extends State<InfoPanel> {
                           onPress: () {
                             showFDialog(
                               context: context,
-                              builder: (context, style, animation) => FDialog(
+                              builder: (context, style, animation) => punklordeDialog(
                                 style: style,
                                 animation: animation,
                                 title: Text(t.action.login_info),
@@ -229,7 +230,7 @@ class _InfoPanelState extends State<InfoPanel> {
                                     builder: (context, style, animation) {
                                       final colors = context.theme.colors;
                                       final qrCode = _qrCode.watch(context);
-                                      return FDialog(
+                                      return punklordeDialog(
                                         style: style,
                                         animation: animation,
                                         title: Text(t.action.share_code),

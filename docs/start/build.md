@@ -29,13 +29,13 @@
 
 ### 2.2 iOS
 
-当前 iOS 平台**缺乏维护与测试**，可能无法稳定运行。如需尝试构建，请确保：
+iOS 平台已按 Android 的实现适配，但仍需在 macOS 上验证。首次构建请确保：
 
-- macOS 系统，Xcode 安装完整。
+- macOS 系统，Xcode 完整安装，并执行 `sudo gem install cocoapods`（如未安装）。
 - 具备 Apple 开发者账号（用于签名）。
-- 了解 iOS 构建的基本流程。
+- 首次需要执行 `flutter pub get` 以生成 `ios/Podfile.lock` 与 `.xcworkspace`（仓库已提供 `ios/Podfile`）。
 
-需请自行补充测试与维护。
+注意：SSL VPN 功能依赖 Android 的 `VpnService`/TUN 能力，iOS 上该功能不可用（入口已做平台降级）。
 
 ## 3. 签名配置
 
@@ -160,6 +160,15 @@ flutter build ios --release
 ```
 
 若遇到签名问题，请在 Xcode 中打开 `ios/Runner.xcworkspace`，配置好签名后再执行构建。
+
+### 5.3 持续集成（GitHub Actions）
+
+仓库自带 `.github/workflows/ci.yml`：
+
+- **Analyze & Test**：任意 push / PR 触发，运行 `build_runner`、`slang` 代码生成后执行 `flutter analyze` 与 `flutter test`。
+- **Build Android APK (debug)**：手动触发（`workflow_dispatch`），在干净环境中安装 Flutter / Rust / Go / Android NDK 后构建 debug APK。
+
+CI 需要生成 `lib/env.g.dart`，会自动写入一个临时的 `.env`（可选的 GitHub Secrets：`MMKV_KEY`、`BAIDU_MAP_APIKEY_ANDROID`、`BAIDU_MAP_APIKEY_IOS`）。
 
 ## 6. 常见问题
 以下是编译时常见的问题，部分问题需要您手动解决。

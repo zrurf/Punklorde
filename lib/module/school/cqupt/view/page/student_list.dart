@@ -136,8 +136,6 @@ class _TableBody extends StatelessWidget {
                   child: ListView.builder(
                     itemCount: students.length,
                     itemExtent: _rowHeight,
-                    // 预构建视口外 8 行
-                    cacheExtent: _rowHeight * 8,
                     padding: EdgeInsets.zero,
                     itemBuilder: (_, index) {
                       return RepaintBoundary(

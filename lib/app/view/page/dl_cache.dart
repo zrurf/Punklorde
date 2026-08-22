@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -218,7 +219,7 @@ class _DlCachePageState extends State<DlCachePage> {
     final t = Translations.of(context);
     showFDialog(
       context: context,
-      builder: (context, style, animation) => FDialog(
+      builder: (context, style, animation) => punklordeDialog(
         style: style,
         animation: animation,
         title: Text(t.setting.cache_detail),
@@ -369,7 +370,7 @@ class _DlCachePageState extends State<DlCachePage> {
   void _confirmDeleteCache(String key) {
     showFDialog(
       context: context,
-      builder: (context, style, animation) => FDialog(
+      builder: (context, style, animation) => punklordeDialog(
         style: style,
         animation: animation,
         title: Text(t.action.delete),
@@ -410,7 +411,7 @@ class _DlCachePageState extends State<DlCachePage> {
   void _confirmClearAll() {
     showFDialog(
       context: context,
-      builder: (context, style, animation) => FDialog(
+      builder: (context, style, animation) => punklordeDialog(
         style: style,
         animation: animation,
         title: Text(t.setting.cache_clear_all),

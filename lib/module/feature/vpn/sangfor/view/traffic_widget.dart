@@ -12,7 +12,7 @@ class VpnTrafficWidget extends StatelessWidget {
     final colors = context.theme.colors;
     final stats = vpnTraffic.watch(context);
 
-    return FCard.raw(
+    return FCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

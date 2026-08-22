@@ -75,9 +75,13 @@
 		<key>NSLocationAlwaysUsageDescription</key>
 		<string>Need to use location information.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>This app needs camera access to scan QR codes</string>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>This app needs photos access to get QR code from photo library</string>
+	<string>This app needs camera access to scan QR codes</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access for classroom interactions.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photos access to get QR code from photo library</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs photos access to save generated QR code images.</string>
 		<key>BGTaskSchedulerPermittedIdentifiers</key>
 		<array>
 			<string>com.pravera.flutter_foreground_task.refresh</string>

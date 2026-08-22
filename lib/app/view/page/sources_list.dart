@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/core/resource/model.dart';
@@ -288,7 +289,7 @@ class SourcesListPage extends StatelessWidget {
     final t = Translations.of(context);
     showFDialog(
       context: context,
-      builder: (context, style, animation) => FDialog(
+      builder: (context, style, animation) => punklordeDialog(
         style: style,
         animation: animation,
         title: Text(t.setting.source_delete),

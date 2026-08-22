@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -166,7 +167,7 @@ class _GuestAddPageState extends State<GuestAddPage> {
                               await showFDialog(
                                 context: context,
                                 builder: (sheetContext, style, animation) =>
-                                    FDialog(
+                                    punklordeDialog(
                                       style: style,
                                       animation: animation,
                                       title: Text(t.title.add_guest),

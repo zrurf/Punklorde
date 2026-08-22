@@ -32,11 +32,11 @@ Future<Permission> _getPermission(PermissionType type) async {
 }
 
 Future<Permission> _getStorePermission() async {
-  final deviceInfo = await DeviceInfoPlugin().androidInfo;
-  final sdkInt = deviceInfo.version.sdkInt;
-  if (Platform.isAndroid) {
-    return sdkInt >= 33 ? .photos : .storage;
-  } else {
+  // 非 Android 平台直接使用相册权限（iOS/macOS 等没有 Android 的“存储”权限概念）
+  if (!Platform.isAndroid) {
     return .storage;
   }
+  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+  final sdkInt = deviceInfo.version.sdkInt;
+  return sdkInt >= 33 ? .photos : .storage;
 }

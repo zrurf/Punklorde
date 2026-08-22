@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:intl/intl.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -152,7 +153,7 @@ class _ScheduleViewState extends State<ScheduleView> {
                   onPress: () {
                     showFDialog(
                       context: context,
-                      builder: (context, style, animation) => FDialog(
+                      builder: (context, style, animation) => punklordeDialog(
                         style: style,
                         animation: animation,
                         title: Text(t.action.refresh_schedule),

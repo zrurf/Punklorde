@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # 静态分析 + 单元/Widget 测试（所有触发方式都会运行）
+  analyze-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare .env for code generation
+        shell: bash
+        run: |
+          cat > .env <<EOF
+          MMKV_KEY=${MMKV_KEY:-ci_mmkv_key}
+          BAIDU_MAP_APIKEY_ANDROID=${BAIDU_MAP_APIKEY_ANDROID:-ci_android_key}
+          BAIDU_MAP_APIKEY_IOS=${BAIDU_MAP_APIKEY_IOS:-ci_ios_key}
+          EOF
+        env:
+          MMKV_KEY: ${{ secrets.MMKV_KEY }}
+          BAIDU_MAP_APIKEY_ANDROID: ${{ secrets.BAIDU_MAP_APIKEY_ANDROID }}
+          BAIDU_MAP_APIKEY_IOS: ${{ secrets.BAIDU_MAP_APIKEY_IOS }}
+
+      - name: Fetch dependencies
+        run: flutter pub get
+
+      - name: Generate code (envied / freezed / json_serializable)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Generate i18n (slang)
+        run: dart run slang
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  # Android APK 构建（仅手动触发，避免拖慢常规 PR）
+  build-android:
+    name: Build Android APK (debug)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.25.0'
+          cache: true
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK platform & NDK
+        run: |
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0" "ndk;29.0.14206865"
+
+      - name: Prepare local.properties
+        run: |
+          echo "baidu_map_key=ci_baidu_key" > android/local.properties
+
+      - name: Prepare .env for code generation
+        shell: bash
+        run: |
+          cat > .env <<EOF
+          MMKV_KEY=${MMKV_KEY:-ci_mmkv_key}
+          BAIDU_MAP_APIKEY_ANDROID=${BAIDU_MAP_APIKEY_ANDROID:-ci_android_key}
+          BAIDU_MAP_APIKEY_IOS=${BAIDU_MAP_APIKEY_IOS:-ci_ios_key}
+          EOF
+        env:
+          MMKV_KEY: ${{ secrets.MMKV_KEY }}
+          BAIDU_MAP_APIKEY_ANDROID: ${{ secrets.BAIDU_MAP_APIKEY_ANDROID }}
+          BAIDU_MAP_APIKEY_IOS: ${{ secrets.BAIDU_MAP_APIKEY_IOS }}
+
+      - name: Fetch dependencies
+        run: flutter pub get
+
+      - name: Generate code (envied / freezed / json_serializable)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Generate i18n (slang)
+        run: dart run slang
+
+      - name: Build debug APK
+        env:
+          ANDROID_NDK_HOME: $ANDROID_HOME/ndk/29.0.14206865
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: punklorde-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error

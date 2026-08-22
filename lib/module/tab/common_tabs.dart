@@ -140,7 +140,7 @@ Widget _buildEventCard(
   int flag,
 ) {
   final colors = context.theme.colors;
-  return FCard.raw(
+  return FCard(
     child: Padding(
       padding: const .all(16),
       child: Column(

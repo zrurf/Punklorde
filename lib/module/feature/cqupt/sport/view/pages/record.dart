@@ -107,7 +107,7 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
 
   Widget _buildStatsCard() {
     final colors = context.theme.colors;
-    return FCard.raw(
+    return FCard(
       child: Padding(
         padding: const .all(16),
         child: (_statistics.watch(context) == null)
@@ -222,7 +222,7 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
 
   Widget _buildRecordCard(RecordResult record) {
     final colors = context.theme.colors;
-    return FCard.raw(
+    return FCard(
       child: Padding(
         padding: const .symmetric(horizontal: 16, vertical: 8),
         child: Column(

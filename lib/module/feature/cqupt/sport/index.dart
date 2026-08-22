@@ -18,6 +18,7 @@ import 'package:punklorde/module/feature/cqupt/sport/data.dart';
 import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/feature/cqupt/sport/resource/resource.dart';
 import 'package:punklorde/module/feature/cqupt/sport/service/map.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:punklorde/module/feature/cqupt/sport/service/sport.dart';
 import 'package:punklorde/module/feature/cqupt/sport/utils/time.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/widgets/config_pannel.dart';
@@ -251,19 +252,21 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                 right: 12,
                 top: 12,
                 height: 120,
-                child: FCard.raw(
-                  style: .delta(
-                    decoration: .boxDelta(
-                      color: const Color(0xE01d1d1f),
-                      border: .all(color: const Color(0xF01d1d1f), width: 1),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xE01d1d1f),
-                          blurRadius: 2,
-                          spreadRadius: 0,
-                        ),
-                      ],
+                child: Container(
+                  // 复刻迁移前 FCard.raw 的自定义暗色样式（forui 0.24+ 移除该 API）
+                  decoration: BoxDecoration(
+                    color: const Color(0xE01d1d1f),
+                    border: Border.all(
+                      color: const Color(0xF01d1d1f),
+                      width: 1,
                     ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0xE01d1d1f),
+                        blurRadius: 2,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -650,7 +653,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
         showFDialog(
           context: context,
           builder: (context, style, animation) {
-            return FDialog(
+            return punklordeDialog(
               style: style,
               animation: animation,
               title: (isRunning)

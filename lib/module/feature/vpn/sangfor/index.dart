@@ -152,6 +152,16 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   }
 
   Future<void> _connect() async {
+    // VPN 隧道依赖 Android 的 VpnService/TUN 能力，iOS 平台暂不支持
+    if (!Platform.isAndroid) {
+      _showError(t.submodule.sangfor_vpn.status_failed);
+      addVpnLog(
+        VpnLogLevel.error,
+        'Sangfor VPN is only supported on Android.',
+      );
+      return;
+    }
+
     // If a session is already running (e.g. re-entered the page while
     // connected), do not start a second one — just resync the UI.
     if (_controller.isRunning()) {
@@ -595,7 +605,7 @@ class _FeatSangforVpnViewState extends State<FeatSangforVpnView> {
   }
 
   Widget _buildTwoFaCard(FColors colors) {
-    return FCard.raw(
+    return FCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

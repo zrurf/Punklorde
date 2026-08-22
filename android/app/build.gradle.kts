@@ -9,7 +9,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.10"
 }
 
 // Force glance-appwidget to stable version: home_widget uses dynamic 1.+ which
@@ -118,11 +118,12 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
 
-    implementation("com.baidu.lbsyun:BaiduMapSDK_Map:7.6.7")
-    implementation("com.baidu.lbsyun:BaiduMapSDK_Location_All:9.6.6.2")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Map_flutter:8.1.0")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Search_flutter:8.1.0")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Util_flutter:8.1.0")
+    implementation("com.baidu.lbsyun:BaiduMapSDK_Location_All:9.6.7")
 }
 
 composeCompiler {
     reportsDestination = layout.buildDirectory.dir("compose_compiler")
-    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
 }

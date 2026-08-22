@@ -15,7 +15,7 @@ class VpnConsoleWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return FCard.raw(
+    return FCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
