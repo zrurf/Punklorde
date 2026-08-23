@@ -22,7 +22,10 @@ Widget punklordeDialog({
         if (title != null) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: DefaultTextStyle(style: style.titleTextStyle, child: title),
+            child: DefaultTextStyle(
+              style: style.titleTextStyle,
+              child: Center(child: title),
+            ),
           ),
           if (body != null) const SizedBox(height: 9),
         ],

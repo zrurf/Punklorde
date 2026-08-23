@@ -214,6 +214,26 @@ abstract class ScheduleService {
   void openEventDetail(BuildContext context, ScheduleEvent event);
 }
 
+/// 无日程服务的占位实现（学校未实现课表时使用）
+class NoopScheduleService implements ScheduleService {
+  @override
+  List<TimeSlot> get slots => [];
+
+  @override
+  AuthCredential? getCredential() => null;
+
+  @override
+  Future<List<ScheduleEvent>?> getBaseEvents(
+    Semester semester,
+    AuthCredential credential,
+  ) async {
+    return [];
+  }
+
+  @override
+  void openEventDetail(BuildContext context, ScheduleEvent event) {}
+}
+
 /// 日历控件读取的索引结构体
 /// 外层 Key: week (学期周次 1-20)
 /// 中层 Key: day (星期 1-7，对应周一至周日)

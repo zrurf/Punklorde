@@ -7,12 +7,13 @@ import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/platform/chaoxing/chaoxing.dart';
 import 'package:punklorde/module/platform/chaoxing/model.dart';
 import 'package:punklorde/module/platform/chaoxing/view/custom_device_page.dart';
+import 'package:punklorde/module/service/vault/vault_dialog.dart';
 import 'package:signals/signals_flutter.dart';
 
 /// 学习通登录页 UI
 class ChaoxingLoginPage extends StatefulWidget {
   final Future<void> Function(String phone, ChaoxingDeviceConfig? deviceConfig)
-      sendVerifyCode;
+  sendVerifyCode;
   final void Function(ChaoxingLoginConfig) onConfirm;
   const ChaoxingLoginPage({
     super.key,
@@ -91,10 +92,7 @@ class _ChaoxingLoginPageState extends State<ChaoxingLoginPage> {
           ),
           label: Text(
             t.action.custom_device_info,
-            style: TextStyle(
-              fontSize: 14,
-              color: colors.mutedForeground,
-            ),
+            style: TextStyle(fontSize: 14, color: colors.mutedForeground),
           ),
         ),
         const SizedBox(height: 4),
@@ -116,9 +114,7 @@ class _ChaoxingLoginPageState extends State<ChaoxingLoginPage> {
   Future<void> _openCustomDevicePage() async {
     final result = await Navigator.of(context).push<ChaoxingDeviceConfig>(
       MaterialPageRoute(
-        builder: (_) => ChaoxingCustomDevicePage(
-          initialConfig: _deviceConfig,
-        ),
+        builder: (_) => ChaoxingCustomDevicePage(initialConfig: _deviceConfig),
         fullscreenDialog: true,
       ),
     );
@@ -232,10 +228,24 @@ class _PasswordFormState extends State<_PasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final Signal<String> _phoneSignal = signal("");
   final Signal<String> _passwordSignal = signal("");
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fillFromVault() async {
+    final entry = await showVaultEntryPicker(context, platChaoxing.id);
+    if (entry == null || !mounted) return;
+    _phoneController.text = entry.username;
+    _passwordController.text = entry.password;
+    _phoneSignal.value = entry.username;
+    _passwordSignal.value = entry.password;
+    setState(() {});
   }
 
   @override
@@ -245,17 +255,33 @@ class _PasswordFormState extends State<_PasswordForm> {
       key: _formKey,
       child: Column(
         children: [
-          Text(
-            t.action.pwd_login,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: colors.foreground,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  t.action.pwd_login,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: colors.foreground,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  LucideIcons.keyRound,
+                  color: colors.primary,
+                  size: 20,
+                ),
+                tooltip: t.vault.fill_from_vault,
+                onPressed: _fillFromVault,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           FTextFormField(
             control: .managed(
+              controller: _phoneController,
               onChange: (value) => _phoneSignal.value = value.text,
             ),
             label: Text(t.title.phone_num),
@@ -266,6 +292,7 @@ class _PasswordFormState extends State<_PasswordForm> {
           const SizedBox(height: 12),
           FTextFormField.password(
             control: .managed(
+              controller: _passwordController,
               onChange: (value) => _passwordSignal.value = value.text,
             ),
             label: Text(t.common.password),

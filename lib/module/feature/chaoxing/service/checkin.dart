@@ -57,27 +57,20 @@ class ChaoxingCehckinService {
     String enc,
     String enc2,
   ) async {
-    final result = await _apiClient.checkinAllQr(credentials, id, enc, enc2);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platChaoxing,
-            credentials: credentials.map((v) => v.credential).toList(),
-            results: result,
-            onRetry: (newCredentials) async {
-              final List<AuthCredentialCache> creds = [];
-              for (final c in newCredentials) {
-                creds.add(await AuthCredentialCache.fromCredential(c));
-              }
-              if (context.mounted) {
-                await checkinQr(context, creds, id, enc, enc2);
-              }
-            },
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CheckinResultPage(
+          platform: platChaoxing,
+          credentials: credentials.map((v) => v.credential).toList(),
+          onCheckin: (creds) async => _apiClient.checkinAllQr(
+            await _toCaches(creds),
+            id,
+            enc,
+            enc2,
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// 签到码签到
@@ -87,27 +80,16 @@ class ChaoxingCehckinService {
     String id,
     String code,
   ) async {
-    final result = await _apiClient.checkinAllCode(credentials, id, code);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platChaoxing,
-            credentials: credentials.map((v) => v.credential).toList(),
-            results: result,
-            onRetry: (newCredentials) async {
-              final List<AuthCredentialCache> creds = [];
-              for (final c in newCredentials) {
-                creds.add(await AuthCredentialCache.fromCredential(c));
-              }
-              if (context.mounted) {
-                await checkinCode(context, credentials, id, code);
-              }
-            },
-          ),
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CheckinResultPage(
+          platform: platChaoxing,
+          credentials: credentials.map((v) => v.credential).toList(),
+          onCheckin: (creds) async =>
+              _apiClient.checkinAllCode(await _toCaches(creds), id, code),
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// 位置签到
@@ -117,27 +99,25 @@ class ChaoxingCehckinService {
     String id,
     Coordinate pos,
   ) async {
-    final result = await _apiClient.checkinAllPos(credentials, id, pos);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platChaoxing,
-            credentials: credentials.map((v) => v.credential).toList(),
-            results: result,
-            onRetry: (newCredentials) async {
-              final List<AuthCredentialCache> creds = [];
-              for (final c in newCredentials) {
-                creds.add(await AuthCredentialCache.fromCredential(c));
-              }
-              if (context.mounted) {
-                await checkinPos(context, credentials, id, pos);
-              }
-            },
-          ),
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CheckinResultPage(
+          platform: platChaoxing,
+          credentials: credentials.map((v) => v.credential).toList(),
+          onCheckin: (creds) async =>
+              _apiClient.checkinAllPos(await _toCaches(creds), id, pos),
         ),
-      );
-    }
+      ),
+    );
+  }
+
+  /// 将结果页回传的凭证还原为带缓存的凭证
+  Future<List<AuthCredentialCache>> _toCaches(
+    List<AuthCredential> credentials,
+  ) async {
+    return [
+      for (final c in credentials) await AuthCredentialCache.fromCredential(c),
+    ];
   }
 }
 

@@ -103,7 +103,8 @@ class AuthManager {
       final refreshResult = await currentSchoolSignal
           .value
           ?.platforms[credential.type]
-          ?.refresh(credential);
+          ?.refresh(credential)
+          .catchError((_) => null);
       if (refreshResult == null) {
         result = false;
       } else {
@@ -113,22 +114,28 @@ class AuthManager {
     return result;
   }
 
-  // 刷新所有已过期的凭据（包括即将过期）
-  Future<bool> refreshAllOutDated() async {
-    bool result = true;
+  // 刷新所有已过期的凭据（包括即将过期），返回刷新失败的凭据数量
+  // 仅统计当前学校的平台凭证，避免跨校提示
+  Future<int> refreshAllOutDated() async {
+    var failureCount = 0;
+    final currentSchool = currentSchoolSignal.value;
     for (final credential in authCredentials.value.values) {
+      // 跳过不属于当前学校的凭证
+      if (!(currentSchool?.platforms.containsKey(credential.type) ?? false)) {
+        continue;
+      }
       if (credential.expireAt.isAfter(DateTime.now().addHours(3))) continue;
-      final refreshResult = await currentSchoolSignal
-          .value
-          ?.platforms[credential.type]
-          ?.refresh(credential);
+      final refreshResult = await currentSchool?.platforms[credential.type]
+          ?.refresh(credential)
+          .catchError((_) => null);
       if (refreshResult == null) {
-        result = false;
+        failureCount++;
       } else {
         setAuthCredential(refreshResult.copyWith(guest: credential.guest));
       }
     }
-    return result;
+    refreshFailureCountSignal.value = failureCount;
+    return failureCount;
   }
 
   // 添加访客

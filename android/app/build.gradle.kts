@@ -59,7 +59,7 @@ android {
     kotlin {
         jvmToolchain(21)
         compilerOptions {
-            languageVersion = KotlinVersion.KOTLIN_2_3
+            languageVersion = KotlinVersion.KOTLIN_2_4
             jvmTarget = JvmTarget.JVM_21
         }
     }
@@ -74,7 +74,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        manifestPlaceholders["BAIDU_MAP_KEY"] = localProperties.getProperty("baidu_map_key").toString()
+        manifestPlaceholders["BAIDU_MAP_KEY"] = localProperties.getProperty("baidu_map_key") ?: ""
     }
 
     buildTypes {

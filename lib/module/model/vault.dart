@@ -1,47 +1,80 @@
 import 'package:cbor/simple.dart';
-import 'package:punklorde/core/status/app.dart';
+import 'package:uuid/uuid.dart';
 
-class Vault {
-  final String id; // 保管器ID
-  final String name; // 保管器名称
-  final String username; // 账号名称
-  final String password; // 密码（如果开启安全存储则为密文）
+/// 保管库条目
+class VaultEntry {
+  final String id; // 条目ID
+  final String schoolId; // 学校ID
+  final String platformId; // 平台ID
+  final String accountType; // 登录账号类型（默认 = 平台ID，特例为统一认证ID）
+  final String username; // 账号
+  final String password; // 密码
+  final String? remark; // 备注
+  final DateTime createdAt; // 创建时间
 
-  Vault({
+  const VaultEntry({
     required this.id,
-    required this.name,
+    required this.schoolId,
+    required this.platformId,
+    required this.accountType,
     required this.username,
     required this.password,
+    this.remark,
+    required this.createdAt,
   });
 
-  Future<String?> getPassword() async {
-    if (useSafeStorage.value) {
-      return password;
-    } else {
-      return password;
-    }
+  VaultEntry copyWith({
+    String? schoolId,
+    String? platformId,
+    String? accountType,
+    String? username,
+    String? password,
+    String? remark,
+  }) {
+    return VaultEntry(
+      id: id,
+      schoolId: schoolId ?? this.schoolId,
+      platformId: platformId ?? this.platformId,
+      accountType: accountType ?? this.accountType,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      remark: (remark == null) ? this.remark : remark,
+      createdAt: createdAt,
+    );
   }
+
+  static String newId() => const Uuid().v4();
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": name,
+    "school_id": schoolId,
+    "platform_id": platformId,
+    "account_type": accountType,
     "username": username,
     "password": password,
+    if (remark != null) "remark": remark,
+    "created_at": createdAt.millisecondsSinceEpoch,
   };
 
-  factory Vault.fromJson(Map<String, dynamic> json) => Vault(
+  factory VaultEntry.fromJson(Map<String, dynamic> json) => VaultEntry(
     id: json['id'] as String,
-    name: json['name'] as String,
+    schoolId: json['school_id'] as String,
+    platformId: json['platform_id'] as String,
+    accountType: json['account_type'] as String,
     username: json['username'] as String,
     password: json['password'] as String,
+    remark: json['remark'] as String?,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(
+      json['created_at'] as int,
+    ),
   );
 
   List<int> toCbor() => cbor.encode(toJson());
 
-  factory Vault.fromCbor(List<int> data) {
+  factory VaultEntry.fromCbor(List<int> data) {
     final json = Map<String, dynamic>.from(
       cbor.decode(data) as Map<Object?, Object?>,
     );
-    return Vault.fromJson(json);
+    return VaultEntry.fromJson(json);
   }
 }

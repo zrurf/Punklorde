@@ -13,6 +13,8 @@ import 'package:punklorde/app/view/page/scanner.dart';
 import 'package:punklorde/app/view/page/select_school.dart';
 import 'package:punklorde/app/view/page/sources_list.dart';
 import 'package:punklorde/app/view/page/dl_cache.dart';
+import 'package:punklorde/app/view/page/license.dart';
+import 'package:punklorde/app/view/page/vault_page.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/chaoxing/index.dart';
 import 'package:punklorde/module/feature/chaoxing/manifest.dart';
@@ -22,6 +24,8 @@ import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/index.dart';
+import 'package:punklorde/module/feature/cuc/tronclass/index.dart';
+import 'package:punklorde/module/feature/cuc/checkin/index.dart';
 import 'package:punklorde/module/feature/vpn/sangfor/index.dart';
 import 'package:punklorde/module/school/cqupt/view/page/student_list.dart';
 import 'package:signals/signals_flutter.dart';
@@ -215,6 +219,18 @@ final appRoute = GoRouter(
             return const NoTransitionPage(child: DlCachePage());
           },
         ),
+        GoRoute(
+          path: "/s/license",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: AppLicensePage());
+          },
+        ),
+        GoRoute(
+          path: "/s/pwd_vault",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: VaultPage());
+          },
+        ),
       ],
     ),
     ShellRoute(
@@ -264,6 +280,18 @@ final appRoute = GoRouter(
           path: '/feat/cqupt/tronclass',
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: FeatCquptTronclassView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cuc/tronclass',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatCucTronclassView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cuc/checkin',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatCucCheckinView());
           },
         ),
         GoRoute(

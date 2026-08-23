@@ -15,6 +15,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:pointycastle/export.dart';
 import 'package:punklorde/common/model/cookie.dart';
+import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/device.dart' as device;
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/model/platform.dart';
@@ -22,6 +23,7 @@ import 'package:punklorde/module/platform/chaoxing/constant.dart';
 import 'package:punklorde/module/platform/chaoxing/model.dart';
 import 'package:punklorde/module/platform/chaoxing/utils/ua.dart';
 import 'package:punklorde/module/platform/chaoxing/view/login.dart';
+import 'package:punklorde/module/service/vault/vault_dialog.dart';
 import 'package:punklorde/utils/ua.dart';
 
 class ChaoxingPlatform extends Platform {
@@ -354,16 +356,28 @@ class ChaoxingPlatform extends Platform {
 
     final result = await completer.future;
 
-    if (result != null) {
-      if (context.mounted) {
-        context.loaderOverlay.show();
-        return await _login(context, result).then((v) {
-          if (context.mounted) context.loaderOverlay.hide();
-          return v?.copyWith(guest: isGuest);
-        });
-      }
+    if (result == null || !context.mounted) return null;
+    context.loaderOverlay.show();
+    AuthCredential? credential;
+    try {
+      credential = await _login(context, result);
+    } finally {
+      if (context.mounted) context.loaderOverlay.hide();
     }
-    return null;
+    if (credential != null &&
+        !isGuest &&
+        result.method == .pwd &&
+        context.mounted) {
+      showVaultSavePrompt(
+        context,
+        schoolId: currentSchoolSignal.value?.id ?? '',
+        platformId: id,
+        accountType: loginAccountType,
+        username: result.phone,
+        password: result.value,
+      );
+    }
+    return credential?.copyWith(guest: isGuest);
   }
 
   @override

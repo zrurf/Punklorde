@@ -1,126 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:punklorde/common/model/location.dart';
-import 'package:punklorde/core/status/location.dart';
-import 'package:punklorde/module/feature/cqupt/checkin/view/pages/checkin_result.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/api/client.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/model.dart';
+import 'package:punklorde/module/feature/tronclass/model.dart';
+import 'package:punklorde/module/feature/tronclass/service.dart';
+import 'package:punklorde/module/feature/cqupt/tronclass/config.dart';
 import 'package:punklorde/module/model/auth.dart';
-import 'package:punklorde/module/platform/cqupt/tronclass.dart';
 
+/// 学在重邮签到服务（委托共享畅课实现）
 class CquptTronCheckinService {
-  final ApiClient _apiClient = ApiClient();
+  late final TronclassCheckinService _inner = TronclassCheckinService(
+    cquptTronclassConfig,
+  );
 
-  /// 获取签到事件
-  Future<List<RollcallModel>> getCheckinEvents(
-    AuthCredential credentials,
-  ) async {
-    return await _apiClient.getCheckinEvents(credentials) ?? [];
+  Future<List<RollcallModel>> getCheckinEvents(AuthCredential credentials) {
+    return _inner.getCheckinEvents(credentials);
   }
 
-  /// 获取数字签到码
-  Future<String?> getCheckinNumber(AuthCredential credential, String id) async {
-    return await _apiClient.queryCheckinNumber(credential, id);
+  Future<String?> getCheckinNumber(AuthCredential credential, String id) {
+    return _inner.getCheckinNumber(credential, id);
   }
 
-  /// 二维码签到
   Future<void> checkinQr(
     BuildContext context,
     List<AuthCredential> credentials,
     String id,
     String data,
-  ) async {
-    final result = await _apiClient.checkinAllQr(credentials, id, data);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platCquptTronclass,
-            credentials: credentials,
-            results: result,
-            onRetry: (newCredentials) async {
-              await checkinQr(context, newCredentials, id, data);
-            },
-          ),
-        ),
-      );
-    }
+  ) {
+    return _inner.checkinQr(context, credentials, id, data);
   }
 
-  /// PIN签到
   Future<void> checkinPin(
     BuildContext context,
     List<AuthCredential> credentials,
     String id,
     String pin,
-  ) async {
-    final result = await _apiClient.checkinAllPin(credentials, id, pin);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platCquptTronclass,
-            credentials: credentials,
-            results: result,
-            onRetry: (newCredentials) async {
-              await checkinPin(context, newCredentials, id, pin);
-            },
-          ),
-        ),
-      );
-    }
+  ) {
+    return _inner.checkinPin(context, credentials, id, pin);
   }
 
-  /// 暴力PIN签到
   Future<void> checkinPinCrack(
     BuildContext context,
     List<AuthCredential> credentials,
     String id,
-  ) async {
-    final result = await _apiClient.checkinAllPinCrack(credentials, id);
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platCquptTronclass,
-            credentials: credentials,
-            results: result,
-            onRetry: (newCredentials) async {
-              await checkinPinCrack(context, newCredentials, id);
-            },
-          ),
-        ),
-      );
-    }
+  ) {
+    return _inner.checkinPinCrack(context, credentials, id);
   }
 
-  /// 雷达签到
   Future<void> checkinRadar(
     BuildContext context,
     List<AuthCredential> credentials,
     String id,
     Coordinate coordinate,
-  ) async {
-    final result = await _apiClient.checkinAllRadar(
-      credentials,
-      id,
-      coordinate,
-      rawSpeed.value,
-      50,
-    );
-    if (context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CheckinResultPage(
-            platform: platCquptTronclass,
-            credentials: credentials,
-            results: result,
-            onRetry: (newCredentials) async {
-              await checkinRadar(context, newCredentials, id, coordinate);
-            },
-          ),
-        ),
-      );
-    }
+  ) {
+    return _inner.checkinRadar(context, credentials, id, coordinate);
+  }
+
+  Future<void> checkinRadarAuto(
+    BuildContext context,
+    List<AuthCredential> credentials,
+    String id,
+  ) {
+    return _inner.checkinRadarAuto(context, credentials, id);
   }
 }
 

@@ -57,6 +57,7 @@ dependencies:
   intl: ^0.20.2
   live_activities: ^2.5.1
   loader_overlay: ^5.0.0
+  local_auth: ^3.0.1
   lucide_icons_flutter: ^3.1.17
   json_serializable: ^6.14.1
   mmkv: ^2.4.2

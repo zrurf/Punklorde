@@ -9,11 +9,13 @@ import 'package:forui/forui.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:punklorde/common/model/cookie.dart';
 import 'package:punklorde/core/account/view/widget/login_panel.dart';
+import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/model/platform.dart';
 import 'package:punklorde/module/network/interceptor/cqupt.dart';
 import 'package:punklorde/module/platform/cqupt/base/unify.dart';
+import 'package:punklorde/module/service/vault/vault_dialog.dart';
 import 'package:punklorde/utils/ua.dart';
 
 class CquptAcademicPortalPlatform extends Platform {
@@ -32,6 +34,9 @@ class CquptAcademicPortalPlatform extends Platform {
 
   @override
   String get descript => "用于课表、考试等信息查询";
+
+  @override
+  String get loginAccountType => "cqupt_unify";
 
   late final Dio _dio;
 
@@ -52,60 +57,64 @@ class CquptAcademicPortalPlatform extends Platform {
 
   Future<AuthCredential?> _login(String uid, String pwd, bool longTerm) async {
     final CookieJar cookieJar = CookieJar();
-    final url1 = await _unifyBasePlatform.passwordLogin(
-      _domainLogin,
-      uid,
-      pwd,
-      longTerm,
-      cookieJar,
-    );
-    if (url1 == null) return null;
+    try {
+      final url1 = await _unifyBasePlatform.passwordLogin(
+        _domainLogin,
+        uid,
+        pwd,
+        longTerm,
+        cookieJar,
+      );
+      if (url1 == null) return null;
 
-    final uri1 = Uri.parse(url1);
-    final ticket = uri1.queryParameters["ticket"];
+      final uri1 = Uri.parse(url1);
+      final ticket = uri1.queryParameters["ticket"];
 
-    await _dio.get(
-      url1,
-      options: Options(
-        followRedirects: true,
-        headers: {
-          "User-Agent": UAUtil.getUA(.raw),
-          "Cookie": "PHPSESSID=$ticket",
+      await _dio.get(
+        url1,
+        options: Options(
+          followRedirects: true,
+          headers: {
+            "User-Agent": UAUtil.getUA(.raw),
+            "Cookie": "PHPSESSID=$ticket",
+          },
+        ),
+      );
+
+      if (ticket == null) return null;
+      final r1 = await _dio.get(_apiInfo(uid));
+      if (r1.statusCode != 200 ||
+          r1.data["code"] != "10200" ||
+          r1.data["data"] == null) {
+        return null;
+      }
+      final String? stuId = r1.data["data"]["studentNo"];
+      final String? username = r1.data["data"]["username"];
+      final int? grade = int.tryParse(r1.data["data"]["grade"]);
+      final bool sex = r1.data["data"]["sex"] == "1";
+
+      if (stuId == null || username == null || grade == null) return null;
+
+      return AuthCredential(
+        guest: false,
+        type: id,
+        id: stuId,
+        name: username,
+        token: ticket,
+        expireAt: DateTime.now().addMinutes(30),
+        ext: {
+          "unify_id": uid,
+          "grade": grade,
+          "sex": sex,
+          "cookie": await serializeCookieJar(
+            cookieJar,
+            CquptUnifyBasePlatform.cookieDomain,
+          ),
         },
-      ),
-    );
-
-    if (ticket == null) return null;
-    final r1 = await _dio.get(_apiInfo(uid));
-    if (r1.statusCode != 200 ||
-        r1.data["code"] != "10200" ||
-        r1.data["data"] == null) {
+      );
+    } catch (e) {
       return null;
     }
-    final String? stuId = r1.data["data"]["studentNo"];
-    final String? username = r1.data["data"]["username"];
-    final int? grade = int.tryParse(r1.data["data"]["grade"]);
-    final bool sex = r1.data["data"]["sex"] == "1";
-
-    if (stuId == null || username == null || grade == null) return null;
-
-    return AuthCredential(
-      guest: false,
-      type: id,
-      id: stuId,
-      name: username,
-      token: ticket,
-      expireAt: DateTime.now().addMinutes(30),
-      ext: {
-        "unify_id": uid,
-        "grade": grade,
-        "sex": sex,
-        "cookie": await serializeCookieJar(
-          cookieJar,
-          CquptUnifyBasePlatform.cookieDomain,
-        ),
-      },
-    );
   }
 
   Future<AuthCredential?> _refresh(AuthCredential credential) async {
@@ -170,6 +179,7 @@ class CquptAcademicPortalPlatform extends Platform {
             hint: t.common.password,
           ),
         ],
+        vaultAccountType: loginAccountType,
         onConfirm: (values) {
           Navigator.of(sheetContext).pop();
           if (!completer.isCompleted) {
@@ -184,10 +194,23 @@ class CquptAcademicPortalPlatform extends Platform {
 
     if (result != null && result['id'] != null && result['pwd'] != null) {
       if (context.mounted) context.loaderOverlay.show();
-      return await _login(result['id']!, result['pwd']!, true).then((v) {
+      AuthCredential? credential;
+      try {
+        credential = await _login(result['id']!, result['pwd']!, true);
+      } finally {
         if (context.mounted) context.loaderOverlay.hide();
-        return v?.copyWith(guest: isGuest);
-      });
+      }
+      if (credential != null && !isGuest && context.mounted) {
+        showVaultSavePrompt(
+          context,
+          schoolId: currentSchoolSignal.value?.id ?? '',
+          platformId: id,
+          accountType: loginAccountType,
+          username: result['id']!,
+          password: result['pwd']!,
+        );
+      }
+      return credential?.copyWith(guest: isGuest);
     }
 
     return null;

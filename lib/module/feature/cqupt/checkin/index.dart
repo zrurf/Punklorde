@@ -21,7 +21,7 @@ class FeatCquptCheckinView extends StatefulWidget {
 
 class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
   final GlobalKey<_FeatCquptCheckinViewState> widgetKey = GlobalKey();
-  final Signal<bool> _initialized = signal(false);
+  bool _initialized = false;
   Timer? _tronUpdateTimer;
   Timer? _chaoxingUpdateTimer;
 
@@ -32,8 +32,11 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final context = widgetKey.currentContext;
       if (context != null) {
-        fetchEvent(context).then((_) {
-          _initialized.value = true;
+        // 用 whenComplete 确保即使拉取失败也能退出加载态
+        fetchEvent(context).whenComplete(() {
+          if (mounted) {
+            setState(() => _initialized = true);
+          }
         });
       }
       _tronUpdateTimer = Timer.periodic(const Duration(seconds: 2), (v) {
@@ -115,7 +118,7 @@ class _FeatCquptCheckinViewState extends State<FeatCquptCheckinView> {
                   await fetchEvent(context);
                 },
                 color: colors.primary,
-                child: (_initialized.value)
+                child: (_initialized)
                     ? ListView.builder(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,

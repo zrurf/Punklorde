@@ -75,31 +75,41 @@ Future<List<CheckinEvent>> fetchFromCquptTron(BuildContext context) async {
               await context.push("/p/universal_scan");
             },
             RollcallType.pin => (Set<AuthCredential> creds) async {
+              final credList = creds.toList();
+              final auth = (credList.isNotEmpty) ? credList.first : null;
               final r = await openPinInputPanel(
                 context,
                 v.title ?? t.submodule.cqupt_checkin.check_in,
                 "${v.author ?? ''}-${v.dept ?? ''}",
                 4,
+                fetchCheckinCode: (auth == null)
+                    ? null
+                    : () =>
+                          serviceCquptTronCheckin.getCheckinNumber(auth, v.id),
+                onQuickCheckin: (auth == null)
+                    ? null
+                    : (code) {
+                        if (context.mounted) {
+                          serviceCquptTronCheckin.checkinPin(
+                            context,
+                            credList,
+                            v.id,
+                            code,
+                          );
+                        }
+                      },
               );
+              if (!context.mounted) return;
               if (r == null) {
-                if (context.mounted) {
-                  serviceCquptTronCheckin.checkinPinCrack(
-                    context,
-                    creds.toList(),
-                    v.id,
-                  );
-                }
+                serviceCquptTronCheckin.checkinPinCrack(
+                  context,
+                  credList,
+                  v.id,
+                );
                 return;
               }
               if (r.isNotEmpty) {
-                if (context.mounted) {
-                  serviceCquptTronCheckin.checkinPin(
-                    context,
-                    creds.toList(),
-                    v.id,
-                    r,
-                  );
-                }
+                serviceCquptTronCheckin.checkinPin(context, credList, v.id, r);
                 return;
               }
             },
@@ -108,15 +118,21 @@ Future<List<CheckinEvent>> fetchFromCquptTron(BuildContext context) async {
                 context,
                 v.title ?? t.submodule.cqupt_checkin.check_in,
                 "${v.author ?? ''}-${v.dept ?? ''}",
+                onQuickCheckin: () {
+                  serviceCquptTronCheckin.checkinRadarAuto(
+                    context,
+                    creds.toList(),
+                    v.id,
+                  );
+                },
               );
-              if (context.mounted) {
-                serviceCquptTronCheckin.checkinRadar(
-                  context,
-                  creds.toList(),
-                  v.id,
-                  r,
-                );
-              }
+              if (!context.mounted) return;
+              serviceCquptTronCheckin.checkinRadar(
+                context,
+                creds.toList(),
+                v.id,
+                r,
+              );
             },
           },
         ),

@@ -64,7 +64,12 @@ class _PrimaryAccountPageViewState extends State<PrimaryAccountPageView> {
             : Text(t.notice.not_login),
         onPress: (credential == null)
             ? () async {
-                final newCredential = await v.login(context, false);
+                AuthCredential? newCredential;
+                try {
+                  newCredential = await v.login(context, false);
+                } catch (_) {
+                  // 网络等异常按登录失败处理
+                }
                 if (newCredential != null) {
                   setAuthCredential(newCredential);
                 }

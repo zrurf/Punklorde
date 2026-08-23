@@ -7,7 +7,7 @@ import android.net.VpnService
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -15,7 +15,7 @@ import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     companion object {
         private const val VPN_PREPARE_REQUEST = 24
     }

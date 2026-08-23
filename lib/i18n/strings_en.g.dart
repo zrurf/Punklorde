@@ -52,6 +52,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$label$en label = Translations$label$en._(_root);
 	late final Translations$feat$en feat = Translations$feat$en._(_root);
 	late final Translations$setting$en setting = Translations$setting$en._(_root);
+	late final Translations$vault$en vault = Translations$vault$en._(_root);
 	late final Translations$submodule$en submodule = Translations$submodule$en._(_root);
 }
 
@@ -168,6 +169,12 @@ class Translations$notice$en {
 	/// en: 'Login failed'
 	String get login_failed => 'Login failed';
 
+	/// en: 'Verification code sent'
+	String get sms_code_sent => 'Verification code sent';
+
+	/// en: 'Failed to send the verification code'
+	String get sms_code_send_failed => 'Failed to send the verification code';
+
 	/// en: 'Login status refreshed successfully'
 	String get refresh_success => 'Login status refreshed successfully';
 
@@ -176,6 +183,9 @@ class Translations$notice$en {
 
 	/// en: 'Manual re-login may be required.'
 	String get refresh_failed_hint => 'Manual re-login may be required.';
+
+	/// en: '$count credential(s) failed to refresh and have expired. Please log in again.'
+	String credentials_expired({required Object count}) => '${count} credential(s) failed to refresh and have expired. Please log in again.';
 
 	/// en: 'Not logged in'
 	String get not_login => 'Not logged in';
@@ -257,6 +267,18 @@ class Translations$notice$en {
 
 	/// en: 'Please enter the check-in code'
 	String get checkin_code_hint => 'Please enter the check-in code';
+
+	/// en: 'Two-Factor Auth'
+	String get reauth_title => 'Two-Factor Auth';
+
+	/// en: 'Untrusted device, additional verification required'
+	String get reauth_hint => 'Untrusted device, additional verification required';
+
+	/// en: 'Unsupported verification method'
+	String get reauth_unsupported => 'Unsupported verification method';
+
+	/// en: 'Enter the verification code'
+	String get ver_code_hint => 'Enter the verification code';
 
 	/// en: 'This field is required'
 	String get field_required => 'This field is required';
@@ -624,6 +646,24 @@ class Translations$setting$en {
 	/// en: 'Password Vault'
 	String get password_vault => 'Password Vault';
 
+	/// en: 'License'
+	String get license => 'License';
+
+	/// en: 'Build date'
+	String get build_date => 'Build date';
+
+	/// en: 'Build commit'
+	String get git_commit => 'Build commit';
+
+	/// en: 'Language'
+	String get language => 'Language';
+
+	/// en: 'Follow System'
+	String get follow_system => 'Follow System';
+
+	/// en: 'Map Implementation'
+	String get map_provider => 'Map Implementation';
+
 	/// en: 'Download Cache'
 	String get dl_cache => 'Download Cache';
 
@@ -724,6 +764,159 @@ class Translations$setting$en {
 	String cache_cleared({required Object count}) => 'Cleared ${count} caches';
 }
 
+// Path: vault
+class Translations$vault$en {
+	Translations$vault$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Set Unlock Password'
+	String get setup_title => 'Set Unlock Password';
+
+	/// en: 'Set an unlock password on first use to protect the vault'
+	String get setup_hint => 'Set an unlock password on first use to protect the vault';
+
+	/// en: 'Unlock Vault'
+	String get unlock_title => 'Unlock Vault';
+
+	/// en: 'Enter the unlock password to access the vault'
+	String get unlock_hint => 'Enter the unlock password to access the vault';
+
+	/// en: 'Set Password'
+	String get set_password => 'Set Password';
+
+	/// en: 'Confirm Password'
+	String get confirm_password => 'Confirm Password';
+
+	/// en: 'Unlock'
+	String get unlock => 'Unlock';
+
+	/// en: 'Lock'
+	String get lock => 'Lock';
+
+	/// en: 'Change Unlock Password'
+	String get change_password => 'Change Unlock Password';
+
+	/// en: 'The two passwords do not match'
+	String get password_mismatch => 'The two passwords do not match';
+
+	/// en: 'Unlock password set'
+	String get password_set => 'Unlock password set';
+
+	/// en: 'Unlock password updated'
+	String get password_changed => 'Unlock password updated';
+
+	/// en: 'Incorrect unlock password'
+	String get wrong_password => 'Incorrect unlock password';
+
+	/// en: 'No vault entries'
+	String get empty => 'No vault entries';
+
+	/// en: 'Entries are saved automatically after primary account login, or can be added manually'
+	String get empty_hint => 'Entries are saved automatically after primary account login, or can be added manually';
+
+	/// en: 'Add Entry'
+	String get add => 'Add Entry';
+
+	/// en: 'Edit Entry'
+	String get edit => 'Edit Entry';
+
+	/// en: 'Delete Entry'
+	String get delete => 'Delete Entry';
+
+	/// en: 'Delete this entry?'
+	String get delete_confirm => 'Delete this entry?';
+
+	/// en: 'School'
+	String get school => 'School';
+
+	/// en: 'Platform'
+	String get platform => 'Platform';
+
+	/// en: 'Account Type'
+	String get account_type => 'Account Type';
+
+	/// en: 'Platform Account'
+	String get account_type_platform => 'Platform Account';
+
+	/// en: 'Unified Auth'
+	String get account_type_unify => 'Unified Auth';
+
+	/// en: 'Username'
+	String get username => 'Username';
+
+	/// en: 'Remark'
+	String get remark => 'Remark';
+
+	/// en: 'Fill from Vault'
+	String get fill_from_vault => 'Fill from Vault';
+
+	/// en: 'No available vault entries'
+	String get no_entry => 'No available vault entries';
+
+	/// en: 'Vault is not configured'
+	String get not_configured => 'Vault is not configured';
+
+	/// en: 'Entry added'
+	String get entry_added => 'Entry added';
+
+	/// en: 'Entry updated'
+	String get entry_updated => 'Entry updated';
+
+	/// en: 'Entry deleted'
+	String get entry_deleted => 'Entry deleted';
+
+	/// en: 'Biometric Unlock'
+	String get biometric_unlock => 'Biometric Unlock';
+
+	/// en: 'Use device biometrics (fingerprint / face, etc.) instead of the unlock password'
+	String get biometric_hint => 'Use device biometrics (fingerprint / face, etc.) instead of the unlock password';
+
+	/// en: 'Use Biometrics'
+	String get biometric_authenticate => 'Use Biometrics';
+
+	/// en: 'Authenticate to unlock the vault'
+	String get biometric_reason => 'Authenticate to unlock the vault';
+
+	/// en: 'Biometrics are unsupported or not enrolled on this device'
+	String get biometric_unavailable => 'Biometrics are unsupported or not enrolled on this device';
+
+	/// en: 'Biometric unlock requires setting a password first'
+	String get biometric_requires_password => 'Biometric unlock requires setting a password first';
+
+	/// en: 'Save to Password Vault?'
+	String get save_prompt_title => 'Save to Password Vault?';
+
+	/// en: 'Save this account to the password vault after a successful login?'
+	String get save_prompt_hint => 'Save this account to the password vault after a successful login?';
+
+	/// en: 'Save'
+	String get save_action => 'Save';
+
+	/// en: 'Don't Save'
+	String get not_save => 'Don\'t Save';
+
+	/// en: 'Locked'
+	String get locked => 'Locked';
+
+	/// en: 'With the lock enabled, authentication is required each time you enter the vault'
+	String get locked_hint => 'With the lock enabled, authentication is required each time you enter the vault';
+
+	/// en: 'Disable Lock'
+	String get disable_lock => 'Disable Lock';
+
+	/// en: 'Entries are kept after disabling the lock, but access will no longer require authentication. Disable?'
+	String get disable_lock_confirm => 'Entries are kept after disabling the lock, but access will no longer require authentication. Disable?';
+
+	/// en: 'Enable Lock'
+	String get set_lock => 'Enable Lock';
+
+	/// en: 'The lock is enabled once the unlock password is set'
+	String get set_password_hint => 'The lock is enabled once the unlock password is set';
+}
+
 // Path: submodule
 class Translations$submodule$en {
 	Translations$submodule$en._(this._root);
@@ -731,10 +924,23 @@ class Translations$submodule$en {
 	final Translations _root; // ignore: unused_field
 
 	// Translations
+	late final Translations$submodule$cuc_checkin$en cuc_checkin = Translations$submodule$cuc_checkin$en._(_root);
 	late final Translations$submodule$cqupt_checkin$en cqupt_checkin = Translations$submodule$cqupt_checkin$en._(_root);
 	late final Translations$submodule$cqupt_sport$en cqupt_sport = Translations$submodule$cqupt_sport$en._(_root);
 	late final Translations$submodule$chaoxing$en chaoxing = Translations$submodule$chaoxing$en._(_root);
 	late final Translations$submodule$sangfor_vpn$en sangfor_vpn = Translations$submodule$sangfor_vpn$en._(_root);
+}
+
+// Path: submodule.cuc_checkin
+class Translations$submodule$cuc_checkin$en {
+	Translations$submodule$cuc_checkin$en._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Check-in'
+	String get title_check_in => 'Check-in';
 }
 
 // Path: submodule.cqupt_checkin
@@ -796,14 +1002,20 @@ class Translations$submodule$cqupt_checkin$en {
 	/// en: 'No ongoing check-in process'
 	String get no_ongoing_checkin => 'No ongoing check-in process';
 
-	/// en: 'Brute force check-in'
-	String get pin_crack_checkin => 'Brute force check-in';
+	/// en: 'Brute-force Check-in'
+	String get pin_crack_checkin => 'Brute-force Check-in';
 
-	/// en: 'Current Location'
-	String get checkin_use_current_loc => 'Current Location';
+	/// en: 'Quick Check-in'
+	String get checkin_quick => 'Quick Check-in';
 
-	/// en: 'Auto-Obtain Location'
-	String get checkin_use_auto_loc => 'Auto-Obtain Location';
+	/// en: 'Fill Check-in Code'
+	String get checkin_fill_code => 'Fill Check-in Code';
+
+	/// en: 'Check-in with Current Location'
+	String get checkin_use_current_loc => 'Check-in with Current Location';
+
+	/// en: 'Auto-locate Check-in'
+	String get checkin_use_auto_loc => 'Auto-locate Check-in';
 }
 
 // Path: submodule.cqupt_sport
@@ -1228,9 +1440,12 @@ extension on Translations {
 			'notice.no_guest' => 'There is no guest account.',
 			'notice.login_success' => 'Login successfully',
 			'notice.login_failed' => 'Login failed',
+			'notice.sms_code_sent' => 'Verification code sent',
+			'notice.sms_code_send_failed' => 'Failed to send the verification code',
 			'notice.refresh_success' => 'Login status refreshed successfully',
 			'notice.refresh_failed' => 'Failed to refresh login status',
 			'notice.refresh_failed_hint' => 'Manual re-login may be required.',
+			'notice.credentials_expired' => ({required Object count}) => '${count} credential(s) failed to refresh and have expired. Please log in again.',
 			'notice.not_login' => 'Not logged in',
 			'notice.logged_in' => 'Logged in',
 			'notice.unselected_user' => 'Unselected user.',
@@ -1258,6 +1473,10 @@ extension on Translations {
 			'notice.share_failed' => 'Share failed',
 			'notice.failed_open_file' => 'Failed to open file',
 			'notice.checkin_code_hint' => 'Please enter the check-in code',
+			'notice.reauth_title' => 'Two-Factor Auth',
+			'notice.reauth_hint' => 'Untrusted device, additional verification required',
+			'notice.reauth_unsupported' => 'Unsupported verification method',
+			'notice.ver_code_hint' => 'Enter the verification code',
 			'notice.field_required' => 'This field is required',
 			'notice.invalid_resolution_format' => 'Invalid resolution format, expected 720*1280',
 			'title.id' => 'ID',
@@ -1365,6 +1584,12 @@ extension on Translations {
 			'setting.guest_account' => 'Guest Account',
 			'setting.add_account' => 'Add Account',
 			'setting.password_vault' => 'Password Vault',
+			'setting.license' => 'License',
+			'setting.build_date' => 'Build date',
+			'setting.git_commit' => 'Build commit',
+			'setting.language' => 'Language',
+			'setting.follow_system' => 'Follow System',
+			'setting.map_provider' => 'Map Implementation',
 			'setting.dl_cache' => 'Download Cache',
 			'setting.sources_list' => 'Sources List',
 			'setting.github_link' => 'Github',
@@ -1398,6 +1623,55 @@ extension on Translations {
 			'setting.cache_refreshed' => 'Cache refreshed',
 			'setting.cache_deleted' => 'Cache deleted',
 			'setting.cache_cleared' => ({required Object count}) => 'Cleared ${count} caches',
+			'vault.setup_title' => 'Set Unlock Password',
+			'vault.setup_hint' => 'Set an unlock password on first use to protect the vault',
+			'vault.unlock_title' => 'Unlock Vault',
+			'vault.unlock_hint' => 'Enter the unlock password to access the vault',
+			'vault.set_password' => 'Set Password',
+			'vault.confirm_password' => 'Confirm Password',
+			'vault.unlock' => 'Unlock',
+			'vault.lock' => 'Lock',
+			'vault.change_password' => 'Change Unlock Password',
+			'vault.password_mismatch' => 'The two passwords do not match',
+			'vault.password_set' => 'Unlock password set',
+			'vault.password_changed' => 'Unlock password updated',
+			'vault.wrong_password' => 'Incorrect unlock password',
+			'vault.empty' => 'No vault entries',
+			'vault.empty_hint' => 'Entries are saved automatically after primary account login, or can be added manually',
+			'vault.add' => 'Add Entry',
+			'vault.edit' => 'Edit Entry',
+			'vault.delete' => 'Delete Entry',
+			'vault.delete_confirm' => 'Delete this entry?',
+			'vault.school' => 'School',
+			'vault.platform' => 'Platform',
+			'vault.account_type' => 'Account Type',
+			'vault.account_type_platform' => 'Platform Account',
+			'vault.account_type_unify' => 'Unified Auth',
+			'vault.username' => 'Username',
+			'vault.remark' => 'Remark',
+			'vault.fill_from_vault' => 'Fill from Vault',
+			'vault.no_entry' => 'No available vault entries',
+			'vault.not_configured' => 'Vault is not configured',
+			'vault.entry_added' => 'Entry added',
+			'vault.entry_updated' => 'Entry updated',
+			'vault.entry_deleted' => 'Entry deleted',
+			'vault.biometric_unlock' => 'Biometric Unlock',
+			'vault.biometric_hint' => 'Use device biometrics (fingerprint / face, etc.) instead of the unlock password',
+			'vault.biometric_authenticate' => 'Use Biometrics',
+			'vault.biometric_reason' => 'Authenticate to unlock the vault',
+			'vault.biometric_unavailable' => 'Biometrics are unsupported or not enrolled on this device',
+			'vault.biometric_requires_password' => 'Biometric unlock requires setting a password first',
+			'vault.save_prompt_title' => 'Save to Password Vault?',
+			'vault.save_prompt_hint' => 'Save this account to the password vault after a successful login?',
+			'vault.save_action' => 'Save',
+			'vault.not_save' => 'Don\'t Save',
+			'vault.locked' => 'Locked',
+			'vault.locked_hint' => 'With the lock enabled, authentication is required each time you enter the vault',
+			'vault.disable_lock' => 'Disable Lock',
+			'vault.disable_lock_confirm' => 'Entries are kept after disabling the lock, but access will no longer require authentication. Disable?',
+			'vault.set_lock' => 'Enable Lock',
+			'vault.set_password_hint' => 'The lock is enabled once the unlock password is set',
+			'submodule.cuc_checkin.title_check_in' => 'Check-in',
 			'submodule.cqupt_checkin.title_check_in' => 'Check-in',
 			'submodule.cqupt_checkin.check_in' => 'Check in',
 			'submodule.cqupt_checkin.scan_checkin' => 'Scan',
@@ -1415,9 +1689,11 @@ extension on Translations {
 			'submodule.cqupt_checkin.retry_checkin' => 'Retry selected check-in',
 			'submodule.cqupt_checkin.already_checkin' => 'Already checked in',
 			'submodule.cqupt_checkin.no_ongoing_checkin' => 'No ongoing check-in process',
-			'submodule.cqupt_checkin.pin_crack_checkin' => 'Brute force check-in',
-			'submodule.cqupt_checkin.checkin_use_current_loc' => 'Current Location',
-			'submodule.cqupt_checkin.checkin_use_auto_loc' => 'Auto-Obtain Location',
+			'submodule.cqupt_checkin.pin_crack_checkin' => 'Brute-force Check-in',
+			'submodule.cqupt_checkin.checkin_quick' => 'Quick Check-in',
+			'submodule.cqupt_checkin.checkin_fill_code' => 'Fill Check-in Code',
+			'submodule.cqupt_checkin.checkin_use_current_loc' => 'Check-in with Current Location',
+			'submodule.cqupt_checkin.checkin_use_auto_loc' => 'Auto-locate Check-in',
 			'submodule.cqupt_sport.record' => 'Record',
 			'submodule.cqupt_sport.configure' => 'Configure',
 			'submodule.cqupt_sport.motion_profile' => 'Motion Profile',

@@ -107,7 +107,10 @@ jobs:
       - name: Build debug APK
         env:
           ANDROID_NDK_HOME: $ANDROID_HOME/ndk/29.0.14206865
-        run: flutter build apk --debug
+        run: >
+          flutter build apk --debug
+          --dart-define=BUILD_DATE=$(date -u +%Y-%m-%d)
+          --dart-define=GIT_COMMIT=$(git rev-parse --short HEAD)
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

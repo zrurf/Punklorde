@@ -3,8 +3,10 @@ import 'package:forui/forui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:punklorde/core/status/app.dart';
+import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/feature.dart';
+import 'package:punklorde/utils/etc/fdialog.dart';
 
 const double searchBarHeight = 80.0;
 const double functionGridHeight = 300.0;
@@ -33,9 +35,63 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       if (mounted) {
         if (currentSchoolSignal.value == null) {
           context.go('/p/select_school');
+        } else {
+          _showCredentialExpiredDialogIfNeeded();
         }
       }
     });
+  }
+
+  // 主页渲染完成后，提示本次启动刷新失败的凭证数量
+  Future<void> _showCredentialExpiredDialogIfNeeded() async {
+    final failures = refreshFailureCountSignal.value;
+    if (failures <= 0) return;
+    // 再等一帧，确保主页完全加载出来后再弹窗
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    refreshFailureCountSignal.value = 0;
+    await showFDialog(
+      context: context,
+      builder: (context, style, animation) => punklordeDialog(
+        style: style,
+        animation: animation,
+        title: Text(t.notice.refresh_failed),
+        body: Text(t.notice.credentials_expired(count: failures)),
+        actions: [
+          FButton(
+            size: .xs,
+            variant: .primary,
+            onPress: () => Navigator.of(context).pop(),
+            child: Text(t.notice.confirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncTabController();
+  }
+
+  // 学校切换后同步标签数量与索引，避免 TabBar 越界
+  void _syncTabController() {
+    final count = currentSchoolSignal.value?.tabs.length ?? 0;
+    if (_tabController.length == count) {
+      if (count > 0 && _tabController.index >= count) {
+        _tabController.index = count - 1;
+      }
+      return;
+    }
+    final oldIndex = _tabController.index.clamp(0, count - 1).toInt();
+    _tabController.dispose();
+    _tabController = TabController(
+      length: count,
+      vsync: this,
+      initialIndex: oldIndex,
+    );
+    setState(() {});
   }
 
   void _onScroll() {

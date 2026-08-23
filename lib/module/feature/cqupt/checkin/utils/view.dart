@@ -11,8 +11,10 @@ Future<String?> openPinInputPanel(
   BuildContext context,
   String title,
   String desc,
-  int length,
-) async {
+  int length, {
+  Future<String?> Function()? fetchCheckinCode,
+  void Function(String code)? onQuickCheckin,
+}) async {
   final completer = Completer<String?>();
 
   await showFSheet(
@@ -21,6 +23,13 @@ Future<String?> openPinInputPanel(
       title: title,
       desc: desc,
       length: length,
+      fetchCheckinCode: fetchCheckinCode,
+      onQuickCheckin: (onQuickCheckin == null)
+          ? null
+          : (code) {
+              Navigator.of(sheetContext).pop();
+              onQuickCheckin(code);
+            },
       onConfirm: (value, crack) {
         Navigator.of(sheetContext).pop();
         if (!completer.isCompleted) {
@@ -68,14 +77,16 @@ Future<String?> openCommonPinInputPanel(
 Future<Coordinate> openPosCheckinPanel(
   BuildContext context,
   String title,
-  String desc,
-) async {
+  String desc, {
+  VoidCallback? onQuickCheckin,
+}) async {
   final completer = Completer<Coordinate>();
   await showFSheet(
     context: context,
     builder: (sheetContext) => PosCheckinPanel(
       title: title,
       desc: desc,
+      onQuickCheckin: onQuickCheckin,
       onConfirm: (pos) {
         Navigator.of(sheetContext).pop();
         if (!completer.isCompleted) {

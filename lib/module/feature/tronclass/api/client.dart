@@ -2,14 +2,18 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:punklorde/common/model/location.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/api/endpoint.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/model.dart';
-import 'package:punklorde/module/feature/cqupt/tronclass/utils/brute_force.dart';
+import 'package:punklorde/module/feature/tronclass/api/endpoint.dart';
+import 'package:punklorde/module/feature/tronclass/config.dart';
+import 'package:punklorde/module/feature/tronclass/model.dart';
+import 'package:punklorde/module/feature/tronclass/utils/brute_force.dart';
+import 'package:punklorde/module/feature/tronclass/utils/math.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/utils/ua.dart';
 import 'package:punklorde/utils/uuid.dart';
 
-class ApiClient {
+class TronclassApiClient {
+  final TronclassConfig config;
+  final TronclassEndpoints endpoints;
   final Dio _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 20),
@@ -17,14 +21,17 @@ class ApiClient {
     ),
   );
 
+  TronclassApiClient(this.config)
+      : endpoints = TronclassEndpoints(config.apiBaseUrl);
+
   static final String _ua = UAUtil.getUA(.wxwork);
 
   Map<String, dynamic> _getHeader(String sessionId) => {
     "User-Agent": _ua,
     "X-SESSION-ID": sessionId,
     "SESSION": sessionId,
-    "Referer": "http://mobile.tc.cqupt.edu.cn/",
-    "Origin": "http://mobile.tc.cqupt.edu.cn/",
+    "Referer": "${config.mobileBaseUrl}/",
+    "Origin": config.mobileBaseUrl,
     "X-Requested-With": "XMLHttpRequest",
   };
 
@@ -42,7 +49,7 @@ class ApiClient {
   ) async {
     try {
       final r1 = await _dio.get(
-        apiGetEvent,
+        endpoints.apiGetEvent,
         options: Options(headers: _getHeader(credential.token)),
       );
       if (r1.statusCode != 200 || r1.data["rollcalls"] == null) return null;
@@ -60,10 +67,62 @@ class ApiClient {
     String id,
   ) async {
     final r = await _dio.get(
-      apiQueryRollcall(id),
+      endpoints.apiQueryRollcall(id),
       options: Options(headers: _getHeader(credential.token)),
     );
     return r.data["number_code"];
+  }
+
+  /// 雷达签到原始接口（返回距离签到中心的距离，单位：米）
+  Future<double?> rawCheckinRadar(
+    AuthCredential credential,
+    String id,
+    Coordinate coord,
+    double speed,
+    double accuracy,
+  ) async {
+    try {
+      final r = await _dio.put(
+        endpoints.apiCheckinRadar(id),
+        data: {
+          "deviceId": credential.ext?["uuid"] ?? _getDeviceId(credential),
+          "longitude": coord.lng,
+          "latitude": coord.lat,
+          "speed": speed,
+          "accuracy": accuracy,
+        },
+        options: Options(
+          headers: _getHeader(credential.token),
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+      return r.data["distance"];
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 利用两个辅助点的距离探测签到中心
+  Future<List<Coordinate>> detectCheckinCoord(
+    AuthCredential credential,
+    String id,
+    Coordinate auxiliaryA,
+    Coordinate auxiliaryB,
+  ) async {
+    final List<Future<double?>> futures = [
+      rawCheckinRadar(credential, id, auxiliaryA, 0.0, 30),
+      rawCheckinRadar(credential, id, auxiliaryB, 0.0, 30),
+    ];
+    final distances = await Future.wait(futures);
+    if (distances.first == null || distances.last == null) {
+      return List.empty();
+    }
+    return findCircleIntersections(
+      auxiliaryA,
+      distances.first!,
+      auxiliaryB,
+      distances.last!,
+    );
   }
 
   /// 雷达签到
@@ -76,7 +135,7 @@ class ApiClient {
   ) async {
     try {
       final r = await _dio.put(
-        apiCheckinRadar(id),
+        endpoints.apiCheckinRadar(id),
         data: {
           "deviceId": credential.ext?["uuid"] ?? _getDeviceId(credential),
           "longitude": coord.lng,
@@ -103,7 +162,7 @@ class ApiClient {
   ) async {
     try {
       final r = await _dio.put(
-        apiCheckinPin(id),
+        endpoints.apiCheckinPin(id),
         data: {
           "deviceId": credential.ext?["uuid"] ?? _getDeviceId(credential),
           "numberCode": pin,
@@ -120,7 +179,7 @@ class ApiClient {
   Future<String?> checkinPinCrack(AuthCredential credential, String id) async {
     try {
       return await bruteForcePassword(
-        url: apiCheckinPin(id),
+        url: endpoints.apiCheckinPin(id),
         headers: _getHeader(credential.token),
         deviceId: credential.ext?["uuid"] ?? _getDeviceId(credential),
       );
@@ -137,7 +196,7 @@ class ApiClient {
   ) async {
     try {
       final r = await _dio.put(
-        apiCheckinQr(id),
+        endpoints.apiCheckinQr(id),
         data: {
           "deviceId": credential.ext?["uuid"] ?? _getDeviceId(credential),
           "data": data,

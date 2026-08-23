@@ -24,6 +24,9 @@ final Signal<BuiltMap<String, Map<String, String>>> authIndexGuest = signal(
   BuiltMap({}),
 ); // 访客用户索引
 
+// 本次启动刷新失败的凭证数量（用于进入应用时提示）
+final Signal<int> refreshFailureCountSignal = signal(0);
+
 // 认证管理器
 final AuthManager authManager = AuthManager();
 

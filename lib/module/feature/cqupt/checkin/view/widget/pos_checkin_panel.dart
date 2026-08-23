@@ -12,11 +12,15 @@ class PosCheckinPanel extends StatefulWidget {
   final String desc;
   final void Function(Coordinate coord) onConfirm;
 
+  /// 一键签到回调（非空则显示"一键签到"按钮）
+  final VoidCallback? onQuickCheckin;
+
   const PosCheckinPanel({
     super.key,
     required this.title,
     required this.desc,
     required this.onConfirm,
+    this.onQuickCheckin,
   });
 
   @override
@@ -94,6 +98,16 @@ class _PosCheckinPanelState extends State<PosCheckinPanel> {
                     ),
                     const FDivider(),
                     const SizedBox(height: 8),
+                    if (widget.onQuickCheckin != null)
+                      FButton(
+                        variant: .primary,
+                        onPress: () {
+                          Navigator.of(context).pop();
+                          widget.onQuickCheckin!();
+                        },
+                        prefix: const Icon(Icons.bolt),
+                        child: Text(t.submodule.cqupt_checkin.checkin_quick),
+                      ),
                     FButton(
                       variant: .secondary,
                       onPress: _manualSelectPoint,
@@ -101,7 +115,7 @@ class _PosCheckinPanelState extends State<PosCheckinPanel> {
                       child: Text(t.action.manual_select_point),
                     ),
                     FButton(
-                      variant: .primary,
+                      variant: .outline,
                       onPress: () {
                         widget.onConfirm(
                           Coordinate(lat: rawLat.value, lng: rawLng.value),

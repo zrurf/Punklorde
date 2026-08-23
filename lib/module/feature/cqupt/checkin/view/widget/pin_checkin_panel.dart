@@ -12,12 +12,20 @@ class PinCheckinPanel extends SignalStatefulWidget {
   final int length;
   final void Function(String value, bool crack) onConfirm;
 
+  /// 获取签到码（填充/一键签到用，null 时不显示相关按钮）
+  final Future<String?> Function()? fetchCheckinCode;
+
+  /// 一键签到（获取签到码后直接提交）
+  final void Function(String code)? onQuickCheckin;
+
   const PinCheckinPanel({
     super.key,
     required this.title,
     required this.desc,
     required this.length,
     required this.onConfirm,
+    this.fetchCheckinCode,
+    this.onQuickCheckin,
   });
 
   @override
@@ -25,11 +33,45 @@ class PinCheckinPanel extends SignalStatefulWidget {
 }
 
 class _PinCheckinPanelState extends State<PinCheckinPanel> {
-  String value = "";
+  final TextEditingController _controller = TextEditingController();
+
+  /// 是否正在请求签到码
+  bool _filling = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<String?> _fetch() async {
+    final result = await widget.fetchCheckinCode?.call();
+    return (result == null || result.isEmpty) ? null : result;
+  }
+
+  Future<void> _fill() async {
+    if (_filling || widget.fetchCheckinCode == null) return;
+    setState(() => _filling = true);
+    final code = await _fetch();
+    if (!mounted) return;
+    setState(() {
+      _filling = false;
+      if (code != null) _controller.text = code;
+    });
+  }
+
+  Future<void> _quick() async {
+    final onQuick = widget.onQuickCheckin;
+    if (onQuick == null || widget.fetchCheckinCode == null) return;
+    final code = await _fetch();
+    if (code == null) return;
+    onQuick(code);
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.theme.colors;
+    final hasFetch = widget.fetchCheckinCode != null;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: SafeArea(
@@ -76,6 +118,7 @@ class _PinCheckinPanelState extends State<PinCheckinPanel> {
                     const FDivider(),
                     Center(
                       child: Pinput(
+                        controller: _controller,
                         length: widget.length,
                         defaultPinTheme: switch (themeModeSignal.value) {
                           .system =>
@@ -86,15 +129,35 @@ class _PinCheckinPanelState extends State<PinCheckinPanel> {
                           .light => pinLightTheme,
                           .dark => pinDarkTheme,
                         },
-                        onChanged: (v) => value = v,
+                        onChanged: (v) {},
                       ),
                     ),
                     const FDivider(),
                     const SizedBox(height: 8),
+                    if (widget.onQuickCheckin != null && hasFetch)
+                      FButton(
+                        variant: .primary,
+                        prefix: const Icon(Icons.bolt),
+                        onPress: _quick,
+                        child: Text(t.submodule.cqupt_checkin.checkin_quick),
+                      ),
+                    if (hasFetch) ...[
+                      FButton(
+                        variant: .secondary,
+                        prefix: const Icon(Icons.download),
+                        suffix: _filling
+                            ? const FCircularProgress(size: .xs)
+                            : null,
+                        onPress: _filling ? null : _fill,
+                        child: Text(
+                          t.submodule.cqupt_checkin.checkin_fill_code,
+                        ),
+                      ),
+                    ],
                     FButton(
-                      variant: .primary,
+                      variant: .outline,
                       onPress: () {
-                        widget.onConfirm(value, false);
+                        widget.onConfirm(_controller.text, false);
                       },
                       child: Text(t.notice.confirm),
                     ),

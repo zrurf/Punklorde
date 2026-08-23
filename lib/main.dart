@@ -8,6 +8,7 @@ import 'package:punklorde/core/service/widget_service.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
+import 'package:punklorde/core/status/map.dart';
 import 'package:punklorde/core/status/resource.dart';
 import 'package:punklorde/core/status/schedule.dart';
 import 'package:punklorde/core/storage/mmkv.dart';
@@ -45,8 +46,8 @@ Future<void> main() async {
   await initMMKV(Env.keyMmkv);
   await initStatus();
 
-  // 初始化i18n
-  await LocaleSettings.useDeviceLocale();
+  // 初始化i18n（应用持久化的语言设置）
+  applyStoredLocale();
 
   // 初始化资源管理器
   await setupResourceManager(dio: Dio());
@@ -55,7 +56,7 @@ Future<void> main() async {
   await loadResourceStatus();
 
   // 初始化服务
-  await initMapService(Env.keyBaiduMapIOS);
+  await initMapService();
   initLocationService();
 
   // 初始化通知插件
@@ -90,6 +91,8 @@ Future<void> initStatus() async {
   initAppStatus();
   initAuthStatus();
   initResourceStatus();
+  loadMapProvider();
+  initMapStatus();
 }
 
 // 加载状态

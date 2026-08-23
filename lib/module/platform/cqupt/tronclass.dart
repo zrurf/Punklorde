@@ -9,10 +9,12 @@ import 'package:forui/forui.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:punklorde/common/model/cookie.dart';
 import 'package:punklorde/core/account/view/widget/login_panel.dart';
+import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/model/platform.dart';
 import 'package:punklorde/module/platform/cqupt/base/unify.dart';
+import 'package:punklorde/module/service/vault/vault_dialog.dart';
 import 'package:punklorde/utils/ua.dart';
 import 'package:punklorde/utils/uuid.dart';
 
@@ -34,6 +36,9 @@ class CquptTronclassPlatform extends Platform {
 
   @override
   String get descript => "用于学在重邮平台签到";
+
+  @override
+  String get loginAccountType => "cqupt_unify";
 
   late final Dio _dio;
 
@@ -224,6 +229,7 @@ class CquptTronclassPlatform extends Platform {
             hint: t.common.password,
           ),
         ],
+        vaultAccountType: loginAccountType,
         onConfirm: (values) {
           Navigator.of(sheetContext).pop();
           if (!completer.isCompleted) {
@@ -238,10 +244,23 @@ class CquptTronclassPlatform extends Platform {
 
     if (result != null && result['id'] != null && result['pwd'] != null) {
       if (context.mounted) context.loaderOverlay.show();
-      return await _login(result['id']!, result['pwd']!, true).then((v) {
+      AuthCredential? credential;
+      try {
+        credential = await _login(result['id']!, result['pwd']!, true);
+      } finally {
         if (context.mounted) context.loaderOverlay.hide();
-        return v?.copyWith(guest: isGuest);
-      });
+      }
+      if (credential != null && !isGuest && context.mounted) {
+        showVaultSavePrompt(
+          context,
+          schoolId: currentSchoolSignal.value?.id ?? '',
+          platformId: id,
+          accountType: loginAccountType,
+          username: result['id']!,
+          password: result['pwd']!,
+        );
+      }
+      return credential?.copyWith(guest: isGuest);
     }
 
     return null;

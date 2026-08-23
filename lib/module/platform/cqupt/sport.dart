@@ -21,7 +21,12 @@ class CquptSportPlatform extends Platform {
   String _apiLogin(String openid, String device) =>
       "$_apiBaseUrl/wxUnifyId/checkBinding?wxCode=&openid=$openid&phoneType=$device";
 
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+    ),
+  );
 
   CquptSportPlatform() {
     _dio.interceptors.add(CquptForwardInterceptor());
@@ -37,45 +42,49 @@ class CquptSportPlatform extends Platform {
   String get descript => "用于校园跑";
 
   Future<AuthCredential?> _login(String openid) async {
-    final loginResponse = await _dio.get(
-      _apiLogin(openid, '${deviceBrand}_$deviceOs $deviceOSVersion'),
-      options: Options(headers: {"User-Agent": UAUtil.getUA(.wxapplet)}),
-    );
-    if (loginResponse.data['code'] != "10200" ||
-        loginResponse.data['data']['isBind'] != 'true') {
+    try {
+      final loginResponse = await _dio.get(
+        _apiLogin(openid, '${deviceBrand}_$deviceOs $deviceOSVersion'),
+        options: Options(headers: {"User-Agent": UAUtil.getUA(.wxapplet)}),
+      );
+      if (loginResponse.data['code'] != "10200" ||
+          loginResponse.data['data']['isBind'] != 'true') {
+        return null;
+      }
+
+      final token = loginResponse.data['data']['token'];
+
+      final userResponse = await _dio.get(
+        _apiUserInfo,
+        options: Options(
+          headers: {"User-Agent": UAUtil.getUA(.wxapplet), "token": token},
+        ),
+      );
+
+      if (userResponse.data['code'] != "10200") {
+        return null;
+      }
+
+      return AuthCredential(
+        id: openid,
+        name: userResponse.data['data']['username'],
+        token: token,
+        type: id,
+        guest: false,
+        expireAt: DateTime.now().addDays(1),
+        ext: {
+          'id': userResponse.data['data']['id'],
+          'unifyId': userResponse.data['data']['unifyId'],
+          'studentNo': userResponse.data['data']['studentNo'],
+          'sex': userResponse.data['data']['sex'] == '1',
+          'grade': userResponse.data['data']['grade'],
+          'deptName': userResponse.data['data']['deptName'],
+          'publicKey': base64.decode(loginResponse.data['data']['publicKey']),
+        },
+      );
+    } catch (e) {
       return null;
     }
-
-    final token = loginResponse.data['data']['token'];
-
-    final userResponse = await _dio.get(
-      _apiUserInfo,
-      options: Options(
-        headers: {"User-Agent": UAUtil.getUA(.wxapplet), "token": token},
-      ),
-    );
-
-    if (userResponse.data['code'] != "10200") {
-      return null;
-    }
-
-    return AuthCredential(
-      id: openid,
-      name: userResponse.data['data']['username'],
-      token: token,
-      type: id,
-      guest: false,
-      expireAt: DateTime.now().addDays(1),
-      ext: {
-        'id': userResponse.data['data']['id'],
-        'unifyId': userResponse.data['data']['unifyId'],
-        'studentNo': userResponse.data['data']['studentNo'],
-        'sex': userResponse.data['data']['sex'] == '1',
-        'grade': userResponse.data['data']['grade'],
-        'deptName': userResponse.data['data']['deptName'],
-        'publicKey': base64.decode(loginResponse.data['data']['publicKey']),
-      },
-    );
   }
 
   @override
@@ -110,10 +119,13 @@ class CquptSportPlatform extends Platform {
 
     if (result != null && result['openid'] != null) {
       if (context.mounted) context.loaderOverlay.show();
-      return await _login(result['openid']!).then((v) {
+      AuthCredential? credential;
+      try {
+        credential = await _login(result['openid']!);
+      } finally {
         if (context.mounted) context.loaderOverlay.hide();
-        return v?.copyWith(guest: isGuest);
-      });
+      }
+      return credential?.copyWith(guest: isGuest);
     }
 
     return null;

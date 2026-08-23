@@ -13,13 +13,12 @@ class _LauncherViewState extends State<LauncherView> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.endOfFrame.then((_) {
-      if (mounted) {
-        if (currentSchoolSignal.value == null) {
-          context.go('/p/select_school');
-        } else {
-          context.go('/index/home');
-        }
+    WidgetsBinding.instance.endOfFrame.then((_) async {
+      if (!mounted) return;
+      if (currentSchoolSignal.value == null) {
+        context.go('/p/select_school');
+      } else {
+        context.go('/index/home');
       }
     });
   }

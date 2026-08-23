@@ -46,6 +46,7 @@ class TranslationsZhCn with BaseTranslations<AppLocale, Translations> implements
 	@override late final _Translations$label$zh_CN label = _Translations$label$zh_CN._(_root);
 	@override late final _Translations$feat$zh_CN feat = _Translations$feat$zh_CN._(_root);
 	@override late final _Translations$setting$zh_CN setting = _Translations$setting$zh_CN._(_root);
+	@override late final _Translations$vault$zh_CN vault = _Translations$vault$zh_CN._(_root);
 	@override late final _Translations$submodule$zh_CN submodule = _Translations$submodule$zh_CN._(_root);
 }
 
@@ -103,9 +104,12 @@ class _Translations$notice$zh_CN implements Translations$notice$en {
 	@override String get no_guest => '没有访客账户';
 	@override String get login_success => '登录成功';
 	@override String get login_failed => '登录失败';
+	@override String get sms_code_sent => '验证码已发送';
+	@override String get sms_code_send_failed => '验证码发送失败';
 	@override String get refresh_success => '登录状态刷新成功';
 	@override String get refresh_failed => '刷新登录状态失败';
 	@override String get refresh_failed_hint => '可能需要手动重新登录';
+	@override String credentials_expired({required Object count}) => '有 ${count} 个账号凭证刷新失败，已过期，请重新登录';
 	@override String get not_login => '未登录';
 	@override String get logged_in => '已登录';
 	@override String get unselected_user => '未选择用户';
@@ -133,6 +137,10 @@ class _Translations$notice$zh_CN implements Translations$notice$en {
 	@override String get share_failed => '分享失败';
 	@override String get failed_open_file => '无法打开文件';
 	@override String get checkin_code_hint => '请输入签到码';
+	@override String get reauth_title => '二次认证';
+	@override String get reauth_hint => '设备不可信，需完成二次认证';
+	@override String get reauth_unsupported => '不支持的认证方式';
+	@override String get ver_code_hint => '请输入验证码';
 	@override String get field_required => '此字段不能为空';
 	@override String get invalid_resolution_format => '分辨率格式不正确，应为 720*1280';
 }
@@ -285,6 +293,12 @@ class _Translations$setting$zh_CN implements Translations$setting$en {
 	@override String get guest_account => '访客账号';
 	@override String get add_account => '添加账号';
 	@override String get password_vault => '密码保管库';
+	@override String get license => '许可证';
+	@override String get build_date => '构建日期';
+	@override String get git_commit => '构建提交';
+	@override String get language => '语言';
+	@override String get follow_system => '跟随系统';
+	@override String get map_provider => '地图实现';
 	@override String get dl_cache => '下载缓存';
 	@override String get sources_list => '源列表';
 	@override String get github_link => 'Github';
@@ -320,6 +334,63 @@ class _Translations$setting$zh_CN implements Translations$setting$en {
 	@override String cache_cleared({required Object count}) => '已清空 ${count} 个缓存';
 }
 
+// Path: vault
+class _Translations$vault$zh_CN implements Translations$vault$en {
+	_Translations$vault$zh_CN._(this._root);
+
+	final TranslationsZhCn _root; // ignore: unused_field
+
+	// Translations
+	@override String get setup_title => '设置解锁密码';
+	@override String get setup_hint => '首次使用需设置解锁密码，用于保护保管库';
+	@override String get unlock_title => '解锁保管库';
+	@override String get unlock_hint => '输入解锁密码以访问保管库';
+	@override String get set_password => '设置密码';
+	@override String get confirm_password => '确认密码';
+	@override String get unlock => '解锁';
+	@override String get lock => '锁定';
+	@override String get change_password => '重设解锁密码';
+	@override String get password_mismatch => '两次输入的密码不一致';
+	@override String get password_set => '解锁密码已设置';
+	@override String get password_changed => '解锁密码已更新';
+	@override String get wrong_password => '解锁密码错误';
+	@override String get empty => '暂无保管库条目';
+	@override String get empty_hint => '主账号登录后会自动保存，也可手动添加';
+	@override String get add => '添加条目';
+	@override String get edit => '编辑条目';
+	@override String get delete => '删除条目';
+	@override String get delete_confirm => '确定删除此条目？';
+	@override String get school => '学校';
+	@override String get platform => '平台';
+	@override String get account_type => '账号类型';
+	@override String get account_type_platform => '平台账号';
+	@override String get account_type_unify => '统一认证';
+	@override String get username => '账号';
+	@override String get remark => '备注';
+	@override String get fill_from_vault => '从保管库填充';
+	@override String get no_entry => '没有可用的保管库条目';
+	@override String get not_configured => '尚未设置保管库';
+	@override String get entry_added => '条目已添加';
+	@override String get entry_updated => '条目已更新';
+	@override String get entry_deleted => '条目已删除';
+	@override String get biometric_unlock => '生物认证解锁';
+	@override String get biometric_hint => '使用系统生物认证（指纹/人脸等）替代解锁密码';
+	@override String get biometric_authenticate => '使用生物认证';
+	@override String get biometric_reason => '验证身份以解锁保管库';
+	@override String get biometric_unavailable => '设备不支持生物认证或未录入生物特征';
+	@override String get save_prompt_title => '保存到密码保管库？';
+	@override String get save_prompt_hint => '登录成功后是否将此账号保存到密码保管库？';
+	@override String get save_action => '保存';
+	@override String get not_save => '不保存';
+	@override String get locked => '已锁定';
+	@override String get locked_hint => '开启锁后，每次进入保管库需完成一次认证';
+	@override String get disable_lock => '取消锁';
+	@override String get disable_lock_confirm => '取消锁后条目仍保留，但访问不再需要认证，确定取消？';
+	@override String get set_lock => '开启锁';
+	@override String get set_password_hint => '设置解锁密码后将开启锁';
+	@override String get biometric_requires_password => '启用生物认证前需先设置解锁密码';
+}
+
 // Path: submodule
 class _Translations$submodule$zh_CN implements Translations$submodule$en {
 	_Translations$submodule$zh_CN._(this._root);
@@ -327,10 +398,21 @@ class _Translations$submodule$zh_CN implements Translations$submodule$en {
 	final TranslationsZhCn _root; // ignore: unused_field
 
 	// Translations
+	@override late final _Translations$submodule$cuc_checkin$zh_CN cuc_checkin = _Translations$submodule$cuc_checkin$zh_CN._(_root);
 	@override late final _Translations$submodule$cqupt_checkin$zh_CN cqupt_checkin = _Translations$submodule$cqupt_checkin$zh_CN._(_root);
 	@override late final _Translations$submodule$cqupt_sport$zh_CN cqupt_sport = _Translations$submodule$cqupt_sport$zh_CN._(_root);
 	@override late final _Translations$submodule$chaoxing$zh_CN chaoxing = _Translations$submodule$chaoxing$zh_CN._(_root);
 	@override late final _Translations$submodule$sangfor_vpn$zh_CN sangfor_vpn = _Translations$submodule$sangfor_vpn$zh_CN._(_root);
+}
+
+// Path: submodule.cuc_checkin
+class _Translations$submodule$cuc_checkin$zh_CN implements Translations$submodule$cuc_checkin$en {
+	_Translations$submodule$cuc_checkin$zh_CN._(this._root);
+
+	final TranslationsZhCn _root; // ignore: unused_field
+
+	// Translations
+	@override String get title_check_in => '签到';
 }
 
 // Path: submodule.cqupt_checkin
@@ -358,6 +440,8 @@ class _Translations$submodule$cqupt_checkin$zh_CN implements Translations$submod
 	@override String get already_checkin => '已签到';
 	@override String get no_ongoing_checkin => '没有进行中的签到';
 	@override String get pin_crack_checkin => '暴力破解签到';
+	@override String get checkin_quick => '一键签到';
+	@override String get checkin_fill_code => '填充签到码';
 	@override String get checkin_use_current_loc => '使用当前位置签到';
 	@override String get checkin_use_auto_loc => '自动获取位置签到';
 }
@@ -546,9 +630,12 @@ extension on TranslationsZhCn {
 			'notice.no_guest' => '没有访客账户',
 			'notice.login_success' => '登录成功',
 			'notice.login_failed' => '登录失败',
+			'notice.sms_code_sent' => '验证码已发送',
+			'notice.sms_code_send_failed' => '验证码发送失败',
 			'notice.refresh_success' => '登录状态刷新成功',
 			'notice.refresh_failed' => '刷新登录状态失败',
 			'notice.refresh_failed_hint' => '可能需要手动重新登录',
+			'notice.credentials_expired' => ({required Object count}) => '有 ${count} 个账号凭证刷新失败，已过期，请重新登录',
 			'notice.not_login' => '未登录',
 			'notice.logged_in' => '已登录',
 			'notice.unselected_user' => '未选择用户',
@@ -576,6 +663,10 @@ extension on TranslationsZhCn {
 			'notice.share_failed' => '分享失败',
 			'notice.failed_open_file' => '无法打开文件',
 			'notice.checkin_code_hint' => '请输入签到码',
+			'notice.reauth_title' => '二次认证',
+			'notice.reauth_hint' => '设备不可信，需完成二次认证',
+			'notice.reauth_unsupported' => '不支持的认证方式',
+			'notice.ver_code_hint' => '请输入验证码',
 			'notice.field_required' => '此字段不能为空',
 			'notice.invalid_resolution_format' => '分辨率格式不正确，应为 720*1280',
 			'title.id' => 'ID',
@@ -683,6 +774,12 @@ extension on TranslationsZhCn {
 			'setting.guest_account' => '访客账号',
 			'setting.add_account' => '添加账号',
 			'setting.password_vault' => '密码保管库',
+			'setting.license' => '许可证',
+			'setting.build_date' => '构建日期',
+			'setting.git_commit' => '构建提交',
+			'setting.language' => '语言',
+			'setting.follow_system' => '跟随系统',
+			'setting.map_provider' => '地图实现',
 			'setting.dl_cache' => '下载缓存',
 			'setting.sources_list' => '源列表',
 			'setting.github_link' => 'Github',
@@ -716,6 +813,55 @@ extension on TranslationsZhCn {
 			'setting.cache_refreshed' => '缓存已刷新',
 			'setting.cache_deleted' => '缓存已删除',
 			'setting.cache_cleared' => ({required Object count}) => '已清空 ${count} 个缓存',
+			'vault.setup_title' => '设置解锁密码',
+			'vault.setup_hint' => '首次使用需设置解锁密码，用于保护保管库',
+			'vault.unlock_title' => '解锁保管库',
+			'vault.unlock_hint' => '输入解锁密码以访问保管库',
+			'vault.set_password' => '设置密码',
+			'vault.confirm_password' => '确认密码',
+			'vault.unlock' => '解锁',
+			'vault.lock' => '锁定',
+			'vault.change_password' => '重设解锁密码',
+			'vault.password_mismatch' => '两次输入的密码不一致',
+			'vault.password_set' => '解锁密码已设置',
+			'vault.password_changed' => '解锁密码已更新',
+			'vault.wrong_password' => '解锁密码错误',
+			'vault.empty' => '暂无保管库条目',
+			'vault.empty_hint' => '主账号登录后会自动保存，也可手动添加',
+			'vault.add' => '添加条目',
+			'vault.edit' => '编辑条目',
+			'vault.delete' => '删除条目',
+			'vault.delete_confirm' => '确定删除此条目？',
+			'vault.school' => '学校',
+			'vault.platform' => '平台',
+			'vault.account_type' => '账号类型',
+			'vault.account_type_platform' => '平台账号',
+			'vault.account_type_unify' => '统一认证',
+			'vault.username' => '账号',
+			'vault.remark' => '备注',
+			'vault.fill_from_vault' => '从保管库填充',
+			'vault.no_entry' => '没有可用的保管库条目',
+			'vault.not_configured' => '尚未设置保管库',
+			'vault.entry_added' => '条目已添加',
+			'vault.entry_updated' => '条目已更新',
+			'vault.entry_deleted' => '条目已删除',
+			'vault.biometric_unlock' => '生物认证解锁',
+			'vault.biometric_hint' => '使用系统生物认证（指纹/人脸等）替代解锁密码',
+			'vault.biometric_authenticate' => '使用生物认证',
+			'vault.biometric_reason' => '验证身份以解锁保管库',
+			'vault.biometric_unavailable' => '设备不支持生物认证或未录入生物特征',
+			'vault.save_prompt_title' => '保存到密码保管库？',
+			'vault.save_prompt_hint' => '登录成功后是否将此账号保存到密码保管库？',
+			'vault.save_action' => '保存',
+			'vault.not_save' => '不保存',
+			'vault.locked' => '已锁定',
+			'vault.locked_hint' => '开启锁后，每次进入保管库需完成一次认证',
+			'vault.disable_lock' => '取消锁',
+			'vault.disable_lock_confirm' => '取消锁后条目仍保留，但访问不再需要认证，确定取消？',
+			'vault.set_lock' => '开启锁',
+			'vault.set_password_hint' => '设置解锁密码后将开启锁',
+			'vault.biometric_requires_password' => '启用生物认证前需先设置解锁密码',
+			'submodule.cuc_checkin.title_check_in' => '签到',
 			'submodule.cqupt_checkin.title_check_in' => '重邮统一签到',
 			'submodule.cqupt_checkin.check_in' => '签到',
 			'submodule.cqupt_checkin.scan_checkin' => '扫码签到',
@@ -734,6 +880,8 @@ extension on TranslationsZhCn {
 			'submodule.cqupt_checkin.already_checkin' => '已签到',
 			'submodule.cqupt_checkin.no_ongoing_checkin' => '没有进行中的签到',
 			'submodule.cqupt_checkin.pin_crack_checkin' => '暴力破解签到',
+			'submodule.cqupt_checkin.checkin_quick' => '一键签到',
+			'submodule.cqupt_checkin.checkin_fill_code' => '填充签到码',
 			'submodule.cqupt_checkin.checkin_use_current_loc' => '使用当前位置签到',
 			'submodule.cqupt_checkin.checkin_use_auto_loc' => '自动获取位置签到',
 			'submodule.cqupt_sport.record' => '记录',

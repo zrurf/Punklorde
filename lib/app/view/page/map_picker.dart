@@ -10,8 +10,7 @@ import 'package:punklorde/module/service/lbs/location.dart';
 
 /// 地图选点页面
 ///
-/// 展示百度地图，用户可以拖动地图，使目标位置对准屏幕中心的标记，
-/// 点击"确认位置"后返回该坐标。
+/// 展示地图，拖动地图使目标位置对准屏幕中心标记，点击"确认位置"后返回该坐标。
 class MapPickerPage extends StatefulWidget {
   /// 初始坐标（可选），若不传则使用默认位置（重庆）
   final Coordinate? initialCoordinate;
@@ -79,8 +78,9 @@ class _MapPickerPageState extends State<MapPickerPage> {
     if (!mounted || status == null || status.targetGeoPt == null) return;
 
     final center = status.targetGeoPt!;
-    final result = Coordinate(lat: center.latitude, lng: center.longitude);
-    Navigator.of(context).pop(result);
+    Navigator.of(context).pop(
+      Coordinate(lat: center.latitude, lng: center.longitude),
+    );
   }
 
   void _locateToCurrent() {

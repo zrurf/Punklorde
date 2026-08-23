@@ -10,6 +10,7 @@ import 'package:punklorde/core/account/code_handler.dart';
 import 'package:punklorde/core/account/view/page/select_platform.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/i18n/strings.g.dart';
+import 'package:punklorde/module/model/auth.dart';
 
 class GuestLoginPanel extends StatefulWidget {
   const GuestLoginPanel({super.key});
@@ -89,10 +90,15 @@ class _GuestLoginPanelState extends State<GuestLoginPanel> {
                             );
 
                             if (result != null && context.mounted) {
-                              final newCredential = await result.login(
-                                context,
-                                true,
-                              );
+                              AuthCredential? newCredential;
+                              try {
+                                newCredential = await result.login(
+                                  context,
+                                  true,
+                                );
+                              } catch (_) {
+                                // 网络等异常按登录失败处理
+                              }
                               if (newCredential != null) {
                                 setAuthCredential(newCredential);
                               }

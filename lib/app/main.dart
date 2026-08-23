@@ -8,8 +8,42 @@ import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/utils/etc/style.dart';
 import 'package:signals/signals_flutter.dart';
 
-class MainMobileApp extends SignalWidget {
+/// 应用根部：同时监听当前语言与学校变化，
+/// 变化时通过重新生成 key 强制整树重建，确保首页/设置等长驻页面立即刷新
+class MainMobileApp extends StatelessWidget {
   const MainMobileApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return _AppKeyScope(child: const _AppView());
+  }
+}
+
+/// 语言选择与学校双 Signal 监听，驱动 key 重建
+class _AppKeyScope extends StatelessWidget {
+  final Widget child;
+
+  const _AppKeyScope({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return SignalBuilder(
+      builder: (context) {
+        // 订阅语言选择信号，切换语言时触发重建
+        localeSignal.value;
+        final localeKey = localeRawCode(LocaleSettings.instance.currentLocale);
+        final schoolKey = currentSchoolSignal.value?.id ?? '';
+        return KeyedSubtree(
+          key: ValueKey('${localeKey}_$schoolKey'),
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+class _AppView extends SignalWidget {
+  const _AppView();
 
   @override
   Widget build(BuildContext context) {
