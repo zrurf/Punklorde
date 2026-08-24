@@ -18,6 +18,10 @@ class InnerSportServiceConfig {
 
   final AutoRunningConfig? autoRunConfig;
 
+  /// 续跑时继承的初始里程（米）与时长（毫秒）
+  final double initialDistance;
+  final int initialElapsedTimeMs;
+
   final Future<String?> Function() startCaallback;
   final Future<void> Function(String sportId) stopCallback;
   final void Function(String sportId, TrajPoint point) recordCallback;
@@ -34,6 +38,8 @@ class InnerSportServiceConfig {
     required this.placeCode,
     required this.placeName,
     this.autoRunConfig,
+    this.initialDistance = 0,
+    this.initialElapsedTimeMs = 0,
     required this.startCaallback,
     required this.stopCallback,
     required this.recordCallback,
@@ -86,8 +92,8 @@ class InnerSportService {
     isRunning = true;
 
     _lastLocation = null;
-    _distance = 0;
-    _elapsedTime = 0;
+    _distance = config.initialDistance;
+    _elapsedTime = config.initialElapsedTimeMs;
     _speed = 0;
 
     // 初始化
@@ -126,8 +132,6 @@ class InnerSportService {
         _simulatorStart(config.autoRunConfig?.updateFrequency ?? 1000);
         break;
       case SportMode.normal:
-        _distance = 0;
-        _elapsedTime = 0;
         _locationEffect = effect(() {
           final now = DateTime.now();
           _handleNormalUpdate(currentPoint.value, now);
@@ -222,8 +226,11 @@ class InnerSportService {
   void _handleEvent(SimulatorEvent event) {
     _latestSimStats = _simController?.getSimulatorStats();
     if (_latestSimStats != null) {
-      _distance = _latestSimStats!.totalDistance;
-      _elapsedTime = _latestSimStats!.elapsedTimeMs.toInt();
+      _distance =
+          (_config?.initialDistance ?? 0) + _latestSimStats!.totalDistance;
+      _elapsedTime =
+          (_config?.initialElapsedTimeMs ?? 0) +
+          _latestSimStats!.elapsedTimeMs.toInt();
     }
   }
 

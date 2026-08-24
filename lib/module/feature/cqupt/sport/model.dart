@@ -155,6 +155,9 @@ class MotionProfileData {
       );
 }
 
+/// 坐标系
+enum PathCoordinateType { wgs84, gcj02, bd09ll }
+
 /// 虚拟路径
 class VirtualPath {
   /// 路线的唯一ID
@@ -172,6 +175,9 @@ class VirtualPath {
   /// 路线的描述
   final String? description;
 
+  /// 坐标系
+  final PathCoordinateType coordinateType;
+
   /// 路线点
   final List<VirtualPathPoint> points;
 
@@ -181,6 +187,7 @@ class VirtualPath {
     this.author,
     required this.name,
     this.description,
+    this.coordinateType = .gcj02,
     required this.points,
   });
 
@@ -190,10 +197,24 @@ class VirtualPath {
     author: json['author'] as String?,
     name: json['name'] as String,
     description: json['description'] as String?,
+    coordinateType: PathCoordinateType.values.firstWhere(
+      (v) => v.name == (json['coordinate_type'] as String?),
+      orElse: () => .gcj02,
+    ),
     points: (json['points'] as List)
         .map((e) => VirtualPathPoint.fromJson(e as Map<String, dynamic>))
         .toList(),
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'version': version,
+    if (author != null) 'author': author,
+    'name': name,
+    if (description != null) 'description': description,
+    'coordinate_type': coordinateType.name,
+    'points': points.map((e) => e.toJson()).toList(),
+  };
 }
 
 /// 虚拟运动路径点
@@ -211,10 +232,16 @@ class VirtualPathPoint {
 
   factory VirtualPathPoint.fromJson(Map<String, dynamic> json) =>
       VirtualPathPoint(
-        lat: json['lat'] as double,
-        lng: json['lng'] as double,
-        alt: json['alt'] as double?,
+        lat: (json['lat'] as num).toDouble(),
+        lng: (json['lng'] as num).toDouble(),
+        alt: (json['alt'] as num?)?.toDouble(),
       );
+
+  Map<String, dynamic> toJson() => {
+    'lat': lat,
+    'lng': lng,
+    if (alt != null) 'alt': alt,
+  };
 }
 
 /// 用户配置

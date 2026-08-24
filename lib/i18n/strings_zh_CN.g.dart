@@ -515,6 +515,38 @@ class _Translations$submodule$cqupt_sport$zh_CN implements Translations$submodul
 	@override String get face_type_enter => '进场';
 	@override String get face_type_leave => '离场';
 	@override String get face_type_run => '跑步';
+	@override String get about => '关于';
+	@override String get recorded_tracks => '录制的轨迹';
+	@override String get recorded_tracks_hint => '查看和管理通过轨迹录制保存的路线';
+	@override String get track_empty => '暂无录制的轨迹';
+	@override String get track_points_unit => '个坐标点';
+	@override String get track_saved_at => '保存于';
+	@override String get track_delete_title => '删除轨迹';
+	@override String track_delete_tip({required Object name}) => '「${name}」删除后无法恢复，确定删除吗？';
+	@override String get track_too_few_points => '轨迹点过少，已自动丢弃';
+	@override String get track_saved => '轨迹已保存，可在“关于 → 录制的轨迹”中管理';
+	@override String get track_save_failed => '轨迹保存失败';
+	@override String get record_keep_title => '保留这条轨迹？';
+	@override String record_keep_tip({required Object count}) => '本次录制共 ${count} 个坐标点，是否保存到“录制的轨迹”？';
+	@override String get record_default_track_name => '轨迹录制';
+	@override String get keep => '保留';
+	@override String get discard => '丢弃';
+	@override String get resume_found_hint => '检测到未完成的运动，可以续跑';
+	@override String get resume_title => '继续运动';
+	@override String get resume_hint => '选择虚拟路线后将继承原里程和时间，从路线上距上次位置最近的点开始续跑';
+	@override String get resume_unfinished_run => '未完成的运动';
+	@override String get resume_route => '选择虚拟路线';
+	@override String get virtual_route => '虚拟路线';
+	@override String get resume_no_routes => '暂无可用路线，请先加载运动预设';
+	@override String get resume_loading_info => '正在获取运动数据，请稍候…';
+	@override String get resume_info_failed => '获取运动数据失败，点击记录重试';
+	@override String get resume_start => '续跑';
+	@override String get resume_confirm_title => '确认续跑';
+	@override String get resume_failed => '续跑失败，该记录可能已结束';
+	@override String get record_place => '场地';
+	@override String get not_in_playground => '当前定位不在运动场范围内，无法开始';
+	@override String normal_start_confirm({required Object place}) => '当前定位在「${place}」，确定开始跑步吗？';
+	@override String get record_stop_tip => '结束录制后将询问是否保留本次轨迹。';
 }
 
 // Path: submodule.chaoxing
@@ -946,6 +978,38 @@ extension on TranslationsZhCn {
 			'submodule.cqupt_sport.face_type_enter' => '进场',
 			'submodule.cqupt_sport.face_type_leave' => '离场',
 			'submodule.cqupt_sport.face_type_run' => '跑步',
+			'submodule.cqupt_sport.about' => '关于',
+			'submodule.cqupt_sport.recorded_tracks' => '录制的轨迹',
+			'submodule.cqupt_sport.recorded_tracks_hint' => '查看和管理通过轨迹录制保存的路线',
+			'submodule.cqupt_sport.track_empty' => '暂无录制的轨迹',
+			'submodule.cqupt_sport.track_points_unit' => '个坐标点',
+			'submodule.cqupt_sport.track_saved_at' => '保存于',
+			'submodule.cqupt_sport.track_delete_title' => '删除轨迹',
+			'submodule.cqupt_sport.track_delete_tip' => ({required Object name}) => '「${name}」删除后无法恢复，确定删除吗？',
+			'submodule.cqupt_sport.track_too_few_points' => '轨迹点过少，已自动丢弃',
+			'submodule.cqupt_sport.track_saved' => '轨迹已保存，可在“关于 → 录制的轨迹”中管理',
+			'submodule.cqupt_sport.track_save_failed' => '轨迹保存失败',
+			'submodule.cqupt_sport.record_keep_title' => '保留这条轨迹？',
+			'submodule.cqupt_sport.record_keep_tip' => ({required Object count}) => '本次录制共 ${count} 个坐标点，是否保存到“录制的轨迹”？',
+			'submodule.cqupt_sport.record_default_track_name' => '轨迹录制',
+			'submodule.cqupt_sport.keep' => '保留',
+			'submodule.cqupt_sport.discard' => '丢弃',
+			'submodule.cqupt_sport.resume_found_hint' => '检测到未完成的运动，可以续跑',
+			'submodule.cqupt_sport.resume_title' => '继续运动',
+			'submodule.cqupt_sport.resume_hint' => '选择虚拟路线后将继承原里程和时间，从路线上距上次位置最近的点开始续跑',
+			'submodule.cqupt_sport.resume_unfinished_run' => '未完成的运动',
+			'submodule.cqupt_sport.resume_route' => '选择虚拟路线',
+			'submodule.cqupt_sport.virtual_route' => '虚拟路线',
+			'submodule.cqupt_sport.resume_no_routes' => '暂无可用路线，请先加载运动预设',
+			'submodule.cqupt_sport.resume_loading_info' => '正在获取运动数据，请稍候…',
+			'submodule.cqupt_sport.resume_info_failed' => '获取运动数据失败，点击记录重试',
+			'submodule.cqupt_sport.resume_start' => '续跑',
+			'submodule.cqupt_sport.resume_confirm_title' => '确认续跑',
+			'submodule.cqupt_sport.resume_failed' => '续跑失败，该记录可能已结束',
+			'submodule.cqupt_sport.record_place' => '场地',
+			'submodule.cqupt_sport.not_in_playground' => '当前定位不在运动场范围内，无法开始',
+			'submodule.cqupt_sport.normal_start_confirm' => ({required Object place}) => '当前定位在「${place}」，确定开始跑步吗？',
+			'submodule.cqupt_sport.record_stop_tip' => '结束录制后将询问是否保留本次轨迹。',
 			'submodule.chaoxing.courses' => '课程',
 			'submodule.chaoxing.homework' => '作业',
 			'submodule.chaoxing.exam' => '考试',

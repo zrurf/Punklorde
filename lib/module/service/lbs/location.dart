@@ -14,7 +14,7 @@ class LocationServiceOptions {
   final bool? isNeedAltitude;
   final bool? isNeedAddress;
   LocationServiceOptions({
-    this.coorType = CoordinateType.GCJ02,
+    this.coorType = CoordinateType.gcj02,
     this.purpose,
     this.interval = 1000,
     this.distanceFilter = 1.0,

@@ -1,4 +1,5 @@
 // 开始运动请求体
+import 'package:punklorde/common/model/location.dart';
 import 'package:punklorde/module/feature/cqupt/sport/utils/time.dart';
 
 class StartSportModel {
@@ -43,8 +44,8 @@ class UploadPointModel {
 
 // 运动轨迹点
 class PointResult {
-  final num longitude;
-  final num latitude;
+  final double longitude;
+  final double latitude;
   final DateTime collectTime;
   final String isValid;
 
@@ -55,12 +56,21 @@ class PointResult {
     required this.isValid,
   });
 
+  /// 坐标可能为字符串（/sportRecord/info 返回）或数字
+  static double _parseCoord(Object? v) {
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0;
+    return 0;
+  }
+
   factory PointResult.fromJson(Map<String, dynamic> json) {
     return PointResult(
-      longitude: json['longitude'],
-      latitude: json['latitude'],
-      collectTime: parseDate(json['collectTime']),
-      isValid: json['isValid'],
+      longitude: _parseCoord(json['longitude']),
+      latitude: _parseCoord(json['latitude']),
+      collectTime: parseDate(
+        json['collectTime']?.toString() ?? '1970-01-01 00:00:00',
+      ),
+      isValid: json['isValid']?.toString() ?? '1',
     );
   }
 }
@@ -98,6 +108,110 @@ class UploadRecordResult {
       timeConsuming: json['timeConsuming'],
       mileage: json['mileage'],
       expiredCountInForbiddenArea: json['expiredCountInForbiddenArea'],
+    );
+  }
+}
+
+// 进行中的运动记录（对应小程序 getWxSportPage）
+class WxSportRecord {
+  final String sportRecordNo;
+  final String? placeCode;
+  final String? placeName;
+
+  /// 开始时间（yyyy-MM-dd HH:mm:ss）
+  final String? startTime;
+
+  /// 里程（km）
+  final double mileage;
+
+  /// 耗时（秒）
+  final double timeConsuming;
+
+  /// 结束时间（null 表示未结束，可续跑）
+  final String? endTime;
+
+  const WxSportRecord({
+    required this.sportRecordNo,
+    this.placeCode,
+    this.placeName,
+    this.startTime,
+    required this.mileage,
+    required this.timeConsuming,
+    this.endTime,
+  });
+
+  factory WxSportRecord.fromJson(Map<String, dynamic> json) {
+    return WxSportRecord(
+      sportRecordNo: json['sportRecordNo']?.toString() ?? '',
+      placeCode: json['placeCode']?.toString(),
+      placeName: json['placeName']?.toString(),
+      startTime: json['startTime']?.toString(),
+      mileage: (json['mileage'] as num?)?.toDouble() ?? 0,
+      timeConsuming: (json['timeConsuming'] as num?)?.toDouble() ?? 0,
+      endTime: json['endTime']?.toString(),
+    );
+  }
+}
+
+// 运动区域（对应小程序 getAllArea，用于定位匹配运动场）
+class SportArea {
+  final String? placeCode;
+  final String? placeName;
+  final String? areaFuncCode;
+
+  /// 区域多边形顶点
+  final List<Coordinate> areaPointList;
+
+  const SportArea({
+    this.placeCode,
+    this.placeName,
+    this.areaFuncCode,
+    required this.areaPointList,
+  });
+
+  factory SportArea.fromJson(Map<String, dynamic> json) {
+    return SportArea(
+      placeCode: json['placeCode']?.toString(),
+      placeName: json['placeName']?.toString(),
+      areaFuncCode: json['areaFuncCode']?.toString(),
+      areaPointList: (json['areaPointList'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (p) => Coordinate(
+              lat: (p['latitude'] as num?)?.toDouble() ?? 0,
+              lng: (p['longitude'] as num?)?.toDouble() ?? 0,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
+// 运动记录信息（对应小程序 getSportRecordInfo）
+class SportInfoResult {
+  /// 里程（km）
+  final double mileage;
+
+  /// 耗时（秒）
+  final double timeConsuming;
+
+  /// 已上传的轨迹点
+  final List<PointResult> points;
+
+  const SportInfoResult({
+    required this.mileage,
+    required this.timeConsuming,
+    required this.points,
+  });
+
+  factory SportInfoResult.fromJson(Map<String, dynamic> json) {
+    return SportInfoResult(
+      mileage: (json['mileage'] as num?)?.toDouble() ?? 0,
+      timeConsuming: (json['timeConsuming'] as num?)?.toDouble() ?? 0,
+      points: (json['points'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(PointResult.fromJson)
+          .toList(),
     );
   }
 }

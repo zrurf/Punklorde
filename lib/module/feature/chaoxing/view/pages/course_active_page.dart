@@ -16,7 +16,7 @@ import 'package:signals/signals_flutter.dart';
 import 'package:punklorde/module/feature/chaoxing/view/widgets/simple_app_bar.dart';
 import 'package:punklorde/module/feature/chaoxing/view/pages/course_active_checkin.dart';
 
-class CourseActivePage extends StatefulWidget {
+class CourseActivePage extends SignalStatefulWidget {
   final int classId;
   final int courseId;
   final int personId;

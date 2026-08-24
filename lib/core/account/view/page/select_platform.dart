@@ -19,7 +19,7 @@ final _filteredPlats = computed(() {
   return result;
 });
 
-class SelectPlatformPage extends StatefulWidget {
+class SelectPlatformPage extends SignalStatefulWidget {
   const SelectPlatformPage({super.key});
 
   @override

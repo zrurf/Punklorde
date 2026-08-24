@@ -12,7 +12,7 @@ import 'package:punklorde/module/feature/cqupt/checkin/data.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/model.dart';
 import 'package:signals/signals_flutter.dart';
 
-class FeatCquptCheckinView extends StatefulWidget {
+class FeatCquptCheckinView extends SignalStatefulWidget {
   const FeatCquptCheckinView({super.key});
 
   @override

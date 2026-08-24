@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:punklorde/core/account/code_handler.dart';
@@ -9,13 +8,13 @@ import 'package:punklorde/utils/etc/byte.dart';
 class PkldFileHandler {
   static const _channelName = 'hacker.silverwolf.punklorde/pkld_handler';
 
-  final List<_PkldTypeHandler> _handlers = [];
+  final List<PkldTypeHandler> _handlers = [];
 
   PkldFileHandler() {
     _handlers.add(_GuestAccountPkldHandler());
   }
 
-  void registerHandler(_PkldTypeHandler handler) {
+  void registerHandler(PkldTypeHandler handler) {
     _handlers.add(handler);
   }
 
@@ -45,12 +44,12 @@ class PkldFileHandler {
   }
 }
 
-abstract class _PkldTypeHandler {
+abstract class PkldTypeHandler {
   bool match(Uint8List bytes);
   Future<void> handle(Uint8List bytes);
 }
 
-class _GuestAccountPkldHandler extends _PkldTypeHandler {
+class _GuestAccountPkldHandler extends PkldTypeHandler {
   @override
   bool match(Uint8List bytes) {
     return startsWith(bytes, shareDataMagicNum);

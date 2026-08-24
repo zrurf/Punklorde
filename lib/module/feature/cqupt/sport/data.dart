@@ -1,5 +1,6 @@
 import 'package:punklorde/common/model/location.dart';
 import 'package:punklorde/core/status/auth.dart';
+import 'package:punklorde/module/feature/cqupt/sport/api/model/sport.dart';
 import 'package:punklorde/module/feature/cqupt/sport/model.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/platform/cqupt/sport_portal.dart';
@@ -45,3 +46,6 @@ final Signal<MotionProfile?> featMotionProfile = Signal<MotionProfile?>(null);
 // 虚拟路径
 final Signal<Map<String, VirtualPath>?> featVirtualPaths =
     Signal<Map<String, VirtualPath>?>(null);
+
+// 进行中的运动记录（已开始未结束，可用于续跑）
+final Signal<List<WxSportRecord>> featResumableRecords = Signal([]);

@@ -13,6 +13,7 @@ import 'package:punklorde/core/status/device.dart';
 import 'package:punklorde/core/status/location.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/cqupt/sport/api/client.dart';
+import 'package:punklorde/module/feature/cqupt/sport/api/model/sport.dart';
 import 'package:punklorde/module/feature/cqupt/sport/constant.dart';
 import 'package:punklorde/module/feature/cqupt/sport/data.dart';
 import 'package:punklorde/module/feature/cqupt/sport/model.dart';
@@ -20,20 +21,46 @@ import 'package:punklorde/module/feature/cqupt/sport/resource/resource.dart';
 import 'package:punklorde/module/feature/cqupt/sport/service/map.dart';
 import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:punklorde/module/feature/cqupt/sport/service/sport.dart';
+import 'package:punklorde/module/feature/cqupt/sport/service/track_store.dart';
 import 'package:punklorde/module/feature/cqupt/sport/utils/time.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/widgets/config_pannel.dart';
+import 'package:punklorde/module/feature/cqupt/sport/view/widgets/resume_panel.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/widgets/user_panel.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/platform/cqupt/sport.dart';
 import 'package:punklorde/module/service/lbs/location.dart';
 import 'package:punklorde/src/rust/services/motion_sim/model.dart';
 import 'package:punklorde/utils/notification.dart';
+import 'package:punklorde/utils/lbs/distance.dart';
 import 'package:punklorde/utils/permission.dart';
 import 'package:signals/signals_flutter.dart';
 
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-class FeatCquptSportView extends StatefulWidget {
+/// 续跑上下文
+class _ResumeContext {
+  final String sportId;
+  final String placeCode;
+  final String placeName;
+
+  /// 继承的里程（米）与时长（毫秒）
+  final double initialDistance;
+  final int initialElapsedTimeMs;
+
+  /// 从最近点开始的续跑路线
+  final Trajectory trajectory;
+
+  const _ResumeContext({
+    required this.sportId,
+    required this.placeCode,
+    required this.placeName,
+    required this.initialDistance,
+    required this.initialElapsedTimeMs,
+    required this.trajectory,
+  });
+}
+
+class FeatCquptSportView extends SignalStatefulWidget {
   const FeatCquptSportView({super.key});
 
   @override
@@ -71,6 +98,17 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   final Set<String> _faceRecordCache = {}; // 人脸记录缓存
   bool _faceRecordUpdateLock = false;
 
+  // 续跑状态
+  String? _pendingResumeSportId; // 待恢复的运动编号
+
+  // 当前运动使用的场地（自动跑来自预设，自己跑来自定位匹配）
+  String _curPlaceCode = '';
+  String _curPlaceName = '';
+
+  // 自己跑开始前定位匹配到的场地缓存
+  String? _resolvedPlaceCode;
+  String? _resolvedPlaceName;
+
   // 定时器
   Timer? _updateTimer;
   Timer? _faceRecordTimer;
@@ -85,7 +123,10 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
 
     final user = authManager.getPrimaryAuthByPlatform(platCquptSport.id);
     if (user != null && user.isValid()) {
+      // _changeUser 内部会拉取进行中记录
       _changeUser(user);
+    } else {
+      fetchResumableRecords();
     }
 
     loadReourceIndex();
@@ -211,7 +252,6 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                               maxLines: 2,
                             ),
                             value: SportMode.normal,
-                            enabled: false, // 暂不启用
                           ),
                           .item(
                             prefix: Icon(
@@ -228,7 +268,6 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                               maxLines: 2,
                             ),
                             value: SportMode.record,
-                            enabled: false, // 暂不启用
                           ),
                         ],
                       ),
@@ -237,7 +276,9 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                     FButton.icon(
                       variant: .outline,
                       size: .sm,
-                      onPress: () {},
+                      onPress: () {
+                        context.push("/feat/cqupt/sport/about");
+                      },
                       child: const Icon(LucideIcons.info),
                     ),
                   ],
@@ -260,6 +301,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                       color: const Color(0xF01d1d1f),
                       width: 1,
                     ),
+                    borderRadius: .circular(8),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0xE01d1d1f),
@@ -273,72 +315,117 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                       horizontal: 8,
                       vertical: 8,
                     ),
-                    child: Column(
-                      children: [
-                        // 顶部数据区域（每秒变化的运动数据，SignalBuilder 局部重建）
-                        Expanded(
-                          child: SignalBuilder(
-                            builder: (context) => Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                // 运动时间
-                                _buildStatColumn(
-                                  context,
-                                  mainValue: formatDuration(_duration.value),
-                                  mainLabel:
-                                      t.submodule.cqupt_sport.elapsed_time,
-                                  subValue:
-                                      '${t.submodule.cqupt_sport.remain_time} ${formatDuration(_remainTime.value)}',
-                                  alignment: CrossAxisAlignment.center,
-                                ),
+                    child: Builder(
+                      builder: (context) {
+                        // 轨迹录制为纯本地模式：无目标/剩余/进度，距离由本地 Haversine 累计
+                        final isRecording = _mode.value == .record;
 
-                                Container(
-                                  height: 40,
-                                  width: 1,
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                ),
+                        return Column(
+                          children: [
+                            // 顶部数据区域（每秒变化的运动数据，SignalBuilder 局部重建）
+                            Expanded(
+                              child: SignalBuilder(
+                                builder: (context) => Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // 运动时间
+                                    _buildStatColumn(
+                                      context,
+                                      mainValue: formatDuration(
+                                        _duration.value,
+                                      ),
+                                      mainLabel:
+                                          t.submodule.cqupt_sport.elapsed_time,
+                                      subValue: (isRecording)
+                                          ? '${_sportService?.recordPoints.length ?? 0} ${t.submodule.cqupt_sport.track_points_unit}'
+                                          : '${t.submodule.cqupt_sport.remain_time} ${formatDuration(_remainTime.value)}',
+                                      alignment: CrossAxisAlignment.center,
+                                    ),
 
-                                // 运动距离
-                                _buildStatColumn(
-                                  context,
-                                  mainValue: "${_distance.value.round()}m",
-                                  mainLabel: t.submodule.cqupt_sport.distance,
-                                  subValue:
-                                      '${t.submodule.cqupt_sport.target_distance} ${featUserConfig.value.targetDistance.round()}m',
-                                  alignment: CrossAxisAlignment.center,
-                                ),
+                                    Container(
+                                      height: 40,
+                                      width: 1,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                    ),
 
-                                Container(
-                                  height: 40,
-                                  width: 1,
-                                  color: Colors.white.withValues(alpha: 0.1),
-                                ),
+                                    // 运动距离
+                                    _buildStatColumn(
+                                      context,
+                                      mainValue: "${_distance.value.round()}m",
+                                      mainLabel:
+                                          t.submodule.cqupt_sport.distance,
+                                      subValue: (isRecording)
+                                          ? ''
+                                          : '${t.submodule.cqupt_sport.target_distance} ${featUserConfig.value.targetDistance.round()}m',
+                                      alignment: CrossAxisAlignment.center,
+                                    ),
 
-                                // 速度/配速
-                                _buildStatColumn(
-                                  context,
-                                  mainValue: formatPace(_speed.value),
-                                  mainLabel: t.submodule.cqupt_sport.pace,
-                                  subValue:
-                                      '${t.submodule.cqupt_sport.speed} ${_speed.value.toStringAsFixed(2)}m/s',
-                                  alignment: CrossAxisAlignment.center,
+                                    Container(
+                                      height: 40,
+                                      width: 1,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                    ),
+
+                                    // 速度/配速
+                                    _buildStatColumn(
+                                      context,
+                                      mainValue: formatPace(_speed.value),
+                                      mainLabel: t.submodule.cqupt_sport.pace,
+                                      subValue:
+                                          '${t.submodule.cqupt_sport.speed} ${_speed.value.toStringAsFixed(2)}m/s',
+                                      alignment: CrossAxisAlignment.center,
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
 
-                        const SizedBox(height: 8),
+                            const SizedBox(height: 8),
 
-                        // 底部进度条
-                        SignalBuilder(
-                          builder: (context) => _buildProgressBar(context),
-                        ),
-                      ],
+                            // 底部进度条（仅自动跑/自己跑有目标概念）
+                            if (!isRecording)
+                              SignalBuilder(
+                                builder: (context) =>
+                                    _buildProgressBar(context),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
               ),
+            ),
+
+            // 续跑提示横幅
+            SignalBuilder(
+              builder: (context) {
+                final hasResumable =
+                    !_isRunning.value && featResumableRecords.value.isNotEmpty;
+                return Visibility(
+                  visible: hasResumable,
+                  child: Positioned(
+                    left: 12,
+                    right: 12,
+                    bottom: 116,
+                    child: FButton(
+                      variant: .outline,
+                      size: .sm,
+                      prefix: Icon(
+                        LucideIcons.flagTriangleRight,
+                        color: colors.primary,
+                      ),
+                      suffix: const Icon(LucideIcons.chevronRight),
+                      onPress: _showResumePanel,
+                      child: Text(t.submodule.cqupt_sport.resume_found_hint),
+                    ),
+                  ),
+                );
+              },
             ),
 
             // 底部控制面板
@@ -419,6 +506,11 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                                 context: context,
                                 builder: (sheetContext) => ConfigPanel(
                                   onSelectMotionProfile: () {
+                                    // 虚拟路径预览仅为自动跑服务
+                                    if (_mode.value != .auto ||
+                                        _isRunning.value) {
+                                      return;
+                                    }
                                     final mp =
                                         featMotionProfile.value?.data?.paths[0];
                                     if (mp == null) {
@@ -649,9 +741,18 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   Widget _buildMainButton(BuildContext context) {
     final colors = context.theme.colors;
     final isRunning = _isRunning.value;
+    final mode = _mode.value;
+    // 配置信息仅为自动跑服务
+    final showConfigFields =
+        !isRunning && mode == .auto || isRunning && mode != .record;
 
     return GestureDetector(
       onTap: () {
+        if (!isRunning && mode == .normal) {
+          // 自己跑：先定位匹配场地，确认框显示跑步地点（与官方一致）
+          _confirmNormalStart();
+          return;
+        }
         showFDialog(
           context: context,
           builder: (context, style, animation) {
@@ -667,7 +768,11 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                 children: [
                   Text(
                     (isRunning)
-                        ? t.submodule.cqupt_sport.stop_run_tip
+                        ? (mode == .record)
+                              ? t.submodule.cqupt_sport.record_stop_tip
+                              : t.submodule.cqupt_sport.stop_run_tip
+                        : (mode != .auto)
+                        ? modeNames[mode] ?? ''
                         : t.submodule.cqupt_sport.start_run_tip,
                     style: TextStyle(
                       fontSize: 14,
@@ -676,35 +781,38 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                     textAlign: .center,
                   ),
 
-                  _buildInfoField(
-                    context,
-                    title: t.title.user,
-                    value: featCredential.value?.name ?? "",
-                    icon: LucideIcons.userRound,
-                    onLongPress: () {},
-                  ),
+                  if (showConfigFields)
+                    _buildInfoField(
+                      context,
+                      title: t.title.user,
+                      value: featCredential.value?.name ?? "",
+                      icon: LucideIcons.userRound,
+                      onLongPress: () {},
+                    ),
 
-                  _buildInfoField(
-                    context,
-                    title: t.submodule.cqupt_sport.distance,
-                    value: (isRunning)
-                        ? '${_distance.value.toString()} / ${featUserConfig.value.targetDistance.toString()} m'
-                        : '${featUserConfig.value.targetDistance.toString()} m',
-                    icon: LucideIcons.lineSquiggle,
-                    onLongPress: () {},
-                  ),
+                  if (showConfigFields)
+                    _buildInfoField(
+                      context,
+                      title: t.submodule.cqupt_sport.distance,
+                      value: (isRunning)
+                          ? '${_distance.value.toString()} / ${featUserConfig.value.targetDistance.toString()} m'
+                          : '${featUserConfig.value.targetDistance.toString()} m',
+                      icon: LucideIcons.lineSquiggle,
+                      onLongPress: () {},
+                    ),
 
-                  _buildInfoField(
-                    context,
-                    title: (isRunning)
-                        ? t.submodule.cqupt_sport.progress
-                        : t.submodule.cqupt_sport.speed,
-                    value: (isRunning)
-                        ? '${(featUserConfig.value.targetDistance > 0) ? ((min(_distance / featUserConfig.value.targetDistance, 1)) * 100).toStringAsFixed(2) : 0.0} %'
-                        : '${featUserConfig.value.speed.toString()} m/s',
-                    icon: LucideIcons.gauge,
-                    onLongPress: () {},
-                  ),
+                  if (showConfigFields)
+                    _buildInfoField(
+                      context,
+                      title: (isRunning)
+                          ? t.submodule.cqupt_sport.progress
+                          : t.submodule.cqupt_sport.speed,
+                      value: (isRunning)
+                          ? '${(featUserConfig.value.targetDistance > 0) ? ((min(_distance / featUserConfig.value.targetDistance, 1)) * 100).toStringAsFixed(2) : 0.0} %'
+                          : '${featUserConfig.value.speed.toString()} m/s',
+                      icon: LucideIcons.gauge,
+                      onLongPress: () {},
+                    ),
                 ],
               ),
               actions: [
@@ -713,7 +821,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
                   onPress: () {
                     if (isRunning) {
                       // 停止运动
-                      _stopSport();
+                      _stopSport(askKeepRecord: true);
                     } else {
                       // 开始运动
                       _startSport();
@@ -799,7 +907,7 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
 
     await startHeadingService(); // 开启地理磁偏角服务
     final result = await startLocationService(
-      LocationServiceOptions(purpose: .sport, interval: 1000, coorType: .GCJ02),
+      LocationServiceOptions(purpose: .sport, interval: 1000, coorType: .gcj02),
     ); // 启用定位服务
     if (!result) {
       stopHeadingService();
@@ -844,6 +952,13 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
         centerEffect?.call();
       }
     });
+
+    // 绘制电子围栏与禁区（对齐官方 showQuYu）
+    _apiClient.getSportAreas().then((areas) {
+      if (areas.isNotEmpty) {
+        _mapService?.drawFences(areas);
+      }
+    });
   }
 
   // 切换用户
@@ -851,180 +966,554 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
     featCredential.value = cred;
 
     initFaceRecordNotice();
+    fetchResumableRecords();
   }
 
-  Future<bool> _startSport() async {
+  // 拉取进行中的运动记录（已开始未结束，可续跑）
+  Future<void> fetchResumableRecords() async {
+    if (featCredential.value == null) {
+      featResumableRecords.value = [];
+      return;
+    }
+    // 限流：仅拉取第一页最新 10 条（client 内再过滤今天未完成的记录）
+    final list = await _apiClient.getWxSportRecords(1, 10);
+    // 排除当前会话正在使用的编号
+    featResumableRecords.value = list
+        .where((v) => v.sportRecordNo != _pendingResumeSportId)
+        .toList();
+  }
+
+  // 自己跑：定位匹配场地后确认开始
+  Future<void> _confirmNormalStart() async {
+    final context = widgetKey.currentContext;
+    if (context == null || !context.mounted) return;
+    final colors = context.theme.colors;
+
+    if (featCredential.value == null) {
+      showFToast(
+        context: context,
+        variant: .destructive,
+        alignment: .topCenter,
+        title: Text(t.notice.unselected_user),
+        icon: const Icon(LucideIcons.circleX),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    _resolvedPlaceCode = null;
+    _resolvedPlaceName = null;
+    final place = await _resolvePlaceByLocation();
+    if (!context.mounted) return;
+    if (place == null || (place.$1.isEmpty && place.$2.isEmpty)) {
+      showFToast(
+        context: context,
+        variant: .destructive,
+        alignment: .topCenter,
+        title: Text(t.submodule.cqupt_sport.not_in_playground),
+        icon: const Icon(LucideIcons.circleX),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+    _resolvedPlaceCode = place.$1;
+    _resolvedPlaceName = place.$2;
+
+    showFDialog(
+      context: context,
+      builder: (dialogContext, style, animation) {
+        return punklordeDialog(
+          style: style,
+          animation: animation,
+          title: Text(t.submodule.cqupt_sport.start_run),
+          body: Column(
+            mainAxisSize: .min,
+            spacing: 8,
+            children: [
+              Text(
+                t.submodule.cqupt_sport.normal_start_confirm(place: place.$2),
+                textAlign: .center,
+                style: TextStyle(fontSize: 14, color: colors.mutedForeground),
+              ),
+              _buildInfoField(
+                dialogContext,
+                title: t.title.user,
+                value: featCredential.value?.name ?? "",
+                icon: LucideIcons.userRound,
+                onLongPress: () {},
+              ),
+            ],
+          ),
+          actions: [
+            FButton(
+              size: .xs,
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+                _startSport();
+              },
+              child: Text(t.notice.confirm),
+            ),
+            FButton(
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+              },
+              size: .xs,
+              variant: .secondary,
+              child: Text(t.notice.cancel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 打开续跑面板
+  void _showResumePanel() {
+    final context = widgetKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    if (_isRunning.value) {
+      showFToast(
+        context: context,
+        variant: .destructive,
+        alignment: .topCenter,
+        title: Text(t.submodule.cqupt_sport.tip_need_stop),
+        icon: const Icon(LucideIcons.circleX),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+    if (featCredential.value == null) {
+      showFToast(
+        context: context,
+        variant: .destructive,
+        alignment: .topCenter,
+        title: Text(t.notice.unselected_user),
+        icon: const Icon(LucideIcons.circleX),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    showFSheet(
+      context: context,
+      side: .btt,
+      builder: (sheetContext) => ResumePanel(
+        records: featResumableRecords.value,
+        onConfirm: (record, route, info) {
+          Navigator.of(sheetContext).pop();
+          _confirmResume(record, route, info);
+        },
+      ),
+    );
+  }
+
+  // 续跑确认弹窗
+  void _confirmResume(
+    WxSportRecord record,
+    VirtualPath route,
+    SportInfoResult info,
+  ) {
+    final context = widgetKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    showFDialog(
+      context: context,
+      builder: (dialogContext, style, animation) {
+        return punklordeDialog(
+          style: style,
+          animation: animation,
+          title: Text(t.submodule.cqupt_sport.resume_confirm_title),
+          body: Column(
+            mainAxisSize: .min,
+            spacing: 8,
+            children: [
+              _buildInfoField(
+                dialogContext,
+                title: t.submodule.cqupt_sport.record_place,
+                value: record.placeName ?? '-',
+                icon: LucideIcons.mapPin,
+                onLongPress: () {},
+              ),
+              _buildInfoField(
+                dialogContext,
+                title: t.submodule.cqupt_sport.distance,
+                value:
+                    '${(info.mileage * 1000).round()} m / ${formatDuration(Duration(seconds: info.timeConsuming.round()))}',
+                icon: LucideIcons.lineSquiggle,
+                onLongPress: () {},
+              ),
+              _buildInfoField(
+                dialogContext,
+                title: t.submodule.cqupt_sport.virtual_route,
+                value: route.name,
+                icon: LucideIcons.route,
+                onLongPress: () {},
+              ),
+            ],
+          ),
+          actions: [
+            FButton(
+              size: .xs,
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+                _performResume(record, route, info);
+              },
+              child: Text(t.notice.confirm),
+            ),
+            FButton(
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+              },
+              size: .xs,
+              variant: .secondary,
+              child: Text(t.notice.cancel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 执行续跑：继承原里程与时间，从选定路线的最近点开始
+  Future<void> _performResume(
+    WxSportRecord record,
+    VirtualPath route,
+    SportInfoResult info,
+  ) async {
+    final context = widgetKey.currentContext;
+
+    final ok = await _apiClient.continueSport(record.sportRecordNo);
+    if (!ok) {
+      if (context != null && context.mounted) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          alignment: .topCenter,
+          title: Text(t.submodule.cqupt_sport.resume_failed),
+          icon: const Icon(LucideIcons.circleX),
+          duration: const Duration(seconds: 3),
+        );
+      }
+      fetchResumableRecords();
+      return;
+    }
+
+    _mode.value = .auto; // 续跑固定使用模拟器
+
+    // 在地图上绘制原跑步轨迹（深绿色）
+    _mapService?.drawOriginTrack(
+      info.points
+          .map((p) => Coordinate(lat: p.latitude, lng: p.longitude))
+          .toList(),
+    );
+
+    // 继承真实里程与时间
+    final initialDistance = (info.mileage * 1000).roundToDouble();
+    final initialElapsedTimeMs = (info.timeConsuming * 1000).round();
+
+    // 参考位置：原轨迹最后一点，缺失时退回当前定位
+    Coordinate? refPoint;
+    final originPoints = info.points;
+    if (originPoints.isNotEmpty) {
+      refPoint = Coordinate(
+        lat: originPoints.last.latitude,
+        lng: originPoints.last.longitude,
+      );
+    } else if (rawLat.value != 0 || rawLng.value != 0) {
+      refPoint = Coordinate(lat: rawLat.value, lng: rawLng.value);
+    }
+
+    // 在路线上寻找距参考位置最近的点作为续跑起点，并旋转路线使其成为首点
+    var nearestIdx = 0;
+    if (refPoint != null) {
+      var best = double.infinity;
+      for (final (i, p) in route.points.indexed) {
+        final d = haversineDistance(refPoint.lat, refPoint.lng, p.lat, p.lng);
+        if (d < best) {
+          best = d;
+          nearestIdx = i;
+        }
+      }
+    }
+    final rotatedPoints = [
+      ...route.points.sublist(nearestIdx),
+      ...route.points.take(nearestIdx),
+    ];
+
+    final started = await _startSport(
+      resume: _ResumeContext(
+        sportId: record.sportRecordNo,
+        placeCode: record.placeCode ?? '',
+        placeName: record.placeName ?? '',
+        initialDistance: initialDistance,
+        initialElapsedTimeMs: initialElapsedTimeMs,
+        trajectory: Trajectory(
+          id: route.id,
+          name: route.name,
+          points: rotatedPoints
+              .map((p) => GeoPoint(latitude: p.lat, longitude: p.lng))
+              .toList(),
+        ),
+      ),
+    );
+
+    if (!started) {
+      _pendingResumeSportId = null;
+      return;
+    }
+
+    // 从候选列表中移除已恢复的记录
+    featResumableRecords.value = featResumableRecords.value
+        .where((v) => v.sportRecordNo != record.sportRecordNo)
+        .toList();
+  }
+
+  Future<bool> _startSport({_ResumeContext? resume}) async {
     if (_isRunning.value) {
       return false;
     }
     final context = widgetKey.currentContext;
-    if (featCredential.value == null) {
-      if (context != null && context.mounted) {
-        showFToast(
-          context: context,
-          variant: .destructive,
-          alignment: .topCenter,
-          title: Text(t.notice.unselected_user),
-          icon: const Icon(LucideIcons.circleX),
-          duration: const Duration(seconds: 3),
-        );
-      }
-      return false;
-    }
-
-    if (featPlaceCode.value == null ||
-        featPlaceName.value == null ||
-        featMotionProfile.value == null ||
-        featVirtualPaths.value == null) {
-      if (context != null && context.mounted) {
-        showFToast(
-          context: context,
-          variant: .destructive,
-          alignment: .topCenter,
-          title: Text(t.notice.wait_reource_load),
-          icon: const Icon(LucideIcons.circleX),
-          duration: const Duration(seconds: 3),
-        );
-      }
-      return false;
-    }
-
     final mode = _mode.value;
-    if ((mode == .normal || mode == .record) &&
-        !await checkAndRequestPermission(.location)) {
-      return false;
-    }
-    final ok =
-        await _sportService?.start(
-          InnerSportServiceConfig(
-            mode: mode,
-            placeCode: featPlaceCode.value!,
-            placeName: featPlaceName.value!,
-            startCaallback: sportStartCallback,
-            stopCallback: sportStopCallback,
-            recordCallback: sportRecordCallback,
-            uploadCallback: sportUploadCallback,
-            retryUploadCallback: sportRetryUploadCallback,
-            autoRunConfig: AutoRunningConfig(
-              placeCode: featPlaceCode.value!,
-              placeName: featPlaceName.value!,
-              updateFrequency: featUserConfig.value.interval,
-              targetDistance: featUserConfig.value.targetDistance,
-              simulatorConfig: SimulatorConfig(
-                targetSpeed: featUserConfig.value.speed,
-                minSpeed:
-                    featUserConfig.value.speed -
-                    featUserConfig.value.speedJitterAmplitude,
-                maxSpeed:
-                    featUserConfig.value.speed +
-                    featUserConfig.value.speedJitterAmplitude,
-                acceleration: 3,
-                deceleration: 3,
-                stepFrequency: 150,
-                strideLength: 0.8,
-                gpsRefreshRate: 1,
-                accelerometerRefreshRate: 1,
-                gyroscopeRefreshRate: 0,
-                compassRefreshRate: 0,
-                barometerRefreshRate: 0,
-                jitterSeed: featUserConfig.value.seedToBigInt(),
-                positionJitterAmplitude:
-                    featUserConfig.value.positionJitterAmplitude,
-                speedJitterAmplitude: featUserConfig.value.speedJitterAmplitude,
-                bearingJitterAmplitude: 5,
-                accelerometerJitterAmplitude: 0.4,
-                gyroscopeJitterAmplitude: 0,
-                jitterFrequencyScale: 0.12,
-                trajectoryMode: (featVirtualPaths.value?.length != 1)
-                    ? .sequential
-                    : .loop,
-                loopCount: 0,
-                forbiddenZones: [],
-                fenceWarningDistance: 3,
-                checkpoints: [],
-                checkpointTolerance: 5,
-                autoRouteToCheckpoint: false,
-                checkpointStayTime: 0,
-                pathfindingGridResolution: 100,
-                smoothingFactor: 0.8,
-                baseAltitude: 400,
-                altitudeVariation: 0,
+
+    try {
+      // 凭据要求：自动跑/自己跑需要，轨迹录制为纯本地模式
+      if (mode != .record && featCredential.value == null) {
+        if (context != null && context.mounted) {
+          showFToast(
+            context: context,
+            variant: .destructive,
+            alignment: .topCenter,
+            title: Text(t.notice.unselected_user),
+            icon: const Icon(LucideIcons.circleX),
+            duration: const Duration(seconds: 3),
+          );
+        }
+        return false;
+      }
+
+      // 预设资源仅为自动跑服务；自己跑通过定位匹配场地，轨迹录制无需场地
+      if (resume == null && mode == .auto) {
+        final hasPreset =
+            featPlaceCode.value != null &&
+            featPlaceName.value != null &&
+            featMotionProfile.value != null &&
+            featVirtualPaths.value != null;
+        if (!hasPreset) {
+          if (context != null && context.mounted) {
+            showFToast(
+              context: context,
+              variant: .destructive,
+              alignment: .topCenter,
+              title: Text(t.notice.wait_reource_load),
+              icon: const Icon(LucideIcons.circleX),
+              duration: const Duration(seconds: 3),
+            );
+          }
+          return false;
+        }
+      }
+
+      if ((mode == .normal || mode == .record) &&
+          !await checkAndRequestPermission(.location)) {
+        return false;
+      }
+
+      // 确定本次运动的场地信息
+      switch (mode) {
+        case .auto when resume == null:
+          _curPlaceCode = featPlaceCode.value ?? '';
+          _curPlaceName = featPlaceName.value ?? '';
+        case .normal:
+          // 优先使用开始确认时定位匹配的场地缓存
+          final cachedCode = _resolvedPlaceCode;
+          final cachedName = _resolvedPlaceName;
+          _resolvedPlaceCode = null;
+          _resolvedPlaceName = null;
+          final (code, name) = (cachedCode != null && cachedName != null)
+              ? (cachedCode, cachedName)
+              : await _resolvePlaceByLocation() ?? ('', '');
+          if (code.isEmpty && name.isEmpty) {
+            if (context != null && context.mounted) {
+              showFToast(
+                context: context,
+                variant: .destructive,
+                alignment: .topCenter,
+                title: Text(t.submodule.cqupt_sport.not_in_playground),
+                icon: const Icon(LucideIcons.circleX),
+                duration: const Duration(seconds: 3),
+              );
+            }
+            return false;
+          }
+          _curPlaceCode = code;
+          _curPlaceName = name;
+        case .record:
+          _curPlaceCode = '';
+          _curPlaceName = '';
+        default:
+          _curPlaceCode = resume?.placeCode ?? '';
+          _curPlaceName = resume?.placeName ?? '';
+      }
+
+      // 续跑时使用选定的虚拟路线（从最近点开始），否则使用运动预设中的全部路线
+      final List<Trajectory> trajectories = (resume != null)
+          ? [resume.trajectory]
+          : (featMotionProfile.value?.data?.paths
+                    .map((v) {
+                      final vp = featVirtualPaths.value?[v];
+                      if (vp == null) return null;
+                      return Trajectory(
+                        id: vp.id,
+                        name: vp.name,
+                        points: vp.points
+                            .map(
+                              (v1) =>
+                                  GeoPoint(latitude: v1.lat, longitude: v1.lng),
+                            )
+                            .toList(),
+                      );
+                    })
+                    .nonNulls
+                    .toList() ??
+                []);
+
+      if (resume != null) {
+        _pendingResumeSportId = resume.sportId;
+        // 续跑路线预览（传入旋转后的路线，起点标记即落在续跑起跑点）
+        _mapService?.clearPreviewPath();
+        _mapService?.drawPreviewPath(
+          resume.trajectory.points
+              .map((p) => Coordinate(lat: p.latitude, lng: p.longitude))
+              .toList(),
+        );
+      } else if (mode == .normal || mode == .record) {
+        // 自己跑/轨迹录制无路线概念，清除路线预览与历史轨迹
+        _mapService?.clearPreviewPath();
+        _mapService?.clearOriginTrack();
+      }
+
+      final ok =
+          await _sportService?.start(
+            InnerSportServiceConfig(
+              mode: mode,
+              placeCode: _curPlaceCode,
+              placeName: _curPlaceName,
+              initialDistance: resume?.initialDistance ?? 0,
+              initialElapsedTimeMs: resume?.initialElapsedTimeMs ?? 0,
+              startCaallback: sportStartCallback,
+              stopCallback: sportStopCallback,
+              recordCallback: sportRecordCallback,
+              uploadCallback: sportUploadCallback,
+              retryUploadCallback: sportRetryUploadCallback,
+              autoRunConfig: AutoRunningConfig(
+                placeCode: _curPlaceCode,
+                placeName: _curPlaceName,
+                updateFrequency: featUserConfig.value.interval,
+                targetDistance: featUserConfig.value.targetDistance,
+                simulatorConfig: SimulatorConfig(
+                  targetSpeed: featUserConfig.value.speed,
+                  minSpeed:
+                      featUserConfig.value.speed -
+                      featUserConfig.value.speedJitterAmplitude,
+                  maxSpeed:
+                      featUserConfig.value.speed +
+                      featUserConfig.value.speedJitterAmplitude,
+                  acceleration: 3,
+                  deceleration: 3,
+                  stepFrequency: 150,
+                  strideLength: 0.8,
+                  gpsRefreshRate: 1,
+                  accelerometerRefreshRate: 1,
+                  gyroscopeRefreshRate: 0,
+                  compassRefreshRate: 0,
+                  barometerRefreshRate: 0,
+                  jitterSeed: featUserConfig.value.seedToBigInt(),
+                  positionJitterAmplitude:
+                      featUserConfig.value.positionJitterAmplitude,
+                  speedJitterAmplitude:
+                      featUserConfig.value.speedJitterAmplitude,
+                  bearingJitterAmplitude: 5,
+                  accelerometerJitterAmplitude: 0.4,
+                  gyroscopeJitterAmplitude: 0,
+                  jitterFrequencyScale: 0.12,
+                  trajectoryMode: (trajectories.length != 1)
+                      ? .sequential
+                      : .loop,
+                  loopCount: 0,
+                  forbiddenZones: [],
+                  fenceWarningDistance: 3,
+                  checkpoints: [],
+                  checkpointTolerance: 5,
+                  autoRouteToCheckpoint: false,
+                  checkpointStayTime: 0,
+                  pathfindingGridResolution: 100,
+                  smoothingFactor: 0.8,
+                  baseAltitude: 400,
+                  altitudeVariation: 0,
+                ),
+                trajectories: trajectories,
               ),
-              trajectories:
-                  featMotionProfile.value?.data?.paths
-                      .map((v) {
-                        final vp = featVirtualPaths.value?[v];
-                        if (vp == null) return null;
-                        return Trajectory(
-                          id: vp.id,
-                          name: vp.name,
-                          points: vp.points
-                              .map(
-                                (v1) => GeoPoint(
-                                  latitude: v1.lat,
-                                  longitude: v1.lng,
-                                ),
-                              )
-                              .toList(),
-                        );
-                      })
-                      .nonNulls
-                      .toList() ??
-                  [],
             ),
-          ),
-        ) ??
-        false;
-    if (!ok) return false;
-    WakelockPlus.enable();
-    _isRunning.value = true;
-    showNotification(
-      t.submodule.cqupt_sport.start_run_notice,
-      t.submodule.cqupt_sport.start_run_notice_hint,
-      id: noticeChannelId,
-      channelId: noticeChannelStrId,
-      channelName: noticeChannelName,
-    );
-    _duration.value = Duration.zero;
-    _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _duration.value += const Duration(seconds: 1);
-    });
-    _mapService?.clearPlayPath();
-    final firstPoint = featVirtualPaths
-        .value?[featMotionProfile.value?.data?.paths.first ?? '']
-        ?.points
-        .first;
-    if (firstPoint == null) {
-      _stopSport();
-      return false;
-    }
-    _mapService?.initPlayPath(
-      (mode == .auto)
-          ? Coordinate(lat: firstPoint.lat, lng: firstPoint.lng)
-          : Coordinate(lat: rawLat.value, lng: rawLng.value),
-      mode == .auto,
-    );
-    _mapService?.moveTo(firstPoint.lat, firstPoint.lng);
-    _mapService?.scala(19);
-    return true;
-  }
+          ) ??
+          false;
+      if (!ok) {
+        _pendingResumeSportId = null;
+        return false;
+      }
+      WakelockPlus.enable();
+      _isRunning.value = true;
+      showNotification(
+        t.submodule.cqupt_sport.start_run_notice,
+        t.submodule.cqupt_sport.start_run_notice_hint,
+        id: noticeChannelId,
+        channelId: noticeChannelStrId,
+        channelName: noticeChannelName,
+      );
 
-  Future<void> _stopSport() async {
-    await _sportService?.stop();
-    _updateTimer?.cancel();
-    _updateTimer = null;
-    WakelockPlus.disable();
-    _isRunning.value = false;
-  }
+      _duration.value = Duration(
+        milliseconds: resume?.initialElapsedTimeMs ?? 0,
+      );
+      // 复位运动数据（续跑继承原里程，其余从零开始）
+      _distance.value = resume?.initialDistance ?? 0;
+      _speed.value = 0;
+      _remainTime.value = Duration.zero;
+      _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        _duration.value += const Duration(seconds: 1);
+      });
+      _mapService?.clearPlayPath();
 
-  Future<String?> sportStartCallback() async {
-    final context = widgetKey.currentContext;
-    final sportId = await _apiClient.startSport(
-      featPlaceName.value!,
-      featPlaceCode.value!,
-    );
-
-    if (sportId == null) {
+      // 地图轨迹起点：续跑用旋转后路线首点，自动跑用预设路线首点，其余跟随定位（懒初始化）
+      Coordinate? startPoint;
+      if (resume != null) {
+        final p = resume.trajectory.points.first;
+        startPoint = Coordinate(lat: p.latitude, lng: p.longitude);
+      } else if (mode == .auto) {
+        final vpPoint = featVirtualPaths
+            .value?[featMotionProfile.value?.data?.paths.first ?? '']
+            ?.points
+            .firstOrNull;
+        startPoint = (vpPoint == null)
+            ? null
+            : Coordinate(lat: vpPoint.lat, lng: vpPoint.lng);
+      } else {
+        startPoint = (rawLat.value != 0 || rawLng.value != 0)
+            ? Coordinate(lat: rawLat.value, lng: rawLng.value)
+            : null;
+      }
+      if (startPoint != null) {
+        _mapService?.initPlayPath(startPoint, mode == .auto || resume != null);
+        _mapService?.moveTo(startPoint.lat, startPoint.lng);
+        _mapService?.scala(19);
+      }
+      return true;
+    } catch (_) {
+      _pendingResumeSportId = null;
+      // 异常发生在启动成功之后时，强制停止以保持状态一致
+      if (_sportService?.isRunning ?? false) {
+        await _sportService?.stop();
+      }
+      _isRunning.value = false;
       if (context != null && context.mounted) {
         showFToast(
           context: context,
@@ -1035,13 +1524,191 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
           duration: const Duration(seconds: 3),
         );
       }
-      await _stopSport();
+      return false;
+    }
+  }
+
+  // 通过定位匹配运动场区域（与官方小程序 whereAmI 一致）
+  Future<(String, String)?> _resolvePlaceByLocation() async {
+    final lat = rawLat.value;
+    final lng = rawLng.value;
+    if (lat == 0 && lng == 0) return null;
+
+    final areas = await _apiClient.getSportAreas();
+    for (final area in areas) {
+      // 仅跑道区域可作为跑步场地（官方 funcode: dzwl）
+      if (area.areaFuncCode != null && area.areaFuncCode != 'dzwl') continue;
+      if (_isPointInPolygon(lat, lng, area.areaPointList)) {
+        return (area.placeCode ?? '', area.placeName ?? '');
+      }
+    }
+    return null;
+  }
+
+  // 射线法判断点是否在多边形内（移植自官方 IsPtInPoly）
+  bool _isPointInPolygon(double lat, double lng, List<Coordinate> pts) {
+    final n = pts.length;
+    if (n < 3) return false;
+
+    var crossings = 0;
+    for (var i = 0; i < n; i++) {
+      final sLat = pts[i].lat;
+      final sLng = pts[i].lng;
+      final eLat = pts[(i + 1) % n].lat;
+      final eLng = pts[(i + 1) % n].lng;
+      if ((sLat > lat) != (eLat > lat)) {
+        final crossLng = sLng + (eLng - sLng) * (lat - sLat) / (eLat - sLat);
+        if (crossLng < lng) crossings++;
+      }
+    }
+    return crossings.isOdd;
+  }
+
+  Future<void> _stopSport({bool askKeepRecord = false}) async {
+    final wasRunning = _isRunning.value;
+    final wasRecording = _mode.value == .record;
+    final recordedPoints = List<TrajPoint>.from(
+      _sportService?.recordPoints ?? const [],
+    );
+    await _sportService?.stop();
+    _updateTimer?.cancel();
+    _updateTimer = null;
+    WakelockPlus.disable();
+    _isRunning.value = false;
+
+    _pendingResumeSportId = null;
+    // 结束后清理路线类 overlay 并刷新进行中列表（正常结束的记录不会再出现）
+    if (wasRunning) {
+      _mapService?.clearPreviewPath();
+      _mapService?.clearOriginTrack();
+      fetchResumableRecords();
+    }
+
+    if (!askKeepRecord || !wasRecording) return;
+    await _offerKeepRecordedTrack(recordedPoints);
+  }
+
+  // 录制结束后询问是否保留轨迹
+  Future<void> _offerKeepRecordedTrack(List<TrajPoint> points) async {
+    final context = widgetKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    if (points.length < 2) {
+      showFToast(
+        context: context,
+        alignment: .topCenter,
+        title: Text(t.submodule.cqupt_sport.track_too_few_points),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    showFDialog(
+      context: context,
+      builder: (dialogContext, style, animation) {
+        return punklordeDialog(
+          style: style,
+          animation: animation,
+          title: Text(t.submodule.cqupt_sport.record_keep_title),
+          body: Text(
+            t.submodule.cqupt_sport.record_keep_tip(count: points.length),
+          ),
+          actions: [
+            FButton(
+              size: .xs,
+              onPress: () async {
+                Navigator.of(dialogContext).pop();
+                final now = DateTime.now();
+                final vp = VirtualPath(
+                  id: generateRecordedTrackId(now),
+                  version: 1,
+                  name:
+                      '${t.submodule.cqupt_sport.record_default_track_name} ${formatDate(now)}',
+                  coordinateType: .gcj02,
+                  points: points
+                      .map(
+                        (p) => VirtualPathPoint(
+                          lat: p.coordinate.lat,
+                          lng: p.coordinate.lng,
+                        ),
+                      )
+                      .toList(),
+                );
+                try {
+                  await saveRecordedTrack(vp);
+                  if (context.mounted) {
+                    showFToast(
+                      context: context,
+                      alignment: .topCenter,
+                      title: Text(t.submodule.cqupt_sport.track_saved),
+                      duration: const Duration(seconds: 3),
+                    );
+                  }
+                } catch (_) {
+                  if (context.mounted) {
+                    showFToast(
+                      context: context,
+                      variant: .destructive,
+                      alignment: .topCenter,
+                      title: Text(t.submodule.cqupt_sport.track_save_failed),
+                      duration: const Duration(seconds: 3),
+                    );
+                  }
+                }
+              },
+              child: Text(t.submodule.cqupt_sport.keep),
+            ),
+            FButton(
+              onPress: () {
+                Navigator.of(dialogContext).pop();
+              },
+              size: .xs,
+              variant: .secondary,
+              child: Text(t.submodule.cqupt_sport.discard),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String?> sportStartCallback() async {
+    final context = widgetKey.currentContext;
+
+    // 续跑：沿用原运动编号，不新建记录
+    final resumeId = _pendingResumeSportId;
+    if (resumeId != null) {
+      return resumeId;
+    }
+
+    // 轨迹录制：纯本地，不请求服务端
+    if (_mode.value == .record) {
+      return "_punklorde_record";
+    }
+
+    final sportId = await _apiClient.startSport(_curPlaceName, _curPlaceCode);
+
+    if (sportId == null) {
+      // 仅提示，清理由 service.start 内部的 _stop(.error) 统一完成
+      if (context != null && context.mounted) {
+        showFToast(
+          context: context,
+          variant: .destructive,
+          alignment: .topCenter,
+          title: Text(t.notice.sport_start_failed),
+          icon: const Icon(LucideIcons.circleX),
+          duration: const Duration(seconds: 3),
+        );
+      }
       return null;
     }
     return (_mode.value == .record) ? "_punklorde_record" : sportId;
   }
 
   Future<void> sportStopCallback(String sportId) async {
+    // 轨迹录制为纯本地模式，不请求服务端
+    if (sportId == "_punklorde_record") return;
+
     await _apiClient.endSport(sportId);
 
     showNotification(
@@ -1056,6 +1723,13 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   Future<void> sportRecordCallback(String sportId, TrajPoint point) async {
     _speed.value = _sportService?.getSpeed ?? 0; // 更新速度
     _mapService?.updatePlayPath(point.coordinate); // 添加轨迹点
+
+    if (_mode.value == .record) {
+      // 轨迹录制：不上传，距离由本地 Haversine 累计，无目标/剩余概念
+      _distance.value = _sportService?.getDistance ?? 0;
+      return;
+    }
+
     final remainDistance =
         featUserConfig.value.targetDistance - _distance.value;
     _remainTime.value = Duration(
@@ -1071,8 +1745,8 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   ) async {
     final result = await _apiClient.uploadPoint(
       trajectory,
-      featPlaceName.value!,
-      featPlaceCode.value!,
+      _curPlaceName,
+      _curPlaceCode,
       sportId,
     );
     if (result == null) {
@@ -1101,8 +1775,8 @@ class _FeatCquptSportViewState extends State<FeatCquptSportView>
   ) async {
     await _apiClient.retryUploadPoints(
       points,
-      featPlaceName.value!,
-      featPlaceCode.value!,
+      _curPlaceName,
+      _curPlaceCode,
       sportId,
     );
   }

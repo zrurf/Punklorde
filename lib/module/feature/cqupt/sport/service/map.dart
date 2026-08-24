@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_baidu_mapapi_base/flutter_baidu_mapapi_base.dart';
 import 'package:flutter_baidu_mapapi_map/flutter_baidu_mapapi_map.dart';
 import 'package:punklorde/common/model/location.dart';
+import 'package:punklorde/module/feature/cqupt/sport/api/model/sport.dart';
 
 class InnerMapService {
   // 地图控制器
@@ -14,6 +15,7 @@ class InnerMapService {
   BMFMarker? _playMarker;
   BMFPolyline? _previewLine;
   BMFPolyline? _playLine;
+  BMFPolyline? _originLine;
 
   BMFMapController get mapController => _mapController;
 
@@ -78,6 +80,30 @@ class InnerMapService {
     }
   }
 
+  // 绘制历史轨迹（续跑时显示原跑步路线，深绿色）
+  void drawOriginTrack(List<Coordinate> points) {
+    clearOriginTrack();
+    if (points.length < 2) return;
+
+    _originLine = BMFPolyline(
+      coordinates: points.map((v) => BMFCoordinate(v.lat, v.lng)).toList(),
+      width: 8,
+      dottedLine: false,
+      colors: [const Color(0xFF2E7D32)],
+      lineCapType: BMFLineCapType.LineCapButt,
+      lineJoinType: BMFLineJoinType.LineJoinRound,
+    );
+    _mapController.addPolyline(_originLine!);
+  }
+
+  // 清除历史轨迹
+  void clearOriginTrack() {
+    if (_originLine != null) {
+      _mapController.removeOverlay(_originLine!.id);
+      _originLine = null;
+    }
+  }
+
   // 绘制运动轨迹
   void initPlayPath(Coordinate pos, bool showMarker) {
     final coord = BMFCoordinate(pos.lat, pos.lng);
@@ -108,6 +134,11 @@ class InnerMapService {
 
   // 更新运动轨迹
   void updatePlayPath(Coordinate pos) {
+    // 定位晚于开始到达时，懒初始化轨迹
+    if (_playLine == null) {
+      initPlayPath(pos, false);
+      return;
+    }
     final coord = BMFCoordinate(pos.lat, pos.lng);
     _playLine?.updateCoordinates(_playLine!.coordinates + [coord]);
     _playMarker?.updatePosition(coord);
@@ -117,11 +148,55 @@ class InnerMapService {
   void clearPlayPath() {
     if (_playLine != null) {
       _mapController.removeOverlay(_playLine!.id);
-      _previewLine = null;
+      _playLine = null;
     }
     if (_playMarker != null) {
       _mapController.removeMarker(_playMarker!);
-      _previewStartMarker = null;
+      _playMarker = null;
     }
+  }
+
+  // 绘制运动场区域（对齐小程序 showQuYu：dzwl 电子围栏绿色，其余禁区红色）
+  void drawFences(List<SportArea> areas) {
+    clearFences();
+
+    const fenceColor = Color(0xCC28E642); // dzwl 电子围栏
+    const forbiddenColor = Color(0xCCFF2B29); // 禁跑区/其他
+
+    for (final (i, area) in areas.indexed) {
+      if (area.areaPointList.length < 3) continue;
+      final coords = area.areaPointList
+          .map((p) => BMFCoordinate(p.lat, p.lng))
+          .toList();
+      final isFence = area.areaFuncCode == 'dzwl';
+      final color = isFence ? fenceColor : forbiddenColor;
+
+      final polygon = BMFPolygon(
+        coordinates: coords,
+        width: 2,
+        strokeColor: color,
+        fillColor: color.withValues(alpha: 0.15),
+        zIndex: 1,
+      );
+
+      if (isFence) {
+        _fencePolygons['$i'] = polygon;
+      } else {
+        _forbiddenPolygons['$i'] = polygon;
+      }
+      _mapController.addPolygon(polygon);
+    }
+  }
+
+  // 清除运动场区域
+  void clearFences() {
+    for (final p in _fencePolygons.values) {
+      _mapController.removeOverlay(p.id);
+    }
+    for (final p in _forbiddenPolygons.values) {
+      _mapController.removeOverlay(p.id);
+    }
+    _fencePolygons.clear();
+    _forbiddenPolygons.clear();
   }
 }

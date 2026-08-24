@@ -42,14 +42,17 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
 
   @override
   Widget build(BuildContext context) {
-    final totalPage = _sportRecordSignal.value.length ~/ _pageSize;
+    final records = _sportRecordSignal.value;
+    // 页数向上取整；数据刷新导致页数减少时夹紧当前页，避免 sublist 越界
+    final totalPage = (records.length + _pageSize - 1) ~/ _pageSize;
+    final page = min(max(_currentPage.value, 0), max(totalPage - 1, 0));
 
-    final startIndex = _currentPage.value * _pageSize;
-    final endIndex = startIndex + _pageSize;
+    final startIndex = page * _pageSize;
+    final endIndex = min(startIndex + _pageSize, records.length);
 
-    final currentPageRecords = (_sportRecordSignal.value.isEmpty)
+    final currentPageRecords = (records.isEmpty)
         ? <RecordResult>[]
-        : _sportRecordSignal.value.sublist(startIndex, endIndex);
+        : records.sublist(startIndex, endIndex);
 
     return Scaffold(
       body: SafeArea(
@@ -84,7 +87,7 @@ class _FeatSportCquptRecordViewState extends State<FeatSportCquptRecordView> {
                             child: SignalBuilder(
                               builder: (context) => FPagination(
                                 control: .managed(
-                                  initial: _currentPage.value,
+                                  initial: page,
                                   pages: max(totalPage, 1),
                                   onChange: (v) => _currentPage.value = v,
                                 ),

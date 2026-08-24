@@ -11,7 +11,7 @@ import 'package:signals/signals_flutter.dart';
 
 final Signal<String> _searchQuery = Signal('');
 
-class GuestAccountPageView extends StatefulWidget {
+class GuestAccountPageView extends SignalStatefulWidget {
   const GuestAccountPageView({super.key});
 
   @override

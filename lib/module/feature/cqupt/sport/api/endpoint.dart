@@ -53,6 +53,10 @@ String apiSportGetPoints(String sportId) =>
 // 获取运动记录接口
 String apiSportGetRecords() => "$baseUrl/sportsResult/list";
 
+// 获取进行中的运动记录接口（分页，已开始未结束的记录）
+String apiSportGetWxRecords(int pageNo, int pageSize) =>
+    "$baseUrl/sportRecord/mobile/list/$pageNo/$pageSize";
+
 // 获取运动统计接口
 String apiSportStat() => "$basePortalUrl/api/sunlight/mobile/statistics";
 

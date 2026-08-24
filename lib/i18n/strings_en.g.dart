@@ -1211,6 +1211,102 @@ class Translations$submodule$cqupt_sport$en {
 
 	/// en: 'Running'
 	String get face_type_run => 'Running';
+
+	/// en: 'About'
+	String get about => 'About';
+
+	/// en: 'Recorded Tracks'
+	String get recorded_tracks => 'Recorded Tracks';
+
+	/// en: 'View and manage routes saved via track recording'
+	String get recorded_tracks_hint => 'View and manage routes saved via track recording';
+
+	/// en: 'No recorded tracks yet'
+	String get track_empty => 'No recorded tracks yet';
+
+	/// en: 'points'
+	String get track_points_unit => 'points';
+
+	/// en: 'Saved at'
+	String get track_saved_at => 'Saved at';
+
+	/// en: 'Delete Track'
+	String get track_delete_title => 'Delete Track';
+
+	/// en: '"$name" will be permanently deleted. Are you sure?'
+	String track_delete_tip({required Object name}) => '"${name}" will be permanently deleted. Are you sure?';
+
+	/// en: 'Too few track points, discarded automatically'
+	String get track_too_few_points => 'Too few track points, discarded automatically';
+
+	/// en: 'Track saved. Manage it in About → Recorded Tracks'
+	String get track_saved => 'Track saved. Manage it in About → Recorded Tracks';
+
+	/// en: 'Failed to save the track'
+	String get track_save_failed => 'Failed to save the track';
+
+	/// en: 'Keep this track?'
+	String get record_keep_title => 'Keep this track?';
+
+	/// en: 'This recording has $count points. Save it to "Recorded Tracks"?'
+	String record_keep_tip({required Object count}) => 'This recording has ${count} points. Save it to "Recorded Tracks"?';
+
+	/// en: 'Track Recording'
+	String get record_default_track_name => 'Track Recording';
+
+	/// en: 'Keep'
+	String get keep => 'Keep';
+
+	/// en: 'Discard'
+	String get discard => 'Discard';
+
+	/// en: 'Unfinished workout detected. Tap to resume'
+	String get resume_found_hint => 'Unfinished workout detected. Tap to resume';
+
+	/// en: 'Resume Workout'
+	String get resume_title => 'Resume Workout';
+
+	/// en: 'Select a virtual route to inherit the original distance and time. The run will start from the route point nearest to your last position'
+	String get resume_hint => 'Select a virtual route to inherit the original distance and time. The run will start from the route point nearest to your last position';
+
+	/// en: 'Unfinished Workout'
+	String get resume_unfinished_run => 'Unfinished Workout';
+
+	/// en: 'Select a virtual route'
+	String get resume_route => 'Select a virtual route';
+
+	/// en: 'Virtual Route'
+	String get virtual_route => 'Virtual Route';
+
+	/// en: 'No routes available. Load a motion profile first'
+	String get resume_no_routes => 'No routes available. Load a motion profile first';
+
+	/// en: 'Fetching workout data, please wait…'
+	String get resume_loading_info => 'Fetching workout data, please wait…';
+
+	/// en: 'Failed to fetch workout data. Tap the record to retry'
+	String get resume_info_failed => 'Failed to fetch workout data. Tap the record to retry';
+
+	/// en: 'Resume Run'
+	String get resume_start => 'Resume Run';
+
+	/// en: 'Confirm Resume'
+	String get resume_confirm_title => 'Confirm Resume';
+
+	/// en: 'Failed to resume. The record may have ended'
+	String get resume_failed => 'Failed to resume. The record may have ended';
+
+	/// en: 'Place'
+	String get record_place => 'Place';
+
+	/// en: 'You are not inside a playground area. Cannot start'
+	String get not_in_playground => 'You are not inside a playground area. Cannot start';
+
+	/// en: 'You are at "$place". Start running?'
+	String normal_start_confirm({required Object place}) => 'You are at "${place}". Start running?';
+
+	/// en: 'You will be asked whether to keep the recorded track after stopping.'
+	String get record_stop_tip => 'You will be asked whether to keep the recorded track after stopping.';
 }
 
 // Path: submodule.chaoxing
@@ -1756,6 +1852,38 @@ extension on Translations {
 			'submodule.cqupt_sport.face_type_enter' => 'Entry',
 			'submodule.cqupt_sport.face_type_leave' => 'Exit',
 			'submodule.cqupt_sport.face_type_run' => 'Running',
+			'submodule.cqupt_sport.about' => 'About',
+			'submodule.cqupt_sport.recorded_tracks' => 'Recorded Tracks',
+			'submodule.cqupt_sport.recorded_tracks_hint' => 'View and manage routes saved via track recording',
+			'submodule.cqupt_sport.track_empty' => 'No recorded tracks yet',
+			'submodule.cqupt_sport.track_points_unit' => 'points',
+			'submodule.cqupt_sport.track_saved_at' => 'Saved at',
+			'submodule.cqupt_sport.track_delete_title' => 'Delete Track',
+			'submodule.cqupt_sport.track_delete_tip' => ({required Object name}) => '"${name}" will be permanently deleted. Are you sure?',
+			'submodule.cqupt_sport.track_too_few_points' => 'Too few track points, discarded automatically',
+			'submodule.cqupt_sport.track_saved' => 'Track saved. Manage it in About → Recorded Tracks',
+			'submodule.cqupt_sport.track_save_failed' => 'Failed to save the track',
+			'submodule.cqupt_sport.record_keep_title' => 'Keep this track?',
+			'submodule.cqupt_sport.record_keep_tip' => ({required Object count}) => 'This recording has ${count} points. Save it to "Recorded Tracks"?',
+			'submodule.cqupt_sport.record_default_track_name' => 'Track Recording',
+			'submodule.cqupt_sport.keep' => 'Keep',
+			'submodule.cqupt_sport.discard' => 'Discard',
+			'submodule.cqupt_sport.resume_found_hint' => 'Unfinished workout detected. Tap to resume',
+			'submodule.cqupt_sport.resume_title' => 'Resume Workout',
+			'submodule.cqupt_sport.resume_hint' => 'Select a virtual route to inherit the original distance and time. The run will start from the route point nearest to your last position',
+			'submodule.cqupt_sport.resume_unfinished_run' => 'Unfinished Workout',
+			'submodule.cqupt_sport.resume_route' => 'Select a virtual route',
+			'submodule.cqupt_sport.virtual_route' => 'Virtual Route',
+			'submodule.cqupt_sport.resume_no_routes' => 'No routes available. Load a motion profile first',
+			'submodule.cqupt_sport.resume_loading_info' => 'Fetching workout data, please wait…',
+			'submodule.cqupt_sport.resume_info_failed' => 'Failed to fetch workout data. Tap the record to retry',
+			'submodule.cqupt_sport.resume_start' => 'Resume Run',
+			'submodule.cqupt_sport.resume_confirm_title' => 'Confirm Resume',
+			'submodule.cqupt_sport.resume_failed' => 'Failed to resume. The record may have ended',
+			'submodule.cqupt_sport.record_place' => 'Place',
+			'submodule.cqupt_sport.not_in_playground' => 'You are not inside a playground area. Cannot start',
+			'submodule.cqupt_sport.normal_start_confirm' => ({required Object place}) => 'You are at "${place}". Start running?',
+			'submodule.cqupt_sport.record_stop_tip' => 'You will be asked whether to keep the recorded track after stopping.',
 			'submodule.chaoxing.courses' => 'Courses',
 			'submodule.chaoxing.homework' => 'Homework',
 			'submodule.chaoxing.exam' => 'Exam',

@@ -15,7 +15,7 @@ void initChaoxingServices() {
   initStatus();
 }
 
-class FeatChaonxingView extends StatefulWidget {
+class FeatChaonxingView extends SignalStatefulWidget {
   const FeatChaonxingView({super.key});
 
   @override

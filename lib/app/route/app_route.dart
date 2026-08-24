@@ -22,7 +22,9 @@ import 'package:punklorde/module/feature/chaoxing/view/pages/course_active_page.
 import 'package:punklorde/module/feature/chaoxing/view/pages/webview_page.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/index.dart';
 import 'package:punklorde/module/feature/cqupt/sport/index.dart';
+import 'package:punklorde/module/feature/cqupt/sport/view/pages/about.dart';
 import 'package:punklorde/module/feature/cqupt/sport/view/pages/record.dart';
+import 'package:punklorde/module/feature/cqupt/sport/view/pages/tracks.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/index.dart';
 import 'package:punklorde/module/feature/cuc/tronclass/index.dart';
 import 'package:punklorde/module/feature/cuc/checkin/index.dart';
@@ -254,6 +256,29 @@ final appRoute = GoRouter(
           path: '/feat/cqupt/sport/record',
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: FeatSportCquptRecordView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cqupt/sport/about',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatSportCquptAboutView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cqupt/sport/tracks',
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: FeatSportCquptTracksView());
+          },
+        ),
+        GoRoute(
+          path: '/feat/cqupt/sport/tracks/detail',
+          pageBuilder: (context, state) {
+            // go_router 已对 query 参数完成解码
+            return NoTransitionPage(
+              child: FeatSportCquptTrackDetailView(
+                trackId: state.uri.queryParameters['id'] ?? '',
+              ),
+            );
           },
         ),
         GoRoute(

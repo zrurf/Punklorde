@@ -56,6 +56,80 @@ class ApiClient {
     }
   }
 
+  // 获取进行中的运动记录列表（仅限今天、endTime 为 null 的未完成记录，用于续跑）
+  Future<List<WxSportRecord>> getWxSportRecords(
+    int pageNo,
+    int pageSize,
+  ) async {
+    try {
+      final response = await _dio.get(apiSportGetWxRecords(pageNo, pageSize));
+      if (response.data['code'] != '10200') return [];
+      final data = response.data['data'];
+      final list = (data is Map<String, dynamic>) ? data['list'] : null;
+      if (list is List<dynamic>) {
+        final now = DateTime.now();
+        bool startedToday(WxSportRecord v) {
+          if (v.startTime == null) return false;
+          final d = parseDate(v.startTime!);
+          return d.year == now.year && d.month == now.month && d.day == now.day;
+        }
+
+        return list
+            .whereType<Map<String, dynamic>>()
+            .map(WxSportRecord.fromJson)
+            .where(
+              (v) =>
+                  v.sportRecordNo.isNotEmpty &&
+                  v.endTime == null &&
+                  startedToday(v),
+            )
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // 获取运动区域（用于定位匹配运动场）
+  Future<List<SportArea>> getSportAreas() async {
+    try {
+      final response = await _dio.get(apiSportArea());
+      if (response.data['code'] != '10200') return [];
+      final data = response.data['data'];
+      if (data is List<dynamic>) {
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map(SportArea.fromJson)
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // 继续运动
+  Future<bool> continueSport(String sportRecordNo) async {
+    try {
+      final response = await _dio.get(apiSportContinue(sportRecordNo));
+      return (response.data['code'] == '10200');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 获取运动记录信息（含已上传轨迹点）
+  Future<SportInfoResult?> getSportInfo(String sportRecordNo) async {
+    try {
+      final response = await _dio.get(apiSportInfo(sportRecordNo));
+      if (response.data['code'] != '10200') return null;
+      return SportInfoResult.fromJson(response.data['data']);
+    } catch (e) {
+      return null;
+    }
+  }
+
   // 上传运动数据
   Future<UploadRecordResult?> uploadPoint(
     List<TrajPoint> points,

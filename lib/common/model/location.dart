@@ -1,10 +1,10 @@
 import 'package:flutter_bmflocation/flutter_bmflocation.dart';
 
 enum CoordinateType {
-  WGS84, // GPS坐标系
-  GCJ02, // 火星坐标系
-  BD09LL, // 百度经纬度坐标系
-  UNKNOWN, // 未知坐标系
+  wgs84, // GPS坐标系
+  gcj02, // 火星坐标系
+  bd09ll, // 百度经纬度坐标系
+  unknown, // 未知坐标系
 }
 
 enum LocationPurpose {
@@ -16,11 +16,11 @@ enum LocationPurpose {
 extension CoordinateTypeExtension on CoordinateType {
   BMFLocationCoordType toBDMapCoordinateType() {
     switch (this) {
-      case .WGS84:
+      case .wgs84:
         return .wgs84;
-      case .GCJ02:
+      case .gcj02:
         return .gcj02;
-      case .BD09LL:
+      case .bd09ll:
         return .bd09ll;
       default:
         return .wgs84;
