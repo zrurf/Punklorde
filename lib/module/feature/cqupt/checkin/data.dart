@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:punklorde/core/status/auth.dart';
+import 'package:punklorde/core/status/experiment.dart';
 import 'package:punklorde/i18n/strings.g.dart';
 import 'package:punklorde/module/feature/chaoxing/data.dart';
 import 'package:punklorde/module/feature/chaoxing/model/auth.dart';
 import 'package:punklorde/module/feature/chaoxing/service/checkin.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/model.dart';
 import 'package:punklorde/module/feature/cqupt/checkin/utils/view.dart';
+import 'package:punklorde/module/feature/cqupt/tronclass/config.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/model.dart';
 import 'package:punklorde/module/feature/cqupt/tronclass/service.dart';
+import 'package:punklorde/module/feature/tronclass/view/course_qr_checkin_page.dart';
 import 'package:punklorde/module/model/auth.dart';
 import 'package:punklorde/module/platform/chaoxing/chaoxing.dart';
 import 'package:punklorde/module/platform/cqupt/tronclass.dart';
@@ -72,6 +75,15 @@ Future<List<CheckinEvent>> fetchFromCquptTron(BuildContext context) async {
           done: v.isDone(),
           onCall: switch (v.type) {
             RollcallType.qr => (Set<AuthCredential> creds) async {
+              if (isExperimentEnabled(experimentCrossCourseCheckin.id)) {
+                await showCourseCheckinSheet(
+                  context,
+                  config: cquptTronclassConfig,
+                  rollcallId: v.id,
+                  courseTitle: v.title ?? t.submodule.cqupt_checkin.check_in,
+                );
+                return;
+              }
               await context.push("/p/universal_scan");
             },
             RollcallType.pin => (Set<AuthCredential> creds) async {

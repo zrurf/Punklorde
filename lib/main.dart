@@ -8,6 +8,7 @@ import 'package:punklorde/core/service/widget_service.dart';
 import 'package:punklorde/core/status/app.dart';
 import 'package:punklorde/core/status/auth.dart';
 import 'package:punklorde/core/status/device.dart';
+import 'package:punklorde/core/status/experiment.dart';
 import 'package:punklorde/core/status/map.dart';
 import 'package:punklorde/core/status/resource.dart';
 import 'package:punklorde/core/status/schedule.dart';
@@ -84,12 +85,14 @@ Future<void> initStatus() async {
   try {
     loadAppStatus();
     await loadAuthStatus();
+    await loadExperimentStatus();
   } catch (e) {
     print(e);
   }
 
   initAppStatus();
   initAuthStatus();
+  initExperimentStatus();
   initResourceStatus();
   loadMapProvider();
   initMapStatus();

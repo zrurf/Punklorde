@@ -226,7 +226,9 @@
     "cache_detail_path": "File Path",
     "cache_refreshed": "Cache refreshed",
     "cache_deleted": "Cache deleted",
-    "cache_cleared": "Cleared $count caches"
+    "cache_cleared": "Cleared $count caches",
+    "experiment": "Experimental features",
+    "experiment_hint": "Experimental features are still under development and may act unexpectedly"
   },
   "vault": {
     "setup_title": "Set Unlock Password",
@@ -304,7 +306,11 @@
       "checkin_quick": "Quick Check-in",
       "checkin_fill_code": "Fill Check-in Code",
       "checkin_use_current_loc": "Check-in with Current Location",
-      "checkin_use_auto_loc": "Auto-locate Check-in"
+      "checkin_use_auto_loc": "Auto-locate Check-in",
+      "course_scan_checkin": "Check in for this course",
+      "course_scan_checkin_hint": "Use this course ($course) to check in with the data from the scanned QR code",
+      "universal_scan_checkin": "Universal check-in",
+      "universal_scan_checkin_hint": "Scan any course's QR code and check in for its course"
     },
     "cqupt_sport": {
       "record": "Record",

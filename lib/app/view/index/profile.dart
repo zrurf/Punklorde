@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart' show Colors;
 import 'package:forui/forui.dart';
 import 'package:punklorde/utils/etc/fdialog.dart';
 import 'package:go_router/go_router.dart';
@@ -192,6 +193,16 @@ class ProfileView extends SignalWidget {
                         ],
                       ),
                     );
+                  },
+                ),
+                FTile(
+                  title: Text(t.setting.experiment),
+                  suffix: const Icon(
+                    LucideIcons.flaskConical,
+                    color: Colors.orange,
+                  ),
+                  onPress: () {
+                    context.push('/s/experiment');
                   },
                 ),
               ],

@@ -13,6 +13,7 @@ import 'package:punklorde/app/view/page/scanner.dart';
 import 'package:punklorde/app/view/page/select_school.dart';
 import 'package:punklorde/app/view/page/sources_list.dart';
 import 'package:punklorde/app/view/page/dl_cache.dart';
+import 'package:punklorde/app/view/page/experiment_page.dart';
 import 'package:punklorde/app/view/page/license.dart';
 import 'package:punklorde/app/view/page/vault_page.dart';
 import 'package:punklorde/i18n/strings.g.dart';
@@ -219,6 +220,12 @@ final appRoute = GoRouter(
           path: "/s/dl_cache",
           pageBuilder: (context, state) {
             return const NoTransitionPage(child: DlCachePage());
+          },
+        ),
+        GoRoute(
+          path: "/s/experiment",
+          pageBuilder: (context, state) {
+            return const NoTransitionPage(child: ExperimentPage());
           },
         ),
         GoRoute(

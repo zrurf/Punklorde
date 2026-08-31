@@ -226,7 +226,9 @@
     "cache_detail_path": "文件路径",
     "cache_refreshed": "缓存已刷新",
     "cache_deleted": "缓存已删除",
-    "cache_cleared": "已清空 $count 个缓存"
+    "cache_cleared": "已清空 $count 个缓存",
+    "experiment": "实验性功能",
+    "experiment_hint": "实验性功能仍在开发中，可能存在不稳定或不可预期的行为"
   },
   "vault": {
     "setup_title": "设置解锁密码",
@@ -304,7 +306,11 @@
       "checkin_quick": "一键签到",
       "checkin_fill_code": "填充签到码",
       "checkin_use_current_loc": "使用当前位置签到",
-      "checkin_use_auto_loc": "自动获取位置签到"
+      "checkin_use_auto_loc": "自动获取位置签到",
+      "course_scan_checkin": "该课程签到",
+      "course_scan_checkin_hint": "用「$course」的签到记录，配合扫描二维码中的 data 字段上报",
+      "universal_scan_checkin": "通用签到",
+      "universal_scan_checkin_hint": "扫描任意课程的二维码，为二维码对应的课程签到"
     },
     "cqupt_sport": {
       "record": "记录",

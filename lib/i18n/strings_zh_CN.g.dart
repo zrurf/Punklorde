@@ -332,6 +332,8 @@ class _Translations$setting$zh_CN implements Translations$setting$en {
 	@override String get cache_refreshed => '缓存已刷新';
 	@override String get cache_deleted => '缓存已删除';
 	@override String cache_cleared({required Object count}) => '已清空 ${count} 个缓存';
+	@override String get experiment => '实验性功能';
+	@override String get experiment_hint => '实验性功能仍在开发中，可能存在不稳定或不可预期的行为';
 }
 
 // Path: vault
@@ -444,6 +446,10 @@ class _Translations$submodule$cqupt_checkin$zh_CN implements Translations$submod
 	@override String get checkin_fill_code => '填充签到码';
 	@override String get checkin_use_current_loc => '使用当前位置签到';
 	@override String get checkin_use_auto_loc => '自动获取位置签到';
+	@override String get course_scan_checkin => '该课程签到';
+	@override String course_scan_checkin_hint({required Object course}) => '用「${course}」的签到记录，配合扫描二维码中的 data 字段上报';
+	@override String get universal_scan_checkin => '通用签到';
+	@override String get universal_scan_checkin_hint => '扫描任意课程的二维码，为二维码对应的课程签到';
 }
 
 // Path: submodule.cqupt_sport
@@ -845,6 +851,8 @@ extension on TranslationsZhCn {
 			'setting.cache_refreshed' => '缓存已刷新',
 			'setting.cache_deleted' => '缓存已删除',
 			'setting.cache_cleared' => ({required Object count}) => '已清空 ${count} 个缓存',
+			'setting.experiment' => '实验性功能',
+			'setting.experiment_hint' => '实验性功能仍在开发中，可能存在不稳定或不可预期的行为',
 			'vault.setup_title' => '设置解锁密码',
 			'vault.setup_hint' => '首次使用需设置解锁密码，用于保护保管库',
 			'vault.unlock_title' => '解锁保管库',
@@ -916,6 +924,10 @@ extension on TranslationsZhCn {
 			'submodule.cqupt_checkin.checkin_fill_code' => '填充签到码',
 			'submodule.cqupt_checkin.checkin_use_current_loc' => '使用当前位置签到',
 			'submodule.cqupt_checkin.checkin_use_auto_loc' => '自动获取位置签到',
+			'submodule.cqupt_checkin.course_scan_checkin' => '该课程签到',
+			'submodule.cqupt_checkin.course_scan_checkin_hint' => ({required Object course}) => '用「${course}」的签到记录，配合扫描二维码中的 data 字段上报',
+			'submodule.cqupt_checkin.universal_scan_checkin' => '通用签到',
+			'submodule.cqupt_checkin.universal_scan_checkin_hint' => '扫描任意课程的二维码，为二维码对应的课程签到',
 			'submodule.cqupt_sport.record' => '记录',
 			'submodule.cqupt_sport.configure' => '配置',
 			'submodule.cqupt_sport.motion_profile' => '运动预设',

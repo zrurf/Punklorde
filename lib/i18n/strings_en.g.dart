@@ -762,6 +762,12 @@ class Translations$setting$en {
 
 	/// en: 'Cleared $count caches'
 	String cache_cleared({required Object count}) => 'Cleared ${count} caches';
+
+	/// en: 'Experimental features'
+	String get experiment => 'Experimental features';
+
+	/// en: 'Experimental features are still under development and may act unexpectedly'
+	String get experiment_hint => 'Experimental features are still under development and may act unexpectedly';
 }
 
 // Path: vault
@@ -1016,6 +1022,18 @@ class Translations$submodule$cqupt_checkin$en {
 
 	/// en: 'Auto-locate Check-in'
 	String get checkin_use_auto_loc => 'Auto-locate Check-in';
+
+	/// en: 'Check in for this course'
+	String get course_scan_checkin => 'Check in for this course';
+
+	/// en: 'Use this course ($course) to check in with the data from the scanned QR code'
+	String course_scan_checkin_hint({required Object course}) => 'Use this course (${course}) to check in with the data from the scanned QR code';
+
+	/// en: 'Universal check-in'
+	String get universal_scan_checkin => 'Universal check-in';
+
+	/// en: 'Scan any course's QR code and check in for its course'
+	String get universal_scan_checkin_hint => 'Scan any course\'s QR code and check in for its course';
 }
 
 // Path: submodule.cqupt_sport
@@ -1719,6 +1737,8 @@ extension on Translations {
 			'setting.cache_refreshed' => 'Cache refreshed',
 			'setting.cache_deleted' => 'Cache deleted',
 			'setting.cache_cleared' => ({required Object count}) => 'Cleared ${count} caches',
+			'setting.experiment' => 'Experimental features',
+			'setting.experiment_hint' => 'Experimental features are still under development and may act unexpectedly',
 			'vault.setup_title' => 'Set Unlock Password',
 			'vault.setup_hint' => 'Set an unlock password on first use to protect the vault',
 			'vault.unlock_title' => 'Unlock Vault',
@@ -1790,6 +1810,10 @@ extension on Translations {
 			'submodule.cqupt_checkin.checkin_fill_code' => 'Fill Check-in Code',
 			'submodule.cqupt_checkin.checkin_use_current_loc' => 'Check-in with Current Location',
 			'submodule.cqupt_checkin.checkin_use_auto_loc' => 'Auto-locate Check-in',
+			'submodule.cqupt_checkin.course_scan_checkin' => 'Check in for this course',
+			'submodule.cqupt_checkin.course_scan_checkin_hint' => ({required Object course}) => 'Use this course (${course}) to check in with the data from the scanned QR code',
+			'submodule.cqupt_checkin.universal_scan_checkin' => 'Universal check-in',
+			'submodule.cqupt_checkin.universal_scan_checkin_hint' => 'Scan any course\'s QR code and check in for its course',
 			'submodule.cqupt_sport.record' => 'Record',
 			'submodule.cqupt_sport.configure' => 'Configure',
 			'submodule.cqupt_sport.motion_profile' => 'Motion Profile',
