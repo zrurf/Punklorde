@@ -21,8 +21,8 @@ import 'package:punklorde/utils/ua.dart';
 class CquptAcademicPortalPlatform extends Platform {
   static const String _domainLogin =
       "http://jwzx.cqupt.edu.cn/tysfrz/index.php";
-  String _apiInfo(String uid) =>
-      "https://sport.cqupt.edu.cn/new_wxapp/wxUnifyId/getUserInfo?unifyId=$uid&studentNo=1";
+  static const String _apiInfo =
+      "http://jwzx.cqupt.edu.cn/xxkj/index.php?action=getStuXjInfo";
   static const String _apiTest =
       "http://jwzx.cqupt.edu.cn/kebiao/kb_stuList.php?jxb=0";
 
@@ -69,29 +69,27 @@ class CquptAcademicPortalPlatform extends Platform {
 
       final uri1 = Uri.parse(url1);
       final ticket = uri1.queryParameters["ticket"];
+      final header = {
+        "User-Agent": UAUtil.getUA(.raw),
+        "Cookie": "PHPSESSID=$ticket",
+      };
 
       await _dio.get(
         url1,
-        options: Options(
-          followRedirects: true,
-          headers: {
-            "User-Agent": UAUtil.getUA(.raw),
-            "Cookie": "PHPSESSID=$ticket",
-          },
-        ),
+        options: Options(followRedirects: true, headers: header),
       );
 
       if (ticket == null) return null;
-      final r1 = await _dio.get(_apiInfo(uid));
+      final r1 = await _dio.get(_apiInfo, options: Options(headers: header));
       if (r1.statusCode != 200 ||
-          r1.data["code"] != "10200" ||
+          r1.data["code"] != 0 ||
           r1.data["data"] == null) {
         return null;
       }
-      final String? stuId = r1.data["data"]["studentNo"];
-      final String? username = r1.data["data"]["username"];
-      final int? grade = int.tryParse(r1.data["data"]["grade"]);
-      final bool sex = r1.data["data"]["sex"] == "1";
+      final String? stuId = r1.data["data"]["xh"];
+      final String? username = r1.data["data"]["xm"];
+      final int? grade = int.tryParse(r1.data["data"]["nj"]);
+      final bool sex = r1.data["data"]["xb"] == "男";
 
       if (stuId == null || username == null || grade == null) return null;
 
